@@ -1,0 +1,93 @@
+CREATE TABLE "user"
+(
+  UserId SERIAL NOT NULL,
+  FirstName varchar(20) NOT NULL,
+  LastName varchar(20) NOT NULL,
+  Email varchar(40) NOT NULL,
+  Password varchar(20) NOT NULL,
+  IsAdmin BOOLEAN NOT NULL,
+  LoggedIn BOOLEAN NOT NULL,
+  PRIMARY KEY (UserId),
+  UNIQUE (Email)
+);
+
+CREATE TABLE Organization
+(
+  OrgId SERIAL NOT NULL,
+  OrgName varchar(20) NOT NULL,
+  PRIMARY KEY (OrgId)
+);
+
+CREATE TABLE Part_Of
+(
+  UserId SERIAL NOT NULL,
+  OrgId SERIAL NOT NULL,
+  PRIMARY KEY (UserId, OrgId),
+  FOREIGN KEY (UserId) REFERENCES "user"(UserId),
+  FOREIGN KEY (OrgId) REFERENCES Organization(OrgId)
+);
+
+CREATE TABLE Collection
+(
+  CollectionName varchar(20),
+  CollectionId SERIAL NOT NULL,
+  UserId SERIAL NOT NULL,
+  OrgId SERIAL,
+  PRIMARY KEY (CollectionId),
+  FOREIGN KEY (UserId) REFERENCES "user"(UserId),
+  FOREIGN KEY (OrgId) REFERENCES Organization(OrgId),
+  UNIQUE (CollectionName)
+);
+
+CREATE TABLE Note
+(
+  NoteId SERIAL NOT NULL,
+  NoteName varchar(20),
+  TypedNotes TEXT,
+  NoteDate TIMESTAMP NOT NULL,
+  CollectionId SERIAL NOT NULL,
+  PRIMARY KEY (NoteId),
+  FOREIGN KEY (CollectionId) REFERENCES Collection(CollectionId)
+);
+
+CREATE TABLE Study_Plan
+(
+  PlanId SERIAL NOT NULL,
+  StudyDate DATE NOT NULL,
+  TimeAmount INT,
+  PriorityLevel INT NOT NULL,
+  StudyCompleted BOOLEAN NOT NULL,
+  NoteId SERIAL NOT NULL,
+  PRIMARY KEY (PlanId),
+  FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
+);
+
+CREATE TABLE Questions
+(
+  QuestionId SERIAL NOT NULL,
+  QuestionText varchar(100) NOT NULL,
+  Answer TEXT NOT NULL,
+  NoteId SERIAL NOT NULL,
+  PRIMARY KEY (QuestionId),
+  FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
+);
+
+CREATE TABLE Links
+(
+  LinkId SERIAL NOT NULL,
+  Url TEXT NOT NULL,
+  NoteId SERIAL NOT NULL,
+  PRIMARY KEY (LinkId),
+  FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
+);
+
+CREATE TABLE Words
+(
+  WordId SERIAL NOT NULL,
+  VocabWord varchar(40) NOT NULL,
+  Definition TEXT NOT NULL,
+  NoteId SERIAL NOT NULL,
+  PRIMARY KEY (WordId),
+  FOREIGN KEY (NoteId) REFERENCES Note(NoteId),
+  UNIQUE (VocabWord)
+);
