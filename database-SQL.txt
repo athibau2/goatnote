@@ -99,22 +99,27 @@ VIEWS:
   create view see_orgs_collections as
     select o.orgName, c.collectionName
     from organization o, collection c;
+    --this will be filtered later
 
   create view see_collections_notes as
     select n.noteName, c.collectionName
     from note n, collection c;
+    --this will be filtered later
     
   create view see_note_with_data as
     select n.noteName, n.notedate, n.typedNotes, c.collectionName, questiontext, answer, vocabword, definition, url
     from note n, collection c, questions, words, links;
+    --this will be filtered later
     
   create view see_study_plans as
     select n.noteName, n.notedate, studydate, timeamount, prioritylevel, studycompleted
     from note n, study_plan;
+    --this will be filtered later
 
   create view see_personal_data as
     select firstName, lastName, email, "password"
     from "user";
+    --this will be filtered later
     
   create view admin_see_all_users as
     select * from "user";
@@ -123,6 +128,7 @@ VIEWS:
     select o.orgId, o.orgName, c.collectionName, firstName, lastName 
     from collection c inner join organization o 
     on c.orgId = o.orgId inner join "user" on c.userId = "user".userId;
+    --this will be filtered later
 
   create view admin_see_org_users as
     select o.orgName, firstname, lastname
@@ -130,6 +136,7 @@ VIEWS:
     on o.orgId = p.orgId inner join "user"
     on p.userId = "user".userId
     order by o.orgName;
+    --this will be filtered later
 
   create view admin_see_user_collections_notes as
     select o.orgId, c.collectionName, n.notename, firstname, lastname
@@ -137,6 +144,7 @@ VIEWS:
     inner join note n on c.collectionId = n.collectionId
     inner join "user" on c.userId = "user".userId
     order by "user".userId;
+    --this will be filtered later
 
   create view admin_see_user_note_data as
     select u.userId, u.firstname, u.lastname, c.collectionId, n.notename, n.typedNotes, n.notedate,
@@ -147,4 +155,5 @@ VIEWS:
 	  inner join words w on n.noteId = w.noteId
 	  inner join links l on n.noteId = l.noteId
     order by u.userId;
+    --this will be filtered later
   
