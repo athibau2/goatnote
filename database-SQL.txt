@@ -1,93 +1,150 @@
-CREATE TABLE "user"
-(
-  UserId SERIAL NOT NULL,
-  FirstName varchar(20) NOT NULL,
-  LastName varchar(20) NOT NULL,
-  Email varchar(40) NOT NULL,
-  Password varchar(20) NOT NULL,
-  IsAdmin BOOLEAN NOT NULL,
-  LoggedIn BOOLEAN NOT NULL,
-  PRIMARY KEY (UserId),
-  UNIQUE (Email)
-);
+TABLES:
 
-CREATE TABLE Organization
-(
-  OrgId SERIAL NOT NULL,
-  OrgName varchar(20) NOT NULL,
-  PRIMARY KEY (OrgId)
-);
+  CREATE TABLE "user"
+  (
+    UserId SERIAL NOT NULL,
+    FirstName varchar(20) NOT NULL,
+    LastName varchar(20) NOT NULL,
+    Email varchar(40) NOT NULL,
+    Password varchar(20) NOT NULL,
+    IsAdmin BOOLEAN NOT NULL,
+    LoggedIn BOOLEAN NOT NULL,
+    PRIMARY KEY (UserId),
+    UNIQUE (Email)
+  );
 
-CREATE TABLE Part_Of
-(
-  UserId SERIAL NOT NULL,
-  OrgId SERIAL NOT NULL,
-  PRIMARY KEY (UserId, OrgId),
-  FOREIGN KEY (UserId) REFERENCES "user"(UserId),
-  FOREIGN KEY (OrgId) REFERENCES Organization(OrgId)
-);
+  CREATE TABLE Organization
+  (
+    OrgId SERIAL NOT NULL,
+    OrgName varchar(20) NOT NULL,
+    PRIMARY KEY (OrgId)
+  );
 
-CREATE TABLE Collection
-(
-  CollectionName varchar(20),
-  CollectionId SERIAL NOT NULL,
-  UserId SERIAL NOT NULL,
-  OrgId SERIAL,
-  PRIMARY KEY (CollectionId),
-  FOREIGN KEY (UserId) REFERENCES "user"(UserId),
-  FOREIGN KEY (OrgId) REFERENCES Organization(OrgId),
-  UNIQUE (CollectionName)
-);
+  CREATE TABLE Part_Of
+  (
+    UserId SERIAL NOT NULL,
+    OrgId SERIAL NOT NULL,
+    PRIMARY KEY (UserId, OrgId),
+    FOREIGN KEY (UserId) REFERENCES "user"(UserId),
+    FOREIGN KEY (OrgId) REFERENCES Organization(OrgId)
+  );
 
-CREATE TABLE Note
-(
-  NoteId SERIAL NOT NULL,
-  NoteName varchar(20),
-  TypedNotes TEXT,
-  NoteDate TIMESTAMP NOT NULL,
-  CollectionId SERIAL NOT NULL,
-  PRIMARY KEY (NoteId),
-  FOREIGN KEY (CollectionId) REFERENCES Collection(CollectionId)
-);
+  CREATE TABLE Collection
+  (
+    CollectionName varchar(20),
+    CollectionId SERIAL NOT NULL,
+    UserId SERIAL NOT NULL,
+    OrgId SERIAL,
+    PRIMARY KEY (CollectionId),
+    FOREIGN KEY (UserId) REFERENCES "user"(UserId),
+    FOREIGN KEY (OrgId) REFERENCES Organization(OrgId),
+    UNIQUE (CollectionName)
+  );
 
-CREATE TABLE Study_Plan
-(
-  PlanId SERIAL NOT NULL,
-  StudyDate DATE NOT NULL,
-  TimeAmount INT,
-  PriorityLevel INT NOT NULL,
-  StudyCompleted BOOLEAN NOT NULL,
-  NoteId SERIAL NOT NULL,
-  PRIMARY KEY (PlanId),
-  FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
-);
+  CREATE TABLE Note
+  (
+    NoteId SERIAL NOT NULL,
+    NoteName varchar(20),
+    TypedNotes TEXT,
+    NoteDate TIMESTAMP NOT NULL,
+    CollectionId SERIAL NOT NULL,
+    PRIMARY KEY (NoteId),
+    FOREIGN KEY (CollectionId) REFERENCES Collection(CollectionId)
+  );
 
-CREATE TABLE Questions
-(
-  QuestionId SERIAL NOT NULL,
-  QuestionText varchar(100) NOT NULL,
-  Answer TEXT NOT NULL,
-  NoteId SERIAL NOT NULL,
-  PRIMARY KEY (QuestionId),
-  FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
-);
+  CREATE TABLE Study_Plan
+  (
+    PlanId SERIAL NOT NULL,
+    StudyDate DATE NOT NULL,
+    TimeAmount INT,
+    PriorityLevel INT NOT NULL,
+    StudyCompleted BOOLEAN NOT NULL,
+    NoteId SERIAL NOT NULL,
+    PRIMARY KEY (PlanId),
+    FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
+  );
 
-CREATE TABLE Links
-(
-  LinkId SERIAL NOT NULL,
-  Url TEXT NOT NULL,
-  NoteId SERIAL NOT NULL,
-  PRIMARY KEY (LinkId),
-  FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
-);
+  CREATE TABLE Questions
+  (
+    QuestionId SERIAL NOT NULL,
+    QuestionText varchar(100) NOT NULL,
+    Answer TEXT NOT NULL,
+    NoteId SERIAL NOT NULL,
+    PRIMARY KEY (QuestionId),
+    FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
+  );
 
-CREATE TABLE Words
-(
-  WordId SERIAL NOT NULL,
-  VocabWord varchar(40) NOT NULL,
-  Definition TEXT NOT NULL,
-  NoteId SERIAL NOT NULL,
-  PRIMARY KEY (WordId),
-  FOREIGN KEY (NoteId) REFERENCES Note(NoteId),
-  UNIQUE (VocabWord)
-);
+  CREATE TABLE Links
+  (
+    LinkId SERIAL NOT NULL,
+    Url TEXT NOT NULL,
+    NoteId SERIAL NOT NULL,
+    PRIMARY KEY (LinkId),
+    FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
+  );
+
+  CREATE TABLE Words
+  (
+    WordId SERIAL NOT NULL,
+    VocabWord varchar(40) NOT NULL,
+    Definition TEXT NOT NULL,
+    NoteId SERIAL NOT NULL,
+    PRIMARY KEY (WordId),
+    FOREIGN KEY (NoteId) REFERENCES Note(NoteId),
+    UNIQUE (VocabWord)
+  );
+
+
+VIEWS:
+  create view see_orgs_collections as
+    select o.orgName, c.collectionName
+    from organization o, collection c;
+
+  create view see_collections_notes as
+    select n.noteName, c.collectionName
+    from note n, collection c;
+    
+  create view see_note_with_data as
+    select n.noteName, n.notedate, n.typedNotes, c.collectionName, questiontext, answer, vocabword, definition, url
+    from note n, collection c, questions, words, links;
+    
+  create view see_study_plans as
+    select n.noteName, n.notedate, studydate, timeamount, prioritylevel, studycompleted
+    from note n, study_plan;
+
+  create view see_personal_data as
+    select firstName, lastName, email, "password"
+    from "user";
+    
+  create view admin_see_all_users as
+    select * from "user";
+
+  create view admin_see_user_orgs_collections as
+    select o.orgId, o.orgName, c.collectionName, firstName, lastName 
+    from collection c inner join organization o 
+    on c.orgId = o.orgId inner join "user" on c.userId = "user".userId;
+
+  create view admin_see_org_users as
+    select o.orgName, firstname, lastname
+    from organization o inner join part_of p
+    on o.orgId = p.orgId inner join "user"
+    on p.userId = "user".userId
+    order by o.orgName;
+
+  create view admin_see_user_collections_notes as
+    select o.orgId, c.collectionName, n.notename, firstname, lastname
+    from organization o inner join collection c on o.orgId = c.orgId
+    inner join note n on c.collectionId = n.collectionId
+    inner join "user" on c.userId = "user".userId
+    order by "user".userId;
+
+  create view admin_see_user_note_data as
+    select u.userId, u.firstname, u.lastname, c.collectionId, n.notename, n.typedNotes, n.notedate,
+		  q.questiontext, q.answer, w.vocabword, w.definition, l.url
+    from "user" u inner join collection c on c.userId = u.userId 
+	  inner join note n on c.collectionId = n.collectionId
+    inner join questions q on n.noteId = q.noteId
+	  inner join words w on n.noteId = w.noteId
+	  inner join links l on n.noteId = l.noteId
+    order by u.userId;
+  
