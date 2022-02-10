@@ -1,4 +1,4 @@
-TABLES:
+##TABLES:
 
   CREATE TABLE "user"
   (
@@ -95,7 +95,7 @@ TABLES:
   );
 
 
-VIEWS:
+##VIEWS:
   create view see_orgs_collections as
     select o.orgName, c.collectionName
     from organization o, collection c;
