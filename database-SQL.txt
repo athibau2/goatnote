@@ -98,22 +98,29 @@ TABLES:
 VIEWS:
   create view see_orgs_collections as
     select o.orgName, c.collectionName
-    from organization o, collection c;
+    from organization o inner join collection c
+	  on o.orgId = c.orgId order by o.orgId;
     --this will be filtered later
 
   create view see_collections_notes as
     select n.noteName, c.collectionName
-    from note n, collection c;
+    from note n inner join collection c
+	  on n.collectionId = c.collectionId
+    order by c.collectionId;
     --this will be filtered later
     
   create view see_note_with_data as
-    select n.noteName, n.notedate, n.typedNotes, c.collectionName, questiontext, answer, vocabword, definition, url
-    from note n, collection c, questions, words, links;
+    select n.noteName, n.notedate, n.typedNotes, c.collectionName, 
+		  q.questiontext, q.answer, w.vocabword, w.definition, l.url
+    from note n inner join collection c on n.collectionId = c.collectionId
+    inner join questions q on n.noteId = q.noteId
+    inner join words w on n.noteId = w.noteId
+    inner join links l on n.noteId = l.noteId;
     --this will be filtered later
     
   create view see_study_plans as
-    select n.noteName, n.notedate, studydate, timeamount, prioritylevel, studycompleted
-    from note n, study_plan;
+    select n.noteName, n.notedate, s.studydate, s.timeamount, s.prioritylevel, s.studycompleted
+    from note n inner join study_plan s on n.noteId = s.noteId;
     --this will be filtered later
 
   create view see_personal_data as
