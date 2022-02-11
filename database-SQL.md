@@ -1,5 +1,6 @@
 ##TABLES:
 
+  ```sql
   CREATE TABLE "user"
   (
     UserId SERIAL NOT NULL,
@@ -93,9 +94,11 @@
     FOREIGN KEY (NoteId) REFERENCES Note(NoteId),
     UNIQUE (VocabWord)
   );
+  ```
 
 
 ##VIEWS:
+  ```sql
   create view see_orgs_collections as
     select o.orgName, c.collectionName
     from organization o inner join collection c
@@ -163,4 +166,4 @@
 	  inner join links l on n.noteId = l.noteId
     order by u.userId;
     --this will be filtered later
-  
+  ```
