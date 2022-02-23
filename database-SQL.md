@@ -1,4 +1,4 @@
-##TABLES:
+## TABLES:
 
   ```sql
   CREATE TABLE "user"
@@ -97,7 +97,7 @@
   ```
 
 
-##VIEWS:
+## VIEWS:
   ```sql
   create view see_orgs_collections as
     select o.orgName, c.collectionName
@@ -166,4 +166,28 @@
 	  inner join links l on n.noteId = l.noteId
     order by u.userId;
     --this will be filtered later
+  ```
+
+
+## TRIGGERS and FUNCTIONS:
+  ```sql
+  CREATE OR REPLACE FUNCTION trigger_set_last_modified_timestamp()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    NEW.noteDate = NOW();
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+
+
+  CREATE TRIGGER set_update_timestamp
+  BEFORE UPDATE ON note
+  FOR EACH ROW
+  EXECUTE PROCEDURE trigger_set_last_modified_timestamp();
+
+
+  CREATE TRIGGER set_insert_timestamp
+  BEFORE INSERT ON note
+  FOR EACH ROW
+  EXECUTE PROCEDURE trigger_set_last_modified_timestamp();
   ```
