@@ -45,9 +45,8 @@
   CREATE TABLE Note
   (
     NoteId SERIAL NOT NULL,
-    NoteName varchar(20),
+    NoteName varchar(100),
     TypedNotes TEXT,
-    NoteDate TIMESTAMP NOT NULL,
     CollectionId SERIAL NOT NULL,
     PRIMARY KEY (NoteId),
     FOREIGN KEY (CollectionId) REFERENCES Collection(CollectionId)
@@ -59,7 +58,7 @@
     StudyDate DATE NOT NULL,
     TimeAmount INT,
     PriorityLevel INT NOT NULL,
-    StudyCompleted BOOLEAN NOT NULL,
+    StudyCompleted BOOLEAN DEFAULT false,
     NoteId SERIAL NOT NULL,
     PRIMARY KEY (PlanId),
     FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
@@ -69,7 +68,7 @@
   (
     QuestionId SERIAL NOT NULL,
     QuestionText varchar(100) NOT NULL,
-    Answer TEXT NOT NULL,
+    Answer TEXT,
     NoteId SERIAL NOT NULL,
     PRIMARY KEY (QuestionId),
     FOREIGN KEY (NoteId) REFERENCES Note(NoteId)
