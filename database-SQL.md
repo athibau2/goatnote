@@ -8,8 +8,8 @@
     LastName varchar(20) NOT NULL,
     Email varchar(100) NOT NULL,
     Password varchar(50) NOT NULL,
-    IsAdmin BOOLEAN NOT NULL,
-    LoggedIn BOOLEAN NOT NULL,
+    IsAdmin BOOLEAN DEFAULT false,
+    LoggedIn BOOLEAN DEFAULT false,
     PRIMARY KEY (UserId),
     UNIQUE (Email)
   );
@@ -189,4 +189,46 @@
   BEFORE INSERT ON note
   FOR EACH ROW
   EXECUTE PROCEDURE trigger_set_last_modified_timestamp();
+  
+  
+  CREATE OR REPLACE FUNCTION
+    public.signup(firstname text, lastname text, email text, "password" text) RETURNS VOID
+    AS $$
+      INSERT INTO "user" (firstname, lastname, email, "password") VALUES
+        (signup.firstname, signup.lastname, signup.email, signup.password);
+    $$ LANGUAGE sql SECURITY DEFINER;
+
+  
+  CREATE OR REPLACE FUNCTION
+    public.login(email text, "password" text) RETURNS jwt_token
+      LANGUAGE plpgsql SECURITY DEFINER
+      AS $$
+    DECLARE
+      _role NAME;
+      result jwt_token;
+    BEGIN
+      SELECT "user".userid FROM "user" WHERE "user".email = login.email AND "user".password = login.password INTO _role;
+      IF _role IS NULL THEN
+        RAISE invalid_password USING message = 'invalid user or password';
+      END IF;
+
+      SELECT sign(
+          row_to_json(r), current_setting('app.settings.jwt_secret')
+        ) AS token
+        from (
+          SELECT 'admins' AS role, login.email AS email, _role AS user_id,
+            extract(epoch from now())::integer + 3600*60*60 as exp
+        ) r
+        INTO result;
+
+	    --UPDATE "user" SET loggedin = true WHERE "user".userid = login.userid;
+      RETURN result;
+    END;
+    $$
+
+  
+  GRANT EXECUTE ON FUNCTION
+    public.login(text, text),
+    public.signup(text, text, text, text)
+    TO anonymous;
   ```
