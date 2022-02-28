@@ -12,9 +12,13 @@ git branch
 ```bash
 git status
 ```
-* To checkout (switch to) a different branch either locally or from github
+* To checkout (switch to) a different local branch
 ```bash
 git checkout <branch name>
+```
+* To pull/checkout a remote branch from github
+```bash
+git pull origin <remote branch name>
 ```
 * To create a new branch
 ```bash
