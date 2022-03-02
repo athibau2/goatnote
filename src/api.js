@@ -19,7 +19,7 @@ class Api {
       API_URL + "/part_of",
       {
         userid: getUserIdFromToken(getJwtToken()),
-        orgid: orgid // get orgId somehow
+        orgid: 2 // get orgid somehow
       },
       {
         headers: authHeader()
