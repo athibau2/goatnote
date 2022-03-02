@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-jumbotron>
-      <p>Welcome to the IT350 blog!</p>
+      <p>Welcome to GoatNote!</p>
     </b-jumbotron>
     <br />
     <div v-if="loading">Loading articles....</div>
