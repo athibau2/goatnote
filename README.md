@@ -1,4 +1,5 @@
 # Goatnote is our IT&C 350 Project for the winter 2022 semester. 
+to run the development server use the command npm run dev
 
 ## Git / Github
 
