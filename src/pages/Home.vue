@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import Api from "../api";
+import Api from "../../store/api";
 
 export default {
   name: "Home",

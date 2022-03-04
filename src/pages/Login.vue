@@ -45,8 +45,8 @@
 </template>
 
 <script>
-import Api from "../api";
-import { setJwtToken } from "../auth";
+import Api from "../../store/api";
+import { setJwtToken } from "../../store/auth";
 
 export default {
   name: "Login",
