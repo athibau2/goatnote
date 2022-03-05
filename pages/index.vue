@@ -2,15 +2,14 @@
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
       <v-card class="logo py-4 d-flex justify-center">
-        <NuxtLogo />
         <VuetifyLogo />
       </v-card>
       <v-card>
         <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
+          Welcome to GoatNotes
         </v-card-title>
         <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
+          <p>GoatNotes was designed to empower note takers to study more effectively.</p>
           <p>
             For more information on Vuetify, check out the <a
               href="https://vuetifyjs.com"
