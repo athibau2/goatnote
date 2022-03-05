@@ -78,6 +78,33 @@
 
 <script>
 export default {
-  name: 'IndexPage'
+  name: 'IndexPage',
+
+  data () {
+    return {
+      text: '',
+      response: '',
+    }
+  },
+
+  methods: {
+    login() {
+      this.$store.dispatch('accounts/login', {
+        username: 'a.thibs98@gmail.com',
+        password: 'a-password'
+      })
+    },
+
+  },
+
+  computed: {
+    users () {
+      return this.$store.state.journal.list
+    },
+
+    cookie () {
+      return this.$store.state.accounts.cookie
+    }
+  }
 }
 </script>
