@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { deleteJwtToken } from "../../store/auth";
+import { deleteJwtToken } from "../auth";
 export default {
   name: "Logout",
   mounted: function () {

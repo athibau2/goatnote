@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import Api from "../../store/api";
+import Api from "../api";
 
 export default {
   name: "AdminArticleList",
