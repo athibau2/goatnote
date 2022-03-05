@@ -1,7 +1,7 @@
 # Goatnote is our IT&C 350 Project for the winter 2022 semester. 
 to run the development server use the command npm run dev
 
-#Steps to push to github from personal branch
+#Steps to push to github from personal branch  
 *commit changes on personal branch 
 *push the personal changes- git push origin (personal branch name)
 *merge the personal branch with the development branch by going to parent branch and running- git merge origin <child branch>
