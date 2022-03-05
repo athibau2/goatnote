@@ -1,21 +1,27 @@
 import jwt_decode from "jwt-decode";
 
 export function getJwtToken() {
-  return localStorage.getItem("accessToken");
+    if(process.client) {
+        return localStorage.getItem("accessToken");
+    }
 }
 
 export function getUserIdFromToken(token) {
-  const decoded = jwt_decode(token);
-  console.log(decoded);
-  return decoded.user_id;
+    const decoded = jwt_decode(token);
+    console.log(decoded);
+    return decoded; //.user_id
 }
 
 export function setJwtToken(token) {
-  localStorage.setItem("accessToken", token);
+    if(process.client) {
+        localStorage.setItem("accessToken", token);
+    }
 }
 
 export function deleteJwtToken() {
-  localStorage.removeItem("accessToken");
+    if(process.client) {
+        localStorage.removeItem("accessToken");
+    }
 }
 
 export function authHeader() {
