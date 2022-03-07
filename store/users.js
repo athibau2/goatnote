@@ -1,7 +1,7 @@
 import axios from "axios";
 import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
 
-const API_URL = "http://ec2-54-91-199-105.compute-1.amazonaws.com:8000";
+const API_URL = "http://ec2-3-88-53-104.compute-1.amazonaws.com:8000";
 
 export const state = () => ({
     user: null,
