@@ -12,6 +12,7 @@
           v-for="(item, i) in items"
           :key="i"
           :to="item.to"
+          @click="item.click"
           router
           exact
         >
@@ -100,12 +101,19 @@ export default {
         {
           icon: 'mdi-apps',
           title: 'Welcome',
-          to: '/'
+          to: '/',
+          click: ''
         },
         {
           icon: 'mdi-chart-bubble',
           title: 'Inspire',
-          to: '/inspire'
+          to: '/inspire',
+          click: ''
+        },
+        {
+          icon: 'mdi-logout-variant',
+          title: 'Logout',
+          click: this.logout
         }
       ],
       miniVariant: false,
@@ -113,6 +121,12 @@ export default {
       rightDrawer: false,
       title: 'GoatNotes'
     }
-  }
+  },
+
+  methods: {
+    logout() {
+      this.$store.dispatch('users/logout')
+    },
+  },
 }
 </script>

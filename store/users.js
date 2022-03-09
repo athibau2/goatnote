@@ -16,24 +16,46 @@ export const mutations = {
 
 // actions should call mutations
 export const actions = {
-  async login ({ commit }) {
-    const response = await axios.post(API_URL + "/rpc/login", { 
-        email: 'icook8662@gmail.com',
-        password: 'password'
-        },
-        {
-            headers: authHeader()
+    async signup({ dispatch, commit }, { firstname, lastname, email, password }) {
+        const response = await axios.post(API_URL + '/rpc/signup', {
+            firstname: firstname, lastname: lastname, 
+            email: email, password: password
+        })
+        if (response.status === 200) {
+            console.log(response.data)
+            dispatch('login', {
+                email: email,
+                password: password
+            })
         }
-    );
-    if (response.status === 200) {
-        console.log(response.data)
-        setJwtToken(response.data[0].token)
-        commit('setUser', getUserIdFromToken(getJwtToken()))
-    }
-  },
+    },
 
-  async logout({ commit }) {
-      deleteJwtToken()
-      commit('setUser', null)
-  }
+    async login ({ commit }, { email, password }) {
+        const response = await axios.post(API_URL + "/rpc/login", { 
+            email: email,
+            password: password
+            },
+            {
+                headers: authHeader()
+            }
+        );
+        if (response.status === 200) {
+            console.log(response.data)
+            setJwtToken(response.data[0].token)
+            await commit('setUser', getUserIdFromToken(getJwtToken()))
+            this.$router.push('/')
+        }
+    },
+
+    async logout({ commit }) {
+        deleteJwtToken()
+        await commit('setUser', null)
+        this.$router.push('/login')
+    }
 }
+
+export const getters = {
+    isLoggedIn: state => {
+      return state.user
+    }
+  }

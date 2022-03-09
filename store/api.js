@@ -26,14 +26,6 @@ class Api {
       }
     )
   }
-
-  login(email, password) {
-    return axios.post(API_URL + "/rpc/login", { email, password });
-  }
-
-  signup(firstname, lastname, email, password) {
-    return axios.post(API_URL + "/rpc/signup", { firstname, lastname, email, password });
-  }
 }
 
 export default new Api();
