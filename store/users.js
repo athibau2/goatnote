@@ -8,7 +8,6 @@ export const state = () => ({
     userData: [],
     orgs: [],
     collections: [],
-    gettingColls: false
   })
   
 // mutations should update state
@@ -29,9 +28,6 @@ export const mutations = {
         state.collections.push(data)
     },
 
-    getColls(state, data) {
-        state.gettingColls = data
-    }
 }
 
 // actions should call mutations
@@ -55,7 +51,6 @@ export const actions = {
         const response = await axios.get(API_URL + '/see_orgs')
         if (response.status === 200) {
             const orgs = response.data
-            console.log(orgs)
             for (let i = 0; i < orgs.length; ++i) {
                 if (orgs[i]["email"] === state.user.email) {
                     userOrgs.push(orgs[i])
@@ -63,33 +58,36 @@ export const actions = {
             }
             console.log(userOrgs)
             commit('setOrgs', userOrgs)
-            dispatch('collections')
         }
     },
 
-    async collections ({ commit, state }) {
+    async collections ({ commit, state }, { orgid }) {
         const response = await axios.get(API_URL + '/see_collections')
         if (response.status === 200) {
-            const collections = response.data
+            let collections = response.data
+            let temp = []
             for (let i = 0; i < collections.length; ++i) {
-                if (collections[i]["email"] !== state.user.email) {
-                    collections.splice(i, 1)
+                if (collections[i]["email"] === state.user.email) {
+                    temp.push(collections[i])
                 }
             }
-            for (let i = 0; i < state.orgs.length; ++i) {
-                let orgCols = []
-                for (let j = 0; j < collections.length; ++j) {
-                    if (collections[j]["orgid"] === state.orgs[i].orgid) {
-                        orgCols.push(collections[j])
-                    }
+            collections = temp
+            console.log(collections)
+            for (let i = 0; i < collections.length; ++i) {
+                if (collections[i]["orgid"] === orgid) {
+                    commit('setCollections', collections[i])
                 }
-                commit('setCollections', orgCols)
             }
+            // for (let i = 0; i < state.orgs.length; ++i) {
+            //     let orgCols = []
+            //     for (let j = 0; j < collections.length; ++j) {
+            //         if (collections[j]["orgid"] === state.orgs[i].orgid) {
+            //             orgCols.push(collections[j])
+            //         }
+            //     }
+            //     commit('setCollections', orgCols)
+            // }
         }
-    },
-
-    async getColls({ commit }, { gettingColls }) {
-        commit('getColls', gettingColls)
     },
 
     async signup({ dispatch, commit }, { firstname, lastname, email, password }) {
