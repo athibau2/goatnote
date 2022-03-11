@@ -55,12 +55,6 @@ export default {
             email: this.email,
             password: this.password
         })
-        // .then(() => {
-        //     this.$store.dispatch('users/login', {
-        //         email: this.email,
-        //         password: this.password
-        //     })
-        // })
     },
   },
 

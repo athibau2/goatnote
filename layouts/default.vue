@@ -50,13 +50,8 @@
         <v-icon>mdi-minus</v-icon>
       </v-btn>
       <v-toolbar-title v-text="title" />
+      <span v-if="user !== null && user !== undefined">&nbsp;{{user.email}}</span>
       <v-spacer />
-      <v-btn
-        icon
-        @click.stop="rightDrawer = !rightDrawer"
-      >
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -69,16 +64,6 @@
       temporary
       fixed
     >
-      <v-list>
-        <v-list-item @click.native="right = !right">
-          <v-list-item-action>
-            <v-icon light>
-              mdi-repeat
-            </v-icon>
-          </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
-        </v-list-item>
-      </v-list>
     </v-navigation-drawer>
     <v-footer
       :absolute="!fixed"
@@ -102,19 +87,24 @@ export default {
           icon: 'mdi-apps',
           title: 'Welcome',
           to: '/',
-          click: ''
+          click: this.loadOrgs
         },
         {
           icon: 'mdi-chart-bubble',
           title: 'Inspire',
           to: '/inspire',
-          click: ''
+        },
+        {
+          icon: 'mdi-account-cog',
+          title: 'Account',
+          to: '/account',
+          click: this.loadUserData
         },
         {
           icon: 'mdi-logout-variant',
           title: 'Logout',
           click: this.logout
-        }
+        },
       ],
       miniVariant: false,
       right: true,
@@ -127,6 +117,20 @@ export default {
     logout() {
       this.$store.dispatch('users/logout')
     },
+
+    loadUserData () {
+        this.$store.dispatch('users/userData')
+    },
+
+    loadOrgs () {
+        this.$store.dispatch('users/orgs')
+    }
   },
+
+  computed: {
+    user() {
+      return this.$store.state.users.user
+    }
+  }
 }
 </script>

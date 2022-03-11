@@ -93,17 +93,18 @@ CREATE TABLE Words
 
 
 
-create view see_orgs_collections as
-  select o.orgName, c.collectionName
-  from organization o inner join collection c
-  on o.orgId = c.orgId order by o.orgId;
+create or replace view see_orgs as
+  select o.orgName, u.email, o.orgid
+  from organization o inner join part_of p on o.orgid = p.orgid 
+  inner join "user" u on p.userid = u.userid order by o.orgId;
   --this will be filtered later
 
-create view see_collections_notes as
-  select n.noteName, c.collectionName
-  from note n inner join collection c
-  on n.collectionId = c.collectionId
-  order by c.collectionId;
+create or replace view see_collections as
+  select c.collectionName, o.orgid, u.userid, u.email
+  from collection c inner join organization o
+  on c.orgid = o.orgid inner join "user" u
+  on c.userid = u.userid
+  order by o.orgid;
   --this will be filtered later
   
 create view see_note_with_data as
@@ -219,6 +220,16 @@ CREATE OR REPLACE FUNCTION
   END;
   $$
 
+CREATE ROLE authenticator NOINHERIT;
+CREATE ROLE admins;
+CREATE ROLE anonymous;
+
+GRANT anonymous, admins TO authenticator;
+
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anonymous;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO admins;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO admins;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO admins;
 
 GRANT EXECUTE ON FUNCTION
   public.login(text, text),

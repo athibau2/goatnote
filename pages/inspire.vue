@@ -21,6 +21,6 @@
 <script>
 export default {
   name: 'InspirePage',
-  //middleware: "auth",
+  middleware: "auth",
 }
 </script>
