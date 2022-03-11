@@ -74,9 +74,6 @@ export default {
       return this.$store.state.users.collections
     },
 
-    // gettingColls () {
-    //   return this.$store.state.users.gettingColls
-    // }
   }
 }
 </script>
