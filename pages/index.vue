@@ -1,45 +1,33 @@
 <template>
-  <v-app>
-    <div>
-      <v-list>
-        <v-list-item
-          v-for="(org, i) in orgs"
-          :key="i"
-        >
-          <v-card elevation="5" width="200">
-            <v-card-title class="headline">
-                {{org.orgname}}
-            </v-card-title>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn @click="loadCollections(org.orgid)">Go</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-list-item>
-        <v-spacer />
-      </v-list>
-    </div>
+  <v-container>
+    <v-row>
+      <v-col v-for="(org, i) in orgs" :key="i">
+        <v-card elevation="5" width="200">
+          <v-card-title class="headline">
+              {{org.orgname}}
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn @click="loadCollections(org.orgid)">Go</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
     
-    <div>
-      <v-list>
-        <v-list-item
-          v-for="(coll, i) in collections"
-          :key="i"
-        >
-          <v-card elevation="5" width="200">
-            <v-card-title class="headline">
-                {{coll.collectionname}}
-            </v-card-title>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn>Go</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-list-item>
-        <v-spacer />
-      </v-list>
-    </div>
-  </v-app>
+    <v-row>
+      <div v-for="(coll, i) in collections" :key="i">
+        <v-card elevation="5" width="200">
+          <v-card-title class="headline">
+              {{coll.collectionname}}
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn>Go</v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

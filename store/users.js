@@ -4,7 +4,7 @@ import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToke
 const API_URL = "http://ec2-3-88-53-104.compute-1.amazonaws.com:8000";
 
 export const state = () => ({
-    user: getJwtToken(),
+    user: getUserIdFromToken(getJwtToken()),
     userData: [],
     orgs: [],
     collections: [],
@@ -27,6 +27,10 @@ export const mutations = {
     setCollections(state, data) {
         state.collections.push(data)
     },
+
+    clearCollections(state, data) {
+        state.collections = data
+    }
 
 }
 
@@ -62,6 +66,7 @@ export const actions = {
     },
 
     async collections ({ commit, state }, { orgid }) {
+        commit('clearCollections', [])
         const response = await axios.get(API_URL + '/see_collections')
         if (response.status === 200) {
             let collections = response.data
@@ -78,15 +83,6 @@ export const actions = {
                     commit('setCollections', collections[i])
                 }
             }
-            // for (let i = 0; i < state.orgs.length; ++i) {
-            //     let orgCols = []
-            //     for (let j = 0; j < collections.length; ++j) {
-            //         if (collections[j]["orgid"] === state.orgs[i].orgid) {
-            //             orgCols.push(collections[j])
-            //         }
-            //     }
-            //     commit('setCollections', orgCols)
-            // }
         }
     },
 
