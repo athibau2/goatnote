@@ -23,9 +23,15 @@
 </template>
 
 <script>
+import { getJwtToken, getUserIdFromToken } from "../store/auth"
 export default {
   name: 'AccountPage',
   middleware: "auth",
+
+  mounted () {
+    this.$store.dispatch('users/userData')
+    this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
+  },
 
   data () {
     return {
