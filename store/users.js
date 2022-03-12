@@ -4,7 +4,7 @@ import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToke
 const API_URL = "http://ec2-3-88-53-104.compute-1.amazonaws.com:8000";
 
 export const state = () => ({
-    user: getUserIdFromToken(getJwtToken()),
+    user: getJwtToken(),
     userData: [],
     orgs: [],
     collections: [],
@@ -25,7 +25,7 @@ export const mutations = {
     },
 
     setCollections(state, data) {
-        state.collections.push(data)
+        state.collections = data
     },
 
     clearCollections(state, data) {
@@ -77,12 +77,13 @@ export const actions = {
                 }
             }
             collections = temp
-            console.log(collections)
+            temp = []
             for (let i = 0; i < collections.length; ++i) {
                 if (collections[i]["orgid"] === orgid) {
-                    commit('setCollections', collections[i])
+                    temp.push(collections[i])
                 }
             }
+            commit('setCollections', temp)
         }
     },
 
