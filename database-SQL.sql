@@ -100,20 +100,27 @@ create or replace view see_orgs as
   --this will be filtered later
 
 create or replace view see_collections as
-  select c.collectionName, o.orgid, u.userid, u.email
+  select c.collectionName, o.orgid, u.userid, u.email, c.collectionid
   from collection c inner join organization o
   on c.orgid = o.orgid inner join "user" u
   on c.userid = u.userid
   order by o.orgid;
   --this will be filtered later
+
+create or replace view see_notes as
+	select n.noteid, n.notename, c.collectionid, u.email
+	from note n inner join collection c on n.collectionid = c.collectionid
+	inner join "user" u on c.userid = u.userid
+	order by n.collectionid;
+	--this will be filtered later
   
-create view see_note_with_data as
+create or replace view see_note_with_data as
   select n.noteName, n.notedate, n.typedNotes, c.collectionName, 
-    q.questiontext, q.answer, w.vocabword, w.definition, l.url
-  from note n inner join collection c on n.collectionId = c.collectionId
-  inner join questions q on n.noteId = q.noteId
-  inner join words w on n.noteId = w.noteId
-  inner join links l on n.noteId = l.noteId;
+    q.questiontext, q.answer, w.vocabword, w.definition, l.url, n.noteid
+  from note n left join collection c on n.collectionId = c.collectionId
+  left join questions q on n.noteId = q.noteId
+  left join words w on n.noteId = w.noteId
+  left join links l on n.noteId = l.noteId;
   --this will be filtered later
   
 create view see_study_plans as
@@ -201,7 +208,7 @@ CREATE OR REPLACE FUNCTION
     _role NAME;
     result jwt_token;
   BEGIN
-    SELECT "user".userid FROM "user" WHERE "user".email = login.email AND "user".password = crypt(login.password, "user".password) INTO _role;
+    SELECT "user".userid FROM "user" WHERE "user".email = login.email AND "user".password = crypt(login.password, gen_salt('bf', 8)) INTO _role;
     IF _role IS NULL THEN
       RAISE invalid_password USING message = 'invalid user or password';
     END IF;
@@ -226,7 +233,7 @@ CREATE ROLE anonymous;
 
 GRANT anonymous, admins TO authenticator;
 
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO anonymous;
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO anonymous;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO admins;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO admins;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO admins;
