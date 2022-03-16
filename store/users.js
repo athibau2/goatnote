@@ -1,5 +1,7 @@
 import axios from "axios";
+import auth from "~/middleware/auth";
 import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
+
 
 const API_URL = "http://ec2-3-88-53-104.compute-1.amazonaws.com:8000";
 
@@ -8,10 +10,27 @@ export const state = () => ({
     userData: [],
     orgs: [],
     collections: [],
+    notes: [],
+    currentNote: {},
+    makingNewOrg: false,
+    makingNewCollection: false,
+    makingNewNote: false
   })
   
 // mutations should update state
 export const mutations = {
+    newOrg(state, data) {
+        state.makingNewOrg = data
+    },
+
+    newCollection(state, data) {
+        state.makingNewCollection = data
+    },
+
+    newNote(state, data) {
+        state.makingNewNote = data
+    },
+
     setUser(state, user) {
         state.user = user
     },
@@ -28,9 +47,13 @@ export const mutations = {
         state.collections = data
     },
 
-    clearCollections(state, data) {
-        state.collections = data
-    }
+    setNotes(state, data) {
+        state.notes = data
+    },
+
+    currentNote(state, data) {
+        state.currentNote = data
+    },
 
 }
 
@@ -50,6 +73,24 @@ export const actions = {
         }
     },
 
+    async createOrg({ dispatch, commit, state }, { orgname }) {
+        const response = await axios.post(API_URL + '/organization', {
+            orgname: orgname
+        },
+        {
+            headers: authHeader()
+        })
+        const org = await axios.get(API_URL + '/organization?orgname=eq.' + orgname)
+        const res = await axios.post(API_URL + '/part_of', {
+            userid: getUserIdFromToken(getJwtToken()).user_id,
+            orgid: org.data[0].orgid
+        },
+        {
+            headers: authHeader()
+        })
+        dispatch('orgs')
+    },
+
     async orgs({ commit, state }) {
         let userOrgs = []
         const response = await axios.get(API_URL + '/see_orgs')
@@ -66,7 +107,8 @@ export const actions = {
     },
 
     async collections ({ commit, state }, { orgid }) {
-        commit('clearCollections', [])
+        commit('setCollections', [])
+        commit('setNotes', [])
         const response = await axios.get(API_URL + '/see_collections')
         if (response.status === 200) {
             let collections = response.data
@@ -84,6 +126,45 @@ export const actions = {
                 }
             }
             commit('setCollections', temp)
+            temp = []
+        }
+    },
+
+    async notes({ commit, state }, { collectionid }) {
+        commit('setNotes', [])
+        const response = await axios.get(API_URL + '/see_notes')
+        if (response.status === 200) {
+            let notes = response.data
+            let temp = []
+            for (let i = 0; i < notes.length; ++i) {
+                if (notes[i]["userid"] === state.userData.userid) {
+                    temp.push(notes[i])
+                }
+            }
+            notes = temp
+            temp = []
+            for (let i = 0; i < notes.length; ++i) {
+                if (notes[i]["collectionid"] === collectionid) {
+                    temp.push(notes[i])
+                }
+            }
+            commit('setNotes', temp)
+            temp = []
+        }
+    },
+
+    async openNote({ commit }, { noteid }) {
+        commit('currentNote', {})
+        const response = await axios.get(API_URL + '/see_note_with_data')
+        if (response.status === 200) {
+            let notes = response.data
+            for (let i = 0; i < notes.length; ++i) {
+                if (notes[i]["noteid"] === noteid) {
+                    commit('currentNote', notes[i])
+                    break
+                }
+            }
+            this.$router.push('/note')
         }
     },
 
@@ -114,9 +195,21 @@ export const actions = {
             console.log(response.data)
             setJwtToken(response.data[0].token)
             await commit('setUser', getUserIdFromToken(getJwtToken()))
-            //this.$auth.$storage.setUniversal('user', response.data.user, true)
+            dispatch('userData')
             dispatch('orgs')
             this.$router.push('/')
+        }
+    },
+
+    async updatePass({ dispatch, state }, { password }) {
+        const response = await axios.put(API_URL + '/user?email=eq.' + state.user.email, {
+            password: password
+        },
+        {
+            headers: authHeader()
+        })
+        if (response.status === 200) {
+            dispatch('userData')
         }
     },
 
@@ -136,3 +229,4 @@ export const getters = {
         return state.orgs
     }
   }
+

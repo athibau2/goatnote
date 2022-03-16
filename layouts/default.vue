@@ -43,15 +43,14 @@
       >
         <v-icon>mdi-application</v-icon>
       </v-btn>
-      <v-btn
-        icon
-        @click.stop="fixed = !fixed"
-      >
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
       <v-toolbar-title v-text="title" />
-      <span v-if="user !== null && user !== undefined">&nbsp;{{user.email}}</span>
       <v-spacer />
+      <v-btn @click="newOrg()" to="/">+ Organization</v-btn>
+      <v-btn @click="newCollection()" to="/">+ Collection</v-btn>
+      <v-btn @click="newNote()" to="/">+ Note</v-btn>
+      <v-toolbar-title v-if="user !== null && user !== undefined">
+        &nbsp;{{userData.firstname}} {{userData.lastname}}
+      </v-toolbar-title>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -66,7 +65,7 @@
     >
     </v-navigation-drawer>
     <v-footer
-      :absolute="!fixed"
+      :absolute="fixed"
       app
     >
       <span>&copy; {{ new Date().getFullYear() }}</span>
@@ -77,6 +76,11 @@
 <script>
 export default {
   name: 'DefaultLayout',
+
+  mounted () {
+    this.$store.dispatch('users/userData')
+  },
+
   data () {
     return {
       clipped: false,
@@ -85,14 +89,9 @@ export default {
       items: [
         {
           icon: 'mdi-apps',
-          title: 'Welcome',
+          title: 'Home',
           to: '/',
           click: this.loadOrgs
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
         },
         {
           icon: 'mdi-account-cog',
@@ -124,12 +123,38 @@ export default {
 
     loadOrgs () {
         this.$store.dispatch('users/orgs')
+    },
+
+    loadCollections () {
+      this.$store.dispatch('users/collections')
+    },
+
+    newOrg () {
+      this.$store.commit('users/newCollection', false)
+      this.$store.commit('users/newNote', false)
+      this.$store.commit('users/newOrg', true)
+    },
+
+    newCollection () {
+      this.$store.commit('users/newNote', false)
+      this.$store.commit('users/newOrg', false)
+      this.$store.commit('users/newCollection', true)
+    },
+
+    newNote() {
+      this.$store.commit('users/newOrg', false)
+      this.$store.commit('users/newCollection', false)
+      this.$store.commit('users/newNote', true)
     }
   },
 
   computed: {
     user() {
       return this.$store.state.users.user
+    },
+
+    userData() {
+      return this.$store.state.users.userData
     }
   }
 }
