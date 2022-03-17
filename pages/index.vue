@@ -34,13 +34,20 @@
           <v-card-text>
               <input v-model="newCollName" placeholder="Collection Name" required>
           </v-card-text>
+          <dropdown 
+            :options="orgs" 
+            :selected="orgSelected"
+            v-on:updateOption="selectOrg"
+            placeholder="Select an organization"
+          >
+          </dropdown>
           <v-card-actions>
               <v-spacer />
               <v-btn color="primary" nuxt @click="newCollection()">
                   Cancel
               </v-btn>
               <span>&nbsp;</span>
-              <v-btn color="primary" nuxt >
+              <v-btn color="primary" nuxt @click="createCollection()">
                   Submit
               </v-btn>
           </v-card-actions>
@@ -63,7 +70,7 @@
                   Cancel
               </v-btn>
               <span>&nbsp;</span>
-              <v-btn color="primary" nuxt >
+              <v-btn color="primary" nuxt @click="createNote()">
                   Submit
               </v-btn>
           </v-card-actions>
@@ -116,24 +123,34 @@
 
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
+import dropdown from 'vue-dropdowns'
 export default {
   name: 'IndexPage',
   middleware: "auth",
 
   mounted() {
-    this.$store.dispatch('users/orgs')
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
+    this.$store.dispatch('users/orgs')
+  },
+
+  components: {
+    'dropdown': dropdown
   },
 
   data () {
     return {
       newOrgName: "",
       newCollName: "",
-      newNoteName: ""
+      newNoteName: "",
+      orgSelected: ""
     }
   },
 
   methods: {
+    selectOrg (orgname) {
+      this.orgSelected = orgname
+    },
+
     loadCollections (orgid) {
       this.$store.dispatch('users/collections', {
         orgid
@@ -158,6 +175,14 @@ export default {
       })
       this.newOrgName = ""
       this.newOrg()
+    },
+
+    createCollection () {
+      this.$store.dispatch('users/createCollection', {
+        collectionname: this.newCollName
+      })
+      this.newCollName = ""
+      this.newCollection()
     },
 
     newOrg () {

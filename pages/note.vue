@@ -43,7 +43,7 @@ export default {
   },
 
   mounted() {
-    //this.$store.dispatch('users/openNote', )
+    this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
   },
 
