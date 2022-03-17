@@ -115,13 +115,21 @@ create or replace view see_notes as
 	--this will be filtered later
   
 create or replace view see_note_with_data as
-  select n.noteName, n.notedate, n.typedNotes, c.collectionName, 
-    q.questiontext, q.answer, w.vocabword, w.definition, l.url, n.noteid
+  select n.noteid, n.noteName, n.notedate, n.typedNotes, c.collectionName
   from note n left join collection c on n.collectionId = c.collectionId
-  left join questions q on n.noteId = q.noteId
-  left join words w on n.noteId = w.noteId
-  left join links l on n.noteId = l.noteId;
   --this will be filtered later
+
+create or replace view see_words as
+ 	select * from words;
+	--this will be filtered later
+
+create or replace view see_questions as
+ 	select * from questions;
+	--this will be filtered later
+
+create or replace view see_links as
+ 	select * from links;
+	--this will be filtered later
   
 create view see_study_plans as
   select n.noteName, n.notedate, s.studydate, s.timeamount, s.prioritylevel, s.studycompleted

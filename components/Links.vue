@@ -1,9 +1,9 @@
 <template>
     <div class="modal-overlay" @click="$emit('close-modal')">
         <div class="modal" @click.stop>
-            <h6>Words</h6>
-            <p v-for="(word, i) in words" :key="i">
-                {{word.vocabword}}
+            <h6>Links</h6>
+            <p v-for="(link, i) in links" :key="i">
+                {{link.url}}
             </p>
             <v-btn @click="$emit('close-modal')">
                 Cancel
@@ -15,11 +15,11 @@
 
 <script>
   export default {
-      name: "WordsComponent",
+      name: "LinksComponent",
 
       computed: {
-          words () {
-              return this.$store.state.users.words
+          links () {
+              return this.$store.state.users.links
           }
       }
 }

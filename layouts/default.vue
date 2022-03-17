@@ -145,6 +145,7 @@ export default {
       this.$store.commit('users/newOrg', false)
       this.$store.commit('users/newCollection', false)
       this.$store.commit('users/newNote', true)
+      this.$store.dispatch('users/allColls')
     }
   },
 
