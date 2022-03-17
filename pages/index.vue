@@ -9,7 +9,7 @@
               Create a New Organization
           </v-card-title>
           <v-card-text>
-              <input v-model="newOrgName" placeholder="Organization Name" required>
+              <input v-model="newOrgName" placeholder="New Organization Name" required>
           </v-card-text>
           <v-card-actions>
               <v-spacer />
@@ -32,23 +32,22 @@
               Create a New Collection
           </v-card-title>
           <v-card-text>
-              <input v-model="newCollName" placeholder="Collection Name" required>
+              <input v-model="newCollName" placeholder="New Collection Name" required>
           </v-card-text>
-          <dropdown 
-            :options="orgs" 
-            :selected="orgSelected"
-            v-on:updateOption="selectOrg"
-            placeholder="Select an organization"
-          >
-          </dropdown>
+          <v-card-subtitle>
+            Add your new Collection to an Organization:
+          </v-card-subtitle>
+          <v-list>
+            <v-list-item v-for="(org, i) in orgs" :key="i">
+              <v-btn @click="createCollection(org.orgid)">
+                {{org.orgname}}
+              </v-btn>
+            </v-list-item>
+          </v-list>
           <v-card-actions>
               <v-spacer />
               <v-btn color="primary" nuxt @click="newCollection()">
                   Cancel
-              </v-btn>
-              <span>&nbsp;</span>
-              <v-btn color="primary" nuxt @click="createCollection()">
-                  Submit
               </v-btn>
           </v-card-actions>
           </v-card>
@@ -62,37 +61,49 @@
               Create a New Note
           </v-card-title>
           <v-card-text>
-              <input v-model="newNoteName" placeholder="Note Name" required>
+              <input v-model="newNoteName" placeholder="New Note Name" required>
           </v-card-text>
+          <v-card-subtitle>
+            Add your new Note to a Collection:
+          </v-card-subtitle>
+          <v-list>
+            <v-list-item v-for="(coll, i) in allColls" :key="i">
+              <v-btn @click="createNote(coll.collectionid)">
+                {{coll.collectionname}}
+              </v-btn>
+            </v-list-item>
+          </v-list>
           <v-card-actions>
               <v-spacer />
               <v-btn color="primary" nuxt @click="newNote()">
                   Cancel
-              </v-btn>
-              <span>&nbsp;</span>
-              <v-btn color="primary" nuxt @click="createNote()">
-                  Submit
               </v-btn>
           </v-card-actions>
           </v-card>
         </v-row>
       </v-col>
 
-      <v-row>
-        <v-card elevation="5" width="200" v-for="(org, i) in orgs" :key="i">
-          <v-card-title class="headline">
-              {{org.orgname}}
-          </v-card-title>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn @click="loadCollections(org.orgid)">Go</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-row>
+      <br>
 
-      <v-row>
-        <div v-for="(coll, i) in collections" :key="i">
-          <v-card elevation="5" width="200">
+      <v-col>
+        <v-row>
+          <v-card class="orgs" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
+            <v-card-title class="headline">
+                {{org.orgname}}
+            </v-card-title>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click="loadCollections(org.orgid)">Go</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-row>
+      </v-col>
+
+      <br>
+
+      <v-col>
+        <v-row>
+          <v-card class="collections" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
             <v-card-title class="headline">
                 {{coll.collectionname}}
             </v-card-title>
@@ -101,12 +112,14 @@
               <v-btn @click="loadNotes(coll.collectionid)">Go</v-btn>
             </v-card-actions>
           </v-card>
-        </div>
-      </v-row>
+        </v-row>
+      </v-col>
 
-      <v-row>
-        <div v-for="(note, i) in notes" :key="i">
-          <v-card elevation="5" width="200">
+      <br>
+
+      <v-col>
+        <v-row>
+          <v-card class="notes" elevation="5" width="250" v-for="(note, i) in notes" :key="i">
             <v-card-title class="headline">
                 {{note.notename}}
             </v-card-title>
@@ -115,15 +128,16 @@
               <v-btn @click="openNote(note.noteid)">Go</v-btn>
             </v-card-actions>
           </v-card>
-        </div>
-      </v-row>
+        </v-row>
+      </v-col>
+
     </v-container>
   </v-app>
 </template>
 
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
-import dropdown from 'vue-dropdowns'
+
 export default {
   name: 'IndexPage',
   middleware: "auth",
@@ -131,10 +145,7 @@ export default {
   mounted() {
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     this.$store.dispatch('users/orgs')
-  },
-
-  components: {
-    'dropdown': dropdown
+    this.$store.dispatch('users/allColls')
   },
 
   data () {
@@ -142,15 +153,10 @@ export default {
       newOrgName: "",
       newCollName: "",
       newNoteName: "",
-      orgSelected: ""
     }
   },
 
   methods: {
-    selectOrg (orgname) {
-      this.orgSelected = orgname
-    },
-
     loadCollections (orgid) {
       this.$store.dispatch('users/collections', {
         orgid
@@ -177,12 +183,22 @@ export default {
       this.newOrg()
     },
 
-    createCollection () {
+    createCollection (orgid) {
       this.$store.dispatch('users/createCollection', {
-        collectionname: this.newCollName
+        collectionname: this.newCollName,
+        orgid: orgid
       })
       this.newCollName = ""
       this.newCollection()
+    },
+
+    createNote (collectionid) {
+      this.$store.dispatch('users/createNote', {
+        notename: this.newNoteName,
+        collectionid: collectionid
+      })
+      this.newNoteName = ""
+      this.newNote()
     },
 
     newOrg () {
@@ -205,6 +221,10 @@ export default {
 
     orgs () {
       return this.$store.state.users.orgs
+    },
+
+    allColls () {
+      return this.$store.state.users.allColls
     },
 
     collections () {

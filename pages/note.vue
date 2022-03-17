@@ -7,6 +7,11 @@
             </v-col>
             <v-col cols="8">
                 <h2>{{this.currentNote.notename}}</h2>
+                <v-row>
+                  <div>
+                      {{this.currentNote.typednotes}}
+                  </div>
+                </v-row>
             </v-col>
             <v-col>
                 <h3>&nbsp;{{this.currentNote.collectionname}}</h3>
@@ -18,13 +23,12 @@
             <Words v-show="showWords" @close-modal="showWords = false" />
         </div>
         <div>
-            <v-btn>Questions</v-btn>
+            <v-btn @click="showQuestions = true">Questions</v-btn>
+            <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
         </div>
         <div>
-            <v-btn>Links</v-btn>
-        </div>
-        <div>
-            {{this.currentNote.typednotes}}
+            <v-btn @click="showLinks = true">Links</v-btn>
+            <Links v-show="showLinks" @close-modal="showLinks = false" />
         </div>
 
     </v-container>
@@ -34,21 +38,31 @@
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Words from '~/components/Words.vue'
+import Questions from '~/components/Questions.vue'
+import Links from '~/components/Links.vue'
+
 export default {
   name: 'NotePage',
   middleware: "auth",
 
   components: {
-      Words
+      Words,
+      Questions,
+      Links
   },
 
   mounted() {
-    this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
+    this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
+    this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
+    this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
+    this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
   },
 
   data () {
     return {
+        showQuestions: false,
+        showLinks: false,
         showWords: false,
         notetext: ""
     }
@@ -59,18 +73,25 @@ export default {
   },
 
   computed: {
-    currentNote () {
-        return this.$store.state.users.currentNote
-    },
-
     user () {
       return this.$store.state.users.user
     },
 
-    notes () {
-      return this.$store.state.users.notes
+    currentNote () {
+        return this.$store.state.users.currentNote
     },
 
+    words () {
+      return this.$store.state.users.words
+    },
+
+    questions () {
+      return this.$store.state.users.questions
+    },
+
+    links () {
+      return this.$store.state.users.links
+    }
   }
 }
 </script>
