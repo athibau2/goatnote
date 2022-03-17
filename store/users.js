@@ -92,78 +92,36 @@ export const actions = {
     },
 
     async orgs({ commit, state }) {
-        let userOrgs = []
-        const response = await axios.get(API_URL + '/see_orgs')
+        const response = await axios.get(API_URL + '/see_orgs?email=eq.' + state.user.email)
         if (response.status === 200) {
-            const orgs = response.data
-            for (let i = 0; i < orgs.length; ++i) {
-                if (orgs[i]["email"] === state.user.email) {
-                    userOrgs.push(orgs[i])
-                }
-            }
-            console.log(userOrgs)
-            commit('setOrgs', userOrgs)
+            commit('setOrgs', response.data)
         }
     },
 
     async collections ({ commit, state }, { orgid }) {
         commit('setCollections', [])
         commit('setNotes', [])
-        const response = await axios.get(API_URL + '/see_collections')
+        const response = await axios.get(API_URL + '/see_collections?email=eq.' + state.user.email + '&orgid=eq.' + orgid)
         if (response.status === 200) {
-            let collections = response.data
-            let temp = []
-            for (let i = 0; i < collections.length; ++i) {
-                if (collections[i]["email"] === state.user.email) {
-                    temp.push(collections[i])
-                }
-            }
-            collections = temp
-            temp = []
-            for (let i = 0; i < collections.length; ++i) {
-                if (collections[i]["orgid"] === orgid) {
-                    temp.push(collections[i])
-                }
-            }
-            commit('setCollections', temp)
-            temp = []
+            commit('setCollections', response.data)
         }
     },
 
     async notes({ commit, state }, { collectionid }) {
         commit('setNotes', [])
-        const response = await axios.get(API_URL + '/see_notes')
+        const response = await axios.get(API_URL + '/see_notes?email=eq.' + state.user.email + '&collectionid=eq.' + collectionid)
         if (response.status === 200) {
-            let notes = response.data
-            let temp = []
-            for (let i = 0; i < notes.length; ++i) {
-                if (notes[i]["userid"] === state.userData.userid) {
-                    temp.push(notes[i])
-                }
-            }
-            notes = temp
-            temp = []
-            for (let i = 0; i < notes.length; ++i) {
-                if (notes[i]["collectionid"] === collectionid) {
-                    temp.push(notes[i])
-                }
-            }
-            commit('setNotes', temp)
-            temp = []
+            commit('setNotes', response.data)
         }
     },
 
-    async openNote({ commit }, { noteid }) {
-        commit('currentNote', {})
-        const response = await axios.get(API_URL + '/see_note_with_data')
+    async openNote({ commit, state }, { noteid }) {
+        localStorage.removeItem('note')
+        await commit('currentNote', {})
+        const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
         if (response.status === 200) {
-            let notes = response.data
-            for (let i = 0; i < notes.length; ++i) {
-                if (notes[i]["noteid"] === noteid) {
-                    commit('currentNote', notes[i])
-                    break
-                }
-            }
+            await commit('currentNote', response.data[0])
+            localStorage.setItem('note', JSON.stringify(state.currentNote))
             this.$router.push('/note')
         }
     },
@@ -215,6 +173,7 @@ export const actions = {
 
     async logout({ commit }) {
         deleteJwtToken()
+        localStorage.removeItem('note')
         await commit('setUser', null)
         this.$router.push('/login')
     }
