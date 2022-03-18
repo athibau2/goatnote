@@ -92,8 +92,9 @@
                 {{org.orgname}}
             </v-card-title>
             <v-card-actions>
+              <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn> <!--Implement function-->
               <v-spacer />
-              <v-btn @click="loadCollections(org.orgid)">Go</v-btn>
+              <v-btn color="green" @click="loadCollections(org.orgid)">Go</v-btn>
             </v-card-actions>
           </v-card>
         </v-row>
@@ -109,7 +110,8 @@
             </v-card-title>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="loadNotes(coll.collectionid)">Go</v-btn>
+              <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid)">Delete</v-btn> <!--Implement function-->
+              <v-btn color="green" @click="loadNotes(coll.collectionid)">Go</v-btn>
             </v-card-actions>
           </v-card>
         </v-row>
@@ -125,7 +127,8 @@
             </v-card-title>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="openNote(note.noteid)">Go</v-btn>
+              <v-btn color="light red lighten-2" @click="deleteNote(note.noteid)">Delete</v-btn> <!--Implement function-->
+              <v-btn color="green" @click="openNote(note.noteid)">Go</v-btn>
             </v-card-actions>
           </v-card>
         </v-row>
