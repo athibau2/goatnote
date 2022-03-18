@@ -168,15 +168,29 @@ export const actions = {
 
     async openNote({ dispatch, commit, state }, { noteid }) {
         localStorage.removeItem('note')
+        localStorage.removeItem('typedNotes')
         await commit('currentNote', {})
         const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
         if (response.status === 200) {
             await commit('currentNote', response.data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
+            localStorage.setItem('typedNotes', JSON.stringify(state.currentNote.typednotes))
             dispatch('getWords', { noteid })
             dispatch('getQuestions', { noteid })
             dispatch('getLinks', { noteid })
             this.$router.push('/note')
+        }
+    },
+
+    async saveNotes({ dispatch, commit }, { noteText, noteid }) {
+        const response = await axios.put(API_URL + '/note?noteid=eq.' + noteid, {
+            typednotes: noteText
+        },
+        {
+            headers: authHeader()
+        })
+        if (response.status === 200) {
+            localStorage.setItem('typedNotes', noteText)
         }
     },
 
@@ -289,6 +303,27 @@ export const actions = {
         }
     },
 
+    async leaveOrg({ dispatch, state }, { orgid }) {
+        const response = await axios.delete(API_URL + `/part_of?orgid=eq.${orgid}&userid=eq.${state.user.user_id}`)
+        if (response.status === 204) {
+            dispatch('orgs')
+        }
+    },
+
+    async deleteCollection({ dispatch }, { collectionid, orgid }) {
+        const response = await axios.delete(API_URL + `/collection?collectionid=eq.${collectionid}`)
+        if (response.status === 204) {
+            dispatch('collections', { orgid: orgid })
+        }
+    },
+
+    async deleteNote({ dispatch }, { noteid, collectionid }) {
+        const response = await axios.delete(API_URL + `/note?noteid=eq.${noteid}`)
+        if (response.status === 204) {
+            dispatch('notes', { collectionid: collectionid })
+        }
+    },
+
     async login ({ dispatch, commit }, { email, password }) {
         const response = await axios.post(API_URL + "/rpc/login", { 
             email: email,
@@ -323,6 +358,7 @@ export const actions = {
     async logout({ commit }) {
         deleteJwtToken()
         localStorage.removeItem('note')
+        localStorage.removeItem('typedNotes')
         localStorage.removeItem('words')
         localStorage.removeItem('questions')
         localStorage.removeItem('links')
@@ -338,6 +374,10 @@ export const getters = {
 
     getOrgs: state => {
         return state.orgs
+    },
+
+    getTypedNotes: state => {
+        return state.currentNote.typednotes
     }
   }
 

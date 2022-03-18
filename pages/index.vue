@@ -92,9 +92,9 @@
                 {{org.orgname}}
             </v-card-title>
             <v-card-actions>
-              <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn> <!--Implement function-->
               <v-spacer />
-              <v-btn color="green" @click="loadCollections(org.orgid)">Go</v-btn>
+              <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn> <!--Implement function-->
+              <v-btn color="primary" @click="loadCollections(org.orgid)">Go</v-btn>
             </v-card-actions>
           </v-card>
         </v-row>
@@ -110,8 +110,8 @@
             </v-card-title>
             <v-card-actions>
               <v-spacer />
-              <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid)">Delete</v-btn> <!--Implement function-->
-              <v-btn color="green" @click="loadNotes(coll.collectionid)">Go</v-btn>
+              <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn> <!--Implement function-->
+              <v-btn color="primary" @click="loadNotes(coll.collectionid)">Go</v-btn>
             </v-card-actions>
           </v-card>
         </v-row>
@@ -127,8 +127,8 @@
             </v-card-title>
             <v-card-actions>
               <v-spacer />
-              <v-btn color="light red lighten-2" @click="deleteNote(note.noteid)">Delete</v-btn> <!--Implement function-->
-              <v-btn color="green" @click="openNote(note.noteid)">Go</v-btn>
+              <v-btn color="light red lighten-2" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn> <!--Implement function-->
+              <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
             </v-card-actions>
           </v-card>
         </v-row>
@@ -202,6 +202,27 @@ export default {
       })
       this.newNoteName = ""
       this.newNote()
+    },
+
+    leaveOrg(orgid) {
+      this.$store.dispatch('users/leaveOrg', {
+        orgid: orgid
+      })
+    },
+
+    deleteCollection(collectionid, orgid) {
+      this.$store.dispatch('users/deleteCollection', {
+        collectionid: collectionid,
+        orgid: orgid
+
+      })
+    },
+
+    deleteNote(noteid, collectionid) {
+      this.$store.dispatch('users/deleteNote', {
+        noteid: noteid,
+        collectionid: collectionid
+      })
     },
 
     newOrg () {

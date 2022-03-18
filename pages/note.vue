@@ -24,9 +24,10 @@
                   rows="18"
                   auto-grow
                   outlined
-                  :value="this.currentNote.typednotes"
+                  v-model="noteText"
+                  @input="saveNotes()"
                 >
-                </v-textarea> 
+                </v-textarea>
             </v-col>
             <v-col class="text-center">
                 <div>
@@ -82,13 +83,16 @@ export default {
         showQuestions: false,
         showLinks: false,
         showWords: false,
-        noteText: ""
+        noteText: JSON.parse(localStorage.getItem('typedNotes'))
     }
   },
 
   methods: {
       saveNotes () {
-
+        this.$store.dispatch('users/saveNotes', {
+          noteText: this.noteText,
+          noteid: this.currentNote.noteid
+        })
       },
   },
 
