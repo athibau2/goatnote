@@ -7,29 +7,48 @@
             </v-col>
             <v-col cols="8">
                 <h2>{{this.currentNote.notename}}</h2>
-                <v-row>
-                  <div>
-                      {{this.currentNote.typednotes}}
-                  </div>
-                </v-row>
             </v-col>
             <v-col>
                 <h3>&nbsp;{{this.currentNote.collectionname}}</h3>
             </v-col>
         </v-row>
 
-        <div>
-            <v-btn @click="showWords = true">Words</v-btn>
-            <Words v-show="showWords" @close-modal="showWords = false" />
-        </div>
-        <div>
-            <v-btn @click="showQuestions = true">Questions</v-btn>
-            <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
-        </div>
-        <div>
-            <v-btn @click="showLinks = true">Links</v-btn>
-            <Links v-show="showLinks" @close-modal="showLinks = false" />
-        </div>
+        <br>
+        <v-divider />
+        <br>
+
+        <v-row>
+            <v-col cols="10">
+                <v-textarea
+                  filled
+                  rows="18"
+                  auto-grow
+                  outlined
+                  :value="this.currentNote.typednotes"
+                >
+                </v-textarea> 
+            </v-col>
+            <v-col class="text-center">
+                <div>
+                  <v-btn color="primary" @click="saveNotes()">Save Notes</v-btn>
+                </div>
+                <br>
+                <div>
+                    <v-btn @click="showWords = true">Words</v-btn>
+                    <Words v-show="showWords" @close-modal="showWords = false" />
+                </div>
+                <br>
+                <div>
+                    <v-btn @click="showQuestions = true">Questions</v-btn>
+                    <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
+                </div>
+                <br>
+                <div>
+                    <v-btn @click="showLinks = true">Links</v-btn>
+                    <Links v-show="showLinks" @close-modal="showLinks = false" />
+                </div>
+            </v-col>
+        </v-row>
 
     </v-container>
   </v-app>
@@ -57,6 +76,7 @@ export default {
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
+    this.$store.dispatch('users/getWords', { noteid: this.currentNote.noteid })
   },
 
   data () {
@@ -64,12 +84,14 @@ export default {
         showQuestions: false,
         showLinks: false,
         showWords: false,
-        notetext: ""
+        noteText: ""
     }
   },
 
   methods: {
-      
+      saveNotes () {
+
+      },
   },
 
   computed: {
