@@ -2,13 +2,26 @@
     <div class="modal-overlay" @click="$emit('close-modal')">
         <div class="modal" @click.stop>
             <h6>Links</h6>
-            <p v-for="(link, i) in links" :key="i">
-                {{link.url}}
+            <v-divider />
+            <span v-for="(link, i) in links" :key="i">
+                {{link.url}}&nbsp;
+                <v-icon @click="deleteLink(link.linkid)">mdi-delete</v-icon>
+                <v-divider />
+            </span>
+            <br>
+            <p>
+              <v-row>
+                <v-text-field 
+                  v-model="newLink" 
+                  placeholder="Enter New Link"
+                >
+                </v-text-field>
+              </v-row>
             </p>
             <v-btn @click="$emit('close-modal')">
                 Cancel
             </v-btn>
-            <v-btn>Add</v-btn>
+            <v-btn @click="addLink()">Add</v-btn>
         </div>
     </div>
 </template>
@@ -17,10 +30,42 @@
   export default {
       name: "LinksComponent",
 
+      mounted () {
+        this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
+        this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
+      },
+
+      data () {
+        return {
+          newLink: "",
+        }
+      },
+
+      methods: {
+        deleteLink (linkid) {
+          this.$store.dispatch('users/deleteLink', {
+            linkid: linkid,
+            noteid: this.currentNote.noteid
+          })
+        },
+
+        addLink () {
+          this.$store.dispatch('users/addLink', {
+            newLink: this.newLink,
+            noteid: this.currentNote.noteid
+          })
+          this.newLink = ""
+        }
+      },
+
       computed: {
           links () {
               return this.$store.state.users.links
-          }
+          },
+
+          currentNote () {
+            return this.$store.state.users.currentNote
+          },
       }
 }
 </script>
@@ -55,7 +100,7 @@ h6 {
 
 p {
   font-size: 16px;
-  margin: 20px 0;
+  margin: 10px 15px;
 }
 
 </style>

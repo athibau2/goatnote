@@ -2,13 +2,32 @@
     <div class="modal-overlay" @click="$emit('close-modal')">
         <div class="modal" @click.stop>
             <h6>Words</h6>
-            <p v-for="(word, i) in words" :key="i">
-                {{word.vocabword}}
+            <v-divider />
+            <span v-for="(word, i) in words" :key="i">
+                <strong>{{word.vocabword}}:</strong>
+                &nbsp;{{word.definition}}&nbsp;
+                <v-icon @click="deleteWord(word.wordid)">mdi-delete</v-icon>
+                <v-divider />
+            </span>
+            <br>
+            <p>
+              <v-row>
+                <v-text-field 
+                  v-model="newWord" 
+                  placeholder="Enter New Word"
+                >
+                </v-text-field>
+                <v-text-field 
+                  v-model="newDef" 
+                  placeholder="Enter Word Definition"
+                >
+                </v-text-field>
+              </v-row>
             </p>
             <v-btn @click="$emit('close-modal')">
                 Cancel
             </v-btn>
-            <v-btn>Add</v-btn>
+            <v-btn @click="addWord()">Add</v-btn>
         </div>
     </div>
 </template>
@@ -17,9 +36,44 @@
   export default {
       name: "WordsComponent",
 
+      mounted () {
+        this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
+        this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
+      },
+
+      data () {
+        return {
+          newWord: "",
+          newDef: ""
+        }
+      },
+
+      methods: {
+        deleteWord (wordid) {
+          this.$store.dispatch('users/deleteWord', {
+            wordid: wordid,
+            noteid: this.currentNote.noteid
+          })
+        },
+
+        addWord () {
+          this.$store.dispatch('users/addWord', {
+            newWord: this.newWord,
+            newDef: this.newDef,
+            noteid: this.currentNote.noteid
+          })
+          this.newWord = ""
+          this.newDef = ""
+        }
+      },
+
       computed: {
           words () {
               return this.$store.state.users.words
+          },
+
+          currentNote () {
+            return this.$store.state.users.currentNote
           }
       }
 }
@@ -55,7 +109,7 @@ h6 {
 
 p {
   font-size: 16px;
-  margin: 20px 0;
+  margin: 10px 15px;
 }
 
 </style>
