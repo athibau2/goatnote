@@ -25,7 +25,7 @@
               </v-row>
             </p>
             <v-btn @click="$emit('close-modal')">
-                Cancel
+                Exit
             </v-btn>
             <v-btn @click="addWord()">Add</v-btn>
         </div>
