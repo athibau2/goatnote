@@ -250,3 +250,6 @@ GRANT EXECUTE ON FUNCTION
   public.login(text, text),
   public.signup(text, text, text, text)
   TO anonymous;
+
+ALTER TABLE <> ADD CONSTRAINT cascade_delete 
+	FOREIGN KEY (<id>) REFERENCES <> (<id>) ON DELETE CASCADE;

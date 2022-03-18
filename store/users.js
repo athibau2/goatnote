@@ -168,22 +168,46 @@ export const actions = {
 
     async openNote({ dispatch, commit, state }, { noteid }) {
         localStorage.removeItem('note')
-        localStorage.removeItem('links')
         await commit('currentNote', {})
-        await commit('links', {})
         const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
         if (response.status === 200) {
             await commit('currentNote', response.data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
-            const links = await axios.get(API_URL + '/see_links?noteid=eq.' + noteid)
-            if (links.status === 200) {
-                await commit('links', links.data)
-                localStorage.setItem('links', JSON.stringify(state.links))
-            }
-
             dispatch('getWords', { noteid })
             dispatch('getQuestions', { noteid })
+            dispatch('getLinks', { noteid })
             this.$router.push('/note')
+        }
+    },
+
+    async getLinks({ commit, state }, { noteid }) {
+        await commit('links', {})
+        const links = await axios.get(API_URL + '/see_links?noteid=eq.' + noteid)
+        if (links.status === 200) {
+            await commit('links', links.data)
+            localStorage.setItem('links', JSON.stringify(state.links))
+        }
+    },
+
+    async addLink({ dispatch }, { url, noteid }) {
+        const response = await axios.post(API_URL + '/links', {
+            url: url,
+            noteid: noteid
+        },
+        {
+            headers: authHeader()
+        })
+        if (response.status === 201) {
+            dispatch('getLinks', { noteid: noteid })
+        }
+    },
+
+    async deleteLink({ dispatch }, { linkid, noteid }) {
+        const res = await axios.delete(API_URL + '/links?linkid=eq.' + linkid, {
+            headers: authHeader()
+        })
+        if (res.status === 204) {
+            dispatch('getLinks', { noteid: noteid})
         }
     },
 

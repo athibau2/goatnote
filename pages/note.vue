@@ -49,7 +49,6 @@
                 </div>
             </v-col>
         </v-row>
-
     </v-container>
   </v-app>
 </template>
@@ -76,7 +75,6 @@ export default {
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
-    this.$store.dispatch('users/getWords', { noteid: this.currentNote.noteid })
   },
 
   data () {
