@@ -18,10 +18,10 @@
                 </v-text-field>
               </v-row>
             </p>
-            <v-btn @click="$emit('close-modal')">
+            <v-btn color="light red lighten-2" @click="$emit('close-modal')">
                 Exit
             </v-btn>
-            <v-btn @click="addLink()">Add</v-btn>
+            <v-btn color="primary" @click="addLink()">Add</v-btn>
         </div>
     </div>
 </template>

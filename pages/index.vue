@@ -13,7 +13,7 @@
           </v-card-text>
           <v-card-actions>
               <v-spacer />
-              <v-btn color="primary" nuxt @click="newOrg()">
+              <v-btn color="light red lighten-2" nuxt @click="newOrg()">
                   Cancel
               </v-btn>
               <span>&nbsp;</span>
@@ -39,14 +39,14 @@
           </v-card-subtitle>
           <v-list>
             <v-list-item v-for="(org, i) in orgs" :key="i">
-              <v-btn @click="createCollection(org.orgid)">
+              <v-btn color="light blue lighten-4" @click="createCollection(org.orgid)">
                 {{org.orgname}}
               </v-btn>
             </v-list-item>
           </v-list>
           <v-card-actions>
               <v-spacer />
-              <v-btn color="primary" nuxt @click="newCollection()">
+              <v-btn color="light red lighten-2" nuxt @click="newCollection()">
                   Cancel
               </v-btn>
           </v-card-actions>
@@ -68,14 +68,14 @@
           </v-card-subtitle>
           <v-list>
             <v-list-item v-for="(coll, i) in allColls" :key="i">
-              <v-btn @click="createNote(coll.collectionid)">
+              <v-btn color="light green lighten-3" @click="createNote(coll.collectionid)">
                 {{coll.collectionname}}
               </v-btn>
             </v-list-item>
           </v-list>
           <v-card-actions>
               <v-spacer />
-              <v-btn color="primary" nuxt @click="newNote()">
+              <v-btn color="light red lighten-2" nuxt @click="newNote()">
                   Cancel
               </v-btn>
           </v-card-actions>
@@ -87,7 +87,7 @@
 
       <v-col>
         <v-row>
-          <v-card class="orgs" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
+          <v-card class="orgs" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
             <v-card-title class="headline">
                 {{org.orgname}}
             </v-card-title>
@@ -95,6 +95,7 @@
               <v-spacer />
               <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn> <!--Implement function-->
               <v-btn color="primary" @click="loadCollections(org.orgid)">Go</v-btn>
+              <v-spacer />
             </v-card-actions>
           </v-card>
         </v-row>
@@ -104,7 +105,7 @@
 
       <v-col>
         <v-row>
-          <v-card class="collections" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
+          <v-card class="collections" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
             <v-card-title class="headline">
                 {{coll.collectionname}}
             </v-card-title>
@@ -121,7 +122,7 @@
 
       <v-col>
         <v-row>
-          <v-card class="notes" elevation="5" width="250" v-for="(note, i) in notes" :key="i">
+          <v-card class="notes" color="light purple lighten-3" elevation="5" width="250" v-for="(note, i) in notes" :key="i">
             <v-card-title class="headline">
                 {{note.notename}}
             </v-card-title>
