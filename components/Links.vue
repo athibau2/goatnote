@@ -50,7 +50,6 @@
         },
 
         addLink () {
-          console.log(this.newLink)
           this.$store.dispatch('users/addLink', {
             url: this.newLink,
             noteid: this.currentNote.noteid

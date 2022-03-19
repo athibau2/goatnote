@@ -295,7 +295,6 @@ export const actions = {
             email: email, password: password
         })
         if (response.status === 200) {
-            console.log(response.data)
             dispatch('login', {
                 email: email,
                 password: password
@@ -334,7 +333,6 @@ export const actions = {
             }
         );
         if (response.status === 200) {
-            console.log(response.data)
             setJwtToken(response.data[0].token)
             await commit('setUser', getUserIdFromToken(getJwtToken()))
             dispatch('userData')
