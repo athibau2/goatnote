@@ -4,8 +4,11 @@
       :clipped-left="clipped"
       fixed
       app
+      color="grey"
     >
-      <v-toolbar-title v-text="title" />
+    <v-spacer />   
+
+      <v-toolbar-title class="font-weight-bold" v-text="title" />
       <v-spacer />
     </v-app-bar>
     <v-main>
