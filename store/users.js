@@ -344,7 +344,7 @@ export const actions = {
     },
 
     async updatePass({ dispatch, state }, { password }) {
-        const response = await axios.put(API_URL + '/user?email=eq.' + state.user.email, {
+        const response = await axios.put(API_URL + '/user?userid=eq.' + state.user.user_id, {
             password: password
         },
         {
