@@ -205,16 +205,17 @@ export default {
     },
 
     leaveOrg(orgid) {
-      this.$store.dispatch('users/leaveOrg', {
+      if (confirm("Are you sure you want to leave this organization? You will lose access to all collections and notes inside this organization.")) {
+        this.$store.dispatch('users/leaveOrg', {
         orgid: orgid
-      })
+        })
+      }
     },
 
     deleteCollection(collectionid, orgid) {
       this.$store.dispatch('users/deleteCollection', {
         collectionid: collectionid,
         orgid: orgid
-
       })
     },
 
