@@ -2,7 +2,7 @@
     <v-app>
         <v-col v-if="(userData !== null && userData !== undefined)">
           <v-row justify="center" align="center">
-            <v-card elevation="5" width="400">
+            <v-card color="light yellow lighten-4" elevation="5" width="400">
             <v-card-title class="headline">
                 {{userData.firstname}} {{userData.lastname}}
             </v-card-title>
@@ -17,7 +17,7 @@
             </v-card-text>
             <v-card-actions>
                 <v-spacer />
-                <v-btn @click="deleteAccount()">Delete Account</v-btn>
+                <v-btn color="light red lighten-2" @click="deleteAccount()">Delete Account</v-btn>
                 <v-btn color="primary" @click="updatePass()">Update Password</v-btn>
             </v-card-actions>
             </v-card>

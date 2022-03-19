@@ -2,7 +2,7 @@
     <v-app>
         <v-col>
             <v-row justify="center" align="center">
-                <v-card elevation="5" width="400">
+                <v-card color="light yellow lighten-4" elevation="5" width="400">
                 <v-card-title class="headline">
                     Welcome to GoatNotes!
                 </v-card-title>

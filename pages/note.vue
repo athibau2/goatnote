@@ -3,7 +3,7 @@
     <v-container>
         <v-row class="text-center">
             <v-col>
-                <v-btn to="/">&lt; Back</v-btn>
+                <v-btn color="light red lighten-2" to="/">&lt; Back</v-btn>
             </v-col>
             <v-col cols="8">
                 <h2>{{this.currentNote.notename}}</h2>
@@ -21,7 +21,7 @@
         <v-row>
             <v-col cols="10">
                 <v-textarea
-                  filled
+                  background-color="light yellow lighten-5"
                   rows="18"
                   auto-grow
                   outlined
@@ -32,17 +32,17 @@
             </v-col>
             <v-col class="text-center">
                 <div>
-                    <v-btn @click="showWords = true">Words</v-btn>
+                    <v-btn color="light grey" @click="showWords = true">Words</v-btn>
                     <Words v-show="showWords" @close-modal="showWords = false" />
                 </div>
                 <br>
                 <div>
-                    <v-btn @click="showQuestions = true">Questions</v-btn>
+                    <v-btn color="light grey" @click="showQuestions = true">Questions</v-btn>
                     <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
                 </div>
                 <br>
                 <div>
-                    <v-btn @click="showLinks = true">Links</v-btn>
+                    <v-btn color="light grey" @click="showLinks = true">Links</v-btn>
                     <Links v-show="showLinks" @close-modal="showLinks = false" />
                 </div>
             </v-col>

@@ -4,7 +4,7 @@
       :clipped-left="clipped"
       fixed
       app
-      color="grey"
+      color="light grey lighten-1"
     >
     <v-spacer />   
 

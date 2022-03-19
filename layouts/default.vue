@@ -29,7 +29,7 @@
       :clipped-left="clipped"
       fixed
       app
-      color="grey"
+      color="light grey lighten-1"
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-btn
@@ -47,13 +47,13 @@
       <v-toolbar-title class="font-weight-bold" v-text="title" />
       <v-spacer/>
       <div class="topButton">
-      <v-btn  @click="newOrg()" to="/">Add Organization </v-btn>
+      <v-btn color="light blue lighten-4" @click="newOrg()" to="/">Add Organization </v-btn>
       </div>
       <div class="topButton">
-      <v-btn  @click="newCollection()" to="/">Add Collection </v-btn>
+      <v-btn color="light green lighten-3" @click="newCollection()" to="/">Add Collection </v-btn>
       </div>
       <div class="topButton">
-      <v-btn @click="newNote()" to="/">Add Note </v-btn>
+      <v-btn color="light purple lighten-3" @click="newNote()" to="/">Add Note </v-btn>
       </div>
       <v-toolbar-title v-if="user !== null && user !== undefined">
         &nbsp;{{userData.firstname}} {{userData.lastname}}
