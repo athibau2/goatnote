@@ -348,6 +348,7 @@ export const actions = {
         })
         if (response.status === 204) {
             dispatch('userData')
+            alert("Your password has been updated")
         }
     },
 
