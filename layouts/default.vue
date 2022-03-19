@@ -29,6 +29,7 @@
       :clipped-left="clipped"
       fixed
       app
+      color="grey"
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-btn
@@ -43,11 +44,17 @@
       >
         <v-icon>mdi-application</v-icon>
       </v-btn>
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
-      <v-btn @click="newOrg()" to="/">+ Organization</v-btn>
-      <v-btn @click="newCollection()" to="/">+ Collection</v-btn>
-      <v-btn @click="newNote()" to="/">+ Note</v-btn>
+      <v-toolbar-title class="font-weight-bold" v-text="title" />
+      <v-spacer/>
+      <div class="topButton">
+      <v-btn  @click="newOrg()" to="/">Add Organization </v-btn>
+      </div>
+      <div class="topButton">
+      <v-btn  @click="newCollection()" to="/">Add Collection </v-btn>
+      </div>
+      <div class="topButton">
+      <v-btn @click="newNote()" to="/">Add Note </v-btn>
+      </div>
       <v-toolbar-title v-if="user !== null && user !== undefined">
         &nbsp;{{userData.firstname}} {{userData.lastname}}
       </v-toolbar-title>
@@ -154,3 +161,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.topButton {
+  margin-right : 3px;
+}
+</style>

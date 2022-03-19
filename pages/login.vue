@@ -2,8 +2,8 @@
     <v-app>
         <v-col>
             <v-row justify="center" align="center">
-                <v-card elevation="5" width="400">
-                <v-card-title class="headline">
+                <v-card  elevation="5" width="400">
+                <v-card-title  class="headline">
                     Welcome to GoatNotes!
                 </v-card-title>
                 <v-card-subtitle>
@@ -11,7 +11,7 @@
                 </v-card-subtitle>
                 <v-card-text>
                     <input v-model="email" placeholder="Enter your email" required>
-                    <div>
+                    <div class="entry1" >
                         <input v-model="password" type="password" placeholder="Enter your password" required>
                     </div>
                 </v-card-text>
@@ -58,3 +58,8 @@ export default {
 
 }
 </script>
+<style scoped>
+.entry1{
+  margin-top: 15px;
+}
+</style>

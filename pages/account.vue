@@ -17,7 +17,7 @@
             </v-card-text>
             <v-card-actions>
                 <v-spacer />
-                <v-btn @click="updatePass()">Update Password</v-btn>
+                <v-btn color="primary" @click="updatePass()">Update Password</v-btn>
             </v-card-actions>
             </v-card>
           </v-row>
