@@ -7,13 +7,14 @@
             </v-col>
             <v-col cols="8">
                 <h2>{{this.currentNote.notename}}</h2>
+                <h6>{{this.currentNote.notedate}}</h6>
             </v-col>
             <v-col>
                 <h3>&nbsp;{{this.currentNote.collectionname}}</h3>
+                <span>{{this.saving}}</span>
             </v-col>
         </v-row>
 
-        <br>
         <v-divider />
         <br>
 
@@ -30,10 +31,6 @@
                 </v-textarea>
             </v-col>
             <v-col class="text-center">
-                <div>
-                  <v-btn color="primary" @click="saveNotes()">Save Notes</v-btn>
-                </div>
-                <br>
                 <div>
                     <v-btn @click="showWords = true">Words</v-btn>
                     <Words v-show="showWords" @close-modal="showWords = false" />
@@ -83,20 +80,26 @@ export default {
         showQuestions: false,
         showLinks: false,
         showWords: false,
-        noteText: JSON.parse(localStorage.getItem('typedNotes'))
+        noteText: JSON.parse(localStorage.getItem('note')).typednotes,
     }
   },
 
   methods: {
-      saveNotes () {
-        this.$store.dispatch('users/saveNotes', {
+      async saveNotes () {
+        this.$store.commit('users/saving', "Saving...")
+        await this.$store.dispatch('users/saveNotes', {
           noteText: this.noteText,
           noteid: this.currentNote.noteid
         })
+        this.$store.commit('users/saving', "Saved")
       },
   },
 
   computed: {
+    saving () {
+      return this.$store.state.users.saving
+    },
+
     user () {
       return this.$store.state.users.user
     },

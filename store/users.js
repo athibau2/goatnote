@@ -18,11 +18,15 @@ export const state = () => ({
     links: {},
     makingNewOrg: false,
     makingNewCollection: false,
-    makingNewNote: false
+    makingNewNote: false,
+    saving: "Saved"
   })
   
 // mutations should update state
 export const mutations = {
+    saving(state, data) {
+        state.saving = data
+    },
     newOrg(state, data) {
         state.makingNewOrg = data
     },
@@ -80,16 +84,9 @@ export const mutations = {
 // actions should call mutations
 export const actions = {
     async userData({ commit, state }) {
-        const response = await axios.get(API_URL + '/see_personal_data')
+        const response = await axios.get(API_URL + '/see_personal_data?email=eq.' + state.user.email)
         if (response.status === 200) {
-            const users = response.data
-            for (let i = 0; i < users.length; ++i) {
-                if (users[i]["email"] === state.user.email) {
-                    const currentUser = users[i]
-                    commit('setUserData', currentUser)
-                    break
-                }
-            }
+            commit('setUserData', response.data[0])
         }
     },
 
@@ -168,13 +165,13 @@ export const actions = {
 
     async openNote({ dispatch, commit, state }, { noteid }) {
         localStorage.removeItem('note')
-        localStorage.removeItem('typedNotes')
+        //localStorage.removeItem('typedNotes')
         await commit('currentNote', {})
         const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
         if (response.status === 200) {
             await commit('currentNote', response.data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
-            localStorage.setItem('typedNotes', JSON.stringify(state.currentNote.typednotes))
+            //localStorage.setItem('typedNotes', JSON.stringify(state.currentNote.typednotes))
             dispatch('getWords', { noteid })
             dispatch('getQuestions', { noteid })
             dispatch('getLinks', { noteid })
@@ -183,14 +180,17 @@ export const actions = {
     },
 
     async saveNotes({ dispatch, commit }, { noteText, noteid }) {
-        const response = await axios.put(API_URL + '/note?noteid=eq.' + noteid, {
+        const response = await axios.patch(API_URL + '/note?noteid=eq.' + noteid, {
             typednotes: noteText
         },
         {
             headers: authHeader()
         })
-        if (response.status === 200) {
-            localStorage.setItem('typedNotes', noteText)
+        if (response.status === 204) {
+            let temp = JSON.parse(localStorage.getItem('note'))
+            temp.typednotes = noteText
+            commit('currentNote', temp)
+            localStorage.setItem('note', JSON.stringify(temp))
         }
     },
 
@@ -344,13 +344,13 @@ export const actions = {
     },
 
     async updatePass({ dispatch, state }, { password }) {
-        const response = await axios.put(API_URL + '/user?userid=eq.' + state.user.user_id, {
+        const response = await axios.patch(API_URL + '/user?userid=eq.' + state.user.user_id, {
             password: password
         },
         {
             headers: authHeader()
         })
-        if (response.status === 200) {
+        if (response.status === 204) {
             dispatch('userData')
         }
     },
@@ -358,7 +358,7 @@ export const actions = {
     async logout({ commit }) {
         deleteJwtToken()
         localStorage.removeItem('note')
-        localStorage.removeItem('typedNotes')
+        //localStorage.removeItem('typedNotes')
         localStorage.removeItem('words')
         localStorage.removeItem('questions')
         localStorage.removeItem('links')

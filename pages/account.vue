@@ -32,8 +32,8 @@ export default {
   middleware: "auth",
 
   mounted () {
-    this.$store.dispatch('users/userData')
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
+    this.$store.dispatch('users/userData')
   },
 
   data () {
