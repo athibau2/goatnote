@@ -10,9 +10,9 @@
                     Sign In Here
                 </v-card-subtitle>
                 <v-card-text>
-                    <input v-model="email" placeholder="Enter your email" required>
+                    <input class="entryBox" v-model="email" placeholder="Enter your email" required> 
                     <div class="entry1" >
-                        <input v-model="password" type="password" placeholder="Enter your password" required>
+                        <input class="entryBox"  v-model="password" type="password" placeholder="Enter your password" required>
                     </div>
                 </v-card-text>
                 <v-card-actions>
@@ -61,5 +61,8 @@ export default {
 <style scoped>
 .entry1{
   margin-top: 15px;
+}
+input{
+  background-color: rgb(172, 175, 179);
 }
 </style>
