@@ -293,6 +293,7 @@ export const actions = {
             email: email, password: password
         })
         if (response.status === 200) {
+            alert("Account created successfully")
             dispatch('login', {
                 email: email,
                 password: password

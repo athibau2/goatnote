@@ -213,17 +213,21 @@ export default {
     },
 
     deleteCollection(collectionid, orgid) {
-      this.$store.dispatch('users/deleteCollection', {
-        collectionid: collectionid,
-        orgid: orgid
-      })
+      if (confirm("Are you sure you want to delete this collection? This will also delete all notes inside this collection.")) {
+        this.$store.dispatch('users/deleteCollection', {
+          collectionid: collectionid,
+          orgid: orgid
+        })
+      }
     },
 
     deleteNote(noteid, collectionid) {
-      this.$store.dispatch('users/deleteNote', {
-        noteid: noteid,
-        collectionid: collectionid
-      })
+      if (confirm("Are you sure you want to delete this note? This will also delete all words, questions, and links inside this note.")) {
+        this.$store.dispatch('users/deleteNote', {
+          noteid: noteid,
+          collectionid: collectionid
+        })
+      }
     },
 
     newOrg () {
