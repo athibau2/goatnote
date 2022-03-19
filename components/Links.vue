@@ -37,7 +37,7 @@
 
       data () {
         return {
-          newLink: "",
+          newLink: ""
         }
       },
 
@@ -50,8 +50,9 @@
         },
 
         addLink () {
+          console.log(this.newLink)
           this.$store.dispatch('users/addLink', {
-            newLink: this.newLink,
+            url: this.newLink,
             noteid: this.currentNote.noteid
           })
           this.newLink = ""
