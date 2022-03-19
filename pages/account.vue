@@ -17,6 +17,7 @@
             </v-card-text>
             <v-card-actions>
                 <v-spacer />
+                <v-btn @click="deleteAccount()">Delete Account</v-btn>
                 <v-btn @click="updatePass()">Update Password</v-btn>
             </v-card-actions>
             </v-card>
@@ -48,6 +49,12 @@ export default {
         password: this.newPass
       })
       this.newPass = ""
+    },
+
+    deleteAccount () {
+      if(confirm("Are you sure you want to delete your account?")) {
+        this.$store.dispatch('users/deleteAccount')
+      }
     }
   },
 

@@ -165,13 +165,11 @@ export const actions = {
 
     async openNote({ dispatch, commit, state }, { noteid }) {
         localStorage.removeItem('note')
-        //localStorage.removeItem('typedNotes')
         await commit('currentNote', {})
         const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
         if (response.status === 200) {
             await commit('currentNote', response.data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
-            //localStorage.setItem('typedNotes', JSON.stringify(state.currentNote.typednotes))
             dispatch('getWords', { noteid })
             dispatch('getQuestions', { noteid })
             dispatch('getLinks', { noteid })
@@ -354,14 +352,58 @@ export const actions = {
     },
 
     async logout({ commit }) {
-        deleteJwtToken()
+        commit('setCollections', [])
+        commit('setNotes', [])
+        commit('currentNote', {})
         localStorage.removeItem('note')
-        //localStorage.removeItem('typedNotes')
         localStorage.removeItem('words')
         localStorage.removeItem('questions')
         localStorage.removeItem('links')
+        deleteJwtToken()
         await commit('setUser', null)
         this.$router.push('/login')
+    },
+
+    async deleteAccount({ state }) {
+        const collections = await axios.get(API_URL + '/see_collections?userid=eq.' + state.user.user_id)
+        let notes = []
+        for (let i = 0; i < collections.data.length; ++i) {
+            let temp = await axios.get(API_URL + '/see_notes?collectionid=eq.' + collections.data[i].collectionid)
+            for (let j = 0; j < temp.data.length; ++j) {
+                notes.push(temp.data[j])
+            }
+        }
+        let words = []
+        let questions = []
+        let links = []
+        for (let i = 0; i < notes.length; ++i) {
+            let w = await axios.get(API_URL + '/see_words?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < w.data.length; ++j) {
+                words.push(w.data[j])
+            }
+            let q = await axios.get(API_URL + '/see_questions?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < q.data.length; ++j) {
+                questions.push(q.data[j])
+            }
+            let l = await axios.get(API_URL + '/see_links?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < l.data.length; ++j) {
+                links.push(l.data[j])
+            }
+        }
+
+        for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
+        for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
+        for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+        for (let i = 0; i < notes.length; ++i) { await axios.delete(API_URL + '/note?noteid=eq.' + notes[i].noteid) }
+        for (let i = 0; i < collections.data.length; ++i) { await axios.delete(API_URL + '/collection?collectionid=eq.' + collections.data[i].collectionid) }
+
+        await axios.delete(API_URL + '/part_of?userid=eq.' + state.user.user_id)
+        const res = await axios.delete(API_URL + '/user?userid=eq.' + state.user.user_id)
+        if (res.status === 204) {
+            deleteJwtToken()
+            this.$router.push('/login')
+            alert("Your account has been deleted")
+        }
     }
 }
 
