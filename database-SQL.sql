@@ -216,7 +216,7 @@ CREATE OR REPLACE FUNCTION
     _role NAME;
     result jwt_token;
   BEGIN
-    SELECT "user".userid FROM "user" WHERE "user".email = login.email AND "user".password = crypt(login.password, gen_salt('bf', 8)) INTO _role;
+    SELECT "user".userid FROM "user" WHERE "user".email = login.email AND "user".password = crypt(login.password, "user".password) INTO _role;
     IF _role IS NULL THEN
       RAISE invalid_password USING message = 'invalid user or password';
     END IF;
