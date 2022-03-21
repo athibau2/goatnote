@@ -32,17 +32,17 @@
             </v-col>
             <v-col class="text-center">
                 <div>
-                    <v-btn color="light grey" @click="showWords = true">Words</v-btn>
+                    <v-btn color="light grey lighten-1" @click="showWords = true">Words</v-btn>
                     <Words v-show="showWords" @close-modal="showWords = false" />
                 </div>
                 <br>
                 <div>
-                    <v-btn color="light grey" @click="showQuestions = true">Questions</v-btn>
+                    <v-btn color="light grey lighten-1" @click="showQuestions = true">Questions</v-btn>
                     <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
                 </div>
                 <br>
                 <div>
-                    <v-btn color="light grey" @click="showLinks = true">Links</v-btn>
+                    <v-btn color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
                     <Links v-show="showLinks" @close-modal="showLinks = false" />
                 </div>
             </v-col>

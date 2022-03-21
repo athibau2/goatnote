@@ -10,8 +10,8 @@
                     Sign Up Here
                 </v-card-subtitle>
                 <v-card-text>
-                    <input v-model="firstname" placeholder="Enter your first name" required>
-                    <input v-model="lastname" placeholder="Enter your last name" required>
+                    <input class="name" v-model="firstname" placeholder="Enter your first name" required>
+                    <input class="name" v-model="lastname" placeholder="Enter your last name" required>
                     <div>
                         <input v-model="email" placeholder="Enter your email" required>
                     </div>
@@ -66,3 +66,12 @@ export default {
 
 }
 </script>
+
+<style scoped>
+@import '~/assets/styles.css';
+
+.name{
+    width: 39.5%;
+}
+
+</style>

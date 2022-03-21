@@ -87,15 +87,14 @@
 
       <v-col>
         <v-row>
-          <v-card class="orgs" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
+          <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
             <v-card-title class="headline">
                 {{org.orgname}}
             </v-card-title>
             <v-card-actions>
               <v-spacer />
-              <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn> <!--Implement function-->
+              <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn>
               <v-btn color="primary" @click="loadCollections(org.orgid)">Go</v-btn>
-              <v-spacer />
             </v-card-actions>
           </v-card>
         </v-row>
@@ -105,13 +104,13 @@
 
       <v-col>
         <v-row>
-          <v-card class="collections" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
+          <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
             <v-card-title class="headline">
                 {{coll.collectionname}}
             </v-card-title>
             <v-card-actions>
               <v-spacer />
-              <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn> <!--Implement function-->
+              <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
               <v-btn color="primary" @click="loadNotes(coll.collectionid)">Go</v-btn>
             </v-card-actions>
           </v-card>
@@ -122,13 +121,13 @@
 
       <v-col>
         <v-row>
-          <v-card class="notes" color="light purple lighten-3" elevation="5" width="250" v-for="(note, i) in notes" :key="i">
+          <v-card class="list-card" color="light purple lighten-3" elevation="5" width="250" v-for="(note, i) in notes" :key="i">
             <v-card-title class="headline">
                 {{note.notename}}
             </v-card-title>
             <v-card-actions>
               <v-spacer />
-              <v-btn color="light red lighten-2" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn> <!--Implement function-->
+              <v-btn color="light red lighten-2" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
               <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
             </v-card-actions>
           </v-card>
@@ -279,3 +278,12 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+@import '~/assets/styles.css';
+
+.list-card{
+  margin-right: 10px;
+}
+
+</style>

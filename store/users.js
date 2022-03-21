@@ -117,7 +117,7 @@ export const actions = {
         {
             headers: authHeader()
         })
-        dispatch('collections')
+        dispatch('collections', { orgid })
         dispatch('allColls')
     },
 
@@ -129,10 +129,12 @@ export const actions = {
         {
             headers: authHeader()
         })
-        dispatch('notes')
+        dispatch('notes', { collectionid })
     },
 
     async orgs({ commit, state }) {
+        commit('setCollections', [])
+        commit('setNotes', [])
         const response = await axios.get(API_URL + '/see_orgs?email=eq.' + state.user.email)
         if (response.status === 200) {
             commit('setOrgs', response.data)
@@ -287,6 +289,23 @@ export const actions = {
         }
     },
 
+    async updatePass({ dispatch, state }, { newPass, currentPass }) {
+        const res = await axios.get(API_URL + '/user?userid=eq.' + state.user.user_id)
+        if (res.data.password === currentPass) {
+            const response = await axios.patch(API_URL + '/user?userid=eq.' + state.user.user_id, {
+                password: newPass
+            },
+            {
+                headers: authHeader()
+            })
+            if (response.status === 204) {
+                dispatch('userData')
+                alert("Your password has been updated")
+            }
+        }
+        else { alert("The current password you entered is incorrect") }
+    },
+
     async signup({ dispatch }, { firstname, lastname, email, password }) {
         const response = await axios.post(API_URL + '/rpc/signup', {
             firstname: firstname, lastname: lastname, 
@@ -298,27 +317,6 @@ export const actions = {
                 email: email,
                 password: password
             })
-        }
-    },
-
-    async leaveOrg({ dispatch, state }, { orgid }) {
-        const response = await axios.delete(API_URL + `/part_of?orgid=eq.${orgid}&userid=eq.${state.user.user_id}`)
-        if (response.status === 204) {
-            dispatch('orgs')
-        }
-    },
-
-    async deleteCollection({ dispatch }, { collectionid, orgid }) {
-        const response = await axios.delete(API_URL + `/collection?collectionid=eq.${collectionid}`)
-        if (response.status === 204) {
-            dispatch('collections', { orgid: orgid })
-        }
-    },
-
-    async deleteNote({ dispatch }, { noteid, collectionid }) {
-        const response = await axios.delete(API_URL + `/note?noteid=eq.${noteid}`)
-        if (response.status === 204) {
-            dispatch('notes', { collectionid: collectionid })
         }
     },
 
@@ -340,23 +338,13 @@ export const actions = {
         }
     },
 
-    async updatePass({ dispatch, state }, { password }) {
-        const response = await axios.patch(API_URL + '/user?userid=eq.' + state.user.user_id, {
-            password: password
-        },
-        {
-            headers: authHeader()
-        })
-        if (response.status === 204) {
-            dispatch('userData')
-            alert("Your password has been updated")
-        }
-    },
-
     async logout({ commit }) {
         commit('setCollections', [])
         commit('setNotes', [])
         commit('currentNote', {})
+        commit('newOrg', false)
+        commit('newCollection', false)
+        commit('newNote', false)
         localStorage.removeItem('note')
         localStorage.removeItem('words')
         localStorage.removeItem('questions')
@@ -364,6 +352,97 @@ export const actions = {
         deleteJwtToken()
         await commit('setUser', null)
         this.$router.push('/login')
+    },
+
+    async leaveOrg({ dispatch, state }, { orgid }) {
+        const collections = await axios.get(API_URL + `/see_collections?userid=eq.${state.user.user_id}&orgid=eq.${orgid}`)
+        let notes = []
+        for (let i = 0; i < collections.data.length; ++i) {
+            let temp = await axios.get(API_URL + '/see_notes?collectionid=eq.' + collections.data[i].collectionid)
+            for (let j = 0; j < temp.data.length; ++j) {
+                notes.push(temp.data[j])
+            }
+        }
+        let words = []
+        let questions = []
+        let links = []
+        for (let i = 0; i < notes.length; ++i) {
+            let w = await axios.get(API_URL + '/see_words?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < w.data.length; ++j) {
+                words.push(w.data[j])
+            }
+            let q = await axios.get(API_URL + '/see_questions?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < q.data.length; ++j) {
+                questions.push(q.data[j])
+            }
+            let l = await axios.get(API_URL + '/see_links?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < l.data.length; ++j) {
+                links.push(l.data[j])
+            }
+        }
+
+        for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
+        for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
+        for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+        for (let i = 0; i < notes.length; ++i) { await axios.delete(API_URL + '/note?noteid=eq.' + notes[i].noteid) }
+        for (let i = 0; i < collections.data.length; ++i) { await axios.delete(API_URL + '/collection?collectionid=eq.' + collections.data[i].collectionid) }
+
+
+        const response = await axios.delete(API_URL + `/part_of?orgid=eq.${orgid}&userid=eq.${state.user.user_id}`)
+        if (response.status === 204) {
+            dispatch('orgs')
+        }
+    },
+
+    async deleteCollection({ dispatch }, { collectionid, orgid }) {
+        let notes = await axios.get(API_URL + '/see_notes?collectionid=eq.' + collectionid)
+        notes = notes.data
+        let words = []
+        let questions = []
+        let links = []
+
+        for (let i = 0; i < notes.length; ++i) {
+            let w = await axios.get(API_URL + '/see_words?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < w.data.length; ++j) {
+                words.push(w.data[j])
+            }
+            let q = await axios.get(API_URL + '/see_questions?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < q.data.length; ++j) {
+                questions.push(q.data[j])
+            }
+            let l = await axios.get(API_URL + '/see_links?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < l.data.length; ++j) {
+                links.push(l.data[j])
+            }
+        }
+
+        for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
+        for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
+        for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+        for (let i = 0; i < notes.length; ++i) { await axios.delete(API_URL + '/note?noteid=eq.' + notes[i].noteid) }
+
+        const response = await axios.delete(API_URL + `/collection?collectionid=eq.${collectionid}`)
+        if (response.status === 204) {
+            dispatch('collections', { orgid: orgid })
+        }
+    },
+
+    async deleteNote({ dispatch }, { noteid, collectionid }) {
+        let words = await axios.get(API_URL + '/words?noteid=eq.' + noteid)
+        let questions = await axios.get(API_URL + '/questions?noteid=eq.' + noteid)
+        let links = await axios.get(API_URL + '/links?noteid=eq.' + noteid)
+        words = words.data
+        questions = questions.data
+        links = links.data
+
+        for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
+        for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
+        for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+
+        const response = await axios.delete(API_URL + `/note?noteid=eq.${noteid}`)
+        if (response.status === 204) {
+            dispatch('notes', { collectionid: collectionid })
+        }
     },
 
     async deleteAccount({ state }) {

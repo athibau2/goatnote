@@ -9,10 +9,8 @@
             <v-card-subtitle>
                 {{userData.email}}
             </v-card-subtitle>
-            <v-card-subtitle>
-                Password: {{userData.password}}
-            </v-card-subtitle>
             <v-card-text>
+                <input v-model="currentPass" type="password" placeholder="Current Password">
                 <input v-model="newPass" type="password" placeholder="New Password">
             </v-card-text>
             <v-card-actions>
@@ -39,6 +37,7 @@ export default {
 
   data () {
     return {
+      currentPass: "",
       newPass: "",
     }
   },
@@ -46,8 +45,11 @@ export default {
   methods: {
     updatePass () {
       this.$store.dispatch('users/updatePass', {
-        password: this.newPass
+        newPass: this.newPass,
+        currentPass: this.currentPass
+
       })
+      this.currentPass = ""
       this.newPass = ""
     },
 
@@ -70,3 +72,8 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+@import '~/assets/styles.css';
+
+</style>
