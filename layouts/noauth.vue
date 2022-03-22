@@ -32,7 +32,7 @@ export default {
     return {
       clipped: false,
       fixed: false,
-      title: 'GoatNotes'
+      title: 'GOAT Notes'
     }
   },
 }

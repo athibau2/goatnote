@@ -10,8 +10,8 @@ export default {
   ssr: false,
   
   head: {
-    titleTemplate: '%s - goatNote',
-    title: 'goatNote',
+    // titleTemplate: '%s - goatNote',
+    title: 'GOAT Notes',
     htmlAttrs: {
       lang: 'en'
     },

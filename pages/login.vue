@@ -4,7 +4,7 @@
             <v-row justify="center" align="center">
                 <v-card color="light yellow lighten-4" elevation="5" width="400">
                 <v-card-title  class="headline">
-                    Welcome to GoatNotes!
+                    Welcome to GOAT Notes!
                 </v-card-title>
                 <v-card-subtitle>
                     Sign In Here
