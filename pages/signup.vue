@@ -18,6 +18,9 @@
                         </div>
                         <div>
                             <input v-model="password" type="password" placeholder="Enter your password" required>
+                            <div>
+                                <i><h5>&nbsp;Password must be at least 8 characters</h5></i>
+                            </div>
                         </div>
                     </v-card-text>
                     <v-card-actions>
