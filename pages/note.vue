@@ -58,7 +58,8 @@
                 </div>
                 <br>
                 <div>
-                    <v-btn color="light grey lighten-1">Study Plan</v-btn>
+                    <v-btn color="light grey lighten-1" @click="showStudyPlan = true">Study Plan</v-btn>
+                    <StudyPlan v-show="showStudyPlan" @close-modal="showStudyPlan = false" />
                 </div>
             </v-col>
         </v-row>
@@ -71,6 +72,7 @@ import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Words from '~/components/Words.vue'
 import Questions from '~/components/Questions.vue'
 import Links from '~/components/Links.vue'
+import StudyPlan from '~/components/StudyPlan.vue'
 import { VueEditor } from "vue2-editor"
 
 export default {
@@ -81,6 +83,7 @@ export default {
       Words,
       Questions,
       Links,
+      StudyPlan,
       VueEditor
   },
 
@@ -98,6 +101,7 @@ export default {
         showQuestions: false,
         showLinks: false,
         showWords: false,
+        showStudyPlan: false,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
     }

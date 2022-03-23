@@ -3,12 +3,14 @@
         <div v-if="!studyMode" class="modal" @click.stop>
             <h6>Words</h6>
             <v-divider />
-            <span v-for="(word, i) in words" :key="i">
-                <strong>{{word.vocabword}}:</strong>
-                &nbsp;{{word.definition}}&nbsp;
-                <v-icon @click="deleteWord(word.wordid)">mdi-delete</v-icon>
-                <v-divider />
-            </span>
+            <div v-if="words !== null && words !== undefined && words.length !== 0">
+              <span v-for="(word, i) in words" :key="i">
+                  <strong>{{word.vocabword}}:</strong>
+                  &nbsp;{{word.definition}}&nbsp;
+                  <v-icon @click="deleteWord(word.wordid)">mdi-delete</v-icon>
+                  <v-divider />
+              </span>
+            </div>
             <br>
             <p>
               <v-row>
@@ -36,7 +38,7 @@
 
             <v-col>
               <v-row justify="center" align="center">
-                <div>
+                <div v-if="words !== null && words !== undefined && words.length !== 0">
                   <v-btn icon @click="prev()">
                     <v-icon size="50">
                       mdi-chevron-left

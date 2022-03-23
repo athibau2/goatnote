@@ -3,11 +3,13 @@
         <div v-if="!studyMode" class="modal" @click.stop>
             <h6>Links</h6>
             <v-divider />
-            <span v-for="(link, i) in links" :key="i">
-                {{link.url}}&nbsp;
-                <v-icon @click="deleteLink(link.linkid)">mdi-delete</v-icon>
-                <v-divider />
-            </span>
+            <div v-if="links !== null && links !== undefined && links.length !== 0">
+              <span v-for="(link, i) in links" :key="i">
+                  {{link.url}}&nbsp;
+                  <v-icon @click="deleteLink(link.linkid)">mdi-delete</v-icon>
+                  <v-divider />
+              </span>
+            </div>
             <br>
             <p>
               <v-row>
@@ -27,10 +29,12 @@
         <div v-else class="modal" @click.stop>
             <h6>Links</h6>
             <v-divider />
-            <span v-for="(link, i) in links" :key="i">
-                <a @click="launchUrl(link.url)">{{link.url}}</a>
-                <v-divider />
-            </span>
+            <div v-if="links !== null && links !== undefined && links.length !== 0">
+              <span v-for="(link, i) in links" :key="i">
+                  <a @click="launchUrl(link.url)">{{link.url}}</a>
+                  <v-divider />
+              </span>
+            </div>
             <br>
             <v-btn color="light red lighten-2" @click="$emit('close-modal')">
                 Exit

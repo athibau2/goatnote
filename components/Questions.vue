@@ -3,12 +3,14 @@
         <div v-if="!studyMode" class="modal" @click.stop>
             <h6>Questions</h6>
             <v-divider />
-            <span v-for="(q, i) in questions" :key="i">
-                <strong>{{q.questiontext}}</strong>
-                &nbsp;{{q.answer}}&nbsp;
-                <v-icon @click="deleteQuestion(q.questionid)">mdi-delete</v-icon>
-                <v-divider />
-            </span>
+            <div v-if="questions !== null && questions !== undefined && questions.length !== 0">
+              <span v-for="(q, i) in questions" :key="i">
+                  <strong>{{q.questiontext}}</strong>
+                  &nbsp;{{q.answer}}&nbsp;
+                  <v-icon @click="deleteQuestion(q.questionid)">mdi-delete</v-icon>
+                  <v-divider />
+              </span>
+            </div>
             <br>
             <p>
               <v-row>
@@ -36,7 +38,7 @@
 
             <v-col>
               <v-row justify="center" align="center">
-                <div>
+                <div v-if="questions !== null && questions !== undefined && questions.length !== 0">
                   <v-btn icon @click="prev()">
                     <v-icon size="50">
                       mdi-chevron-left

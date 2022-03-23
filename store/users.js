@@ -96,21 +96,28 @@ export const actions = {
     },
 
     async createOrg({ dispatch  }, { orgname }) {
-        const response = await axios.post(API_URL + '/organization', {
-            orgname: orgname
-        },
-        {
-            headers: authHeader()
-        })
-        const org = await axios.get(API_URL + '/organization?orgname=eq.' + orgname)
-        const res = await axios.post(API_URL + '/part_of', {
-            userid: getUserIdFromToken(getJwtToken()).user_id,
-            orgid: org.data[0].orgid
-        },
-        {
-            headers: authHeader()
-        })
-        dispatch('orgs')
+        try {
+            const response = await axios.post(API_URL + '/organization', {
+                orgname: orgname
+            },
+            {
+                headers: authHeader()
+            })
+            const org = await axios.get(API_URL + '/organization?orgname=eq.' + orgname)
+            const res = await axios.post(API_URL + '/part_of', {
+                userid: getUserIdFromToken(getJwtToken()).user_id,
+                orgid: org.data[0].orgid
+            },
+            {
+                headers: authHeader()
+            })
+            dispatch('orgs')
+        } catch(error) {
+            if (error) {
+                if (error.response.status === 409) alert('An organization with that name already exists')
+                else alert('Something went wrong')
+            }
+        }
     },
 
     async createCollection({ dispatch, state }, { collectionname, orgid }) {
@@ -295,6 +302,24 @@ export const actions = {
         })
         if (res.status === 204) {
             dispatch('getWords', { noteid: noteid})
+        }
+    },
+
+    async addPlan({dispatch, commit }, { date, time, amount, priority, completed, noteid}) {
+        const res = await axios.post(API_URL + '/study_plan', {
+            studydate: date,
+            timeamount: amount,
+            prioritylevel: priority,
+            studycompleted: completed,
+            noteid: noteid,
+            time: time
+        },
+        {
+            headers: authHeader()
+        })
+        if (res.status === 201) {
+            alert('Your study plan has been saved')
+            // finish this
         }
     },
 
