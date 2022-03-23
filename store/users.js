@@ -167,9 +167,12 @@ export const actions = {
 
     async openNote({ dispatch, commit, state }, { noteid }) {
         localStorage.removeItem('note')
+        localStorage.removeItem('prettyDate')
         await commit('currentNote', {})
         const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
         if (response.status === 200) {
+            let prettyDate = await parseDate(response.data[0].notedate)
+            localStorage.setItem('prettyDate', prettyDate)
             await commit('currentNote', response.data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
             dispatch('getWords', { noteid })
@@ -500,5 +503,13 @@ export const getters = {
     getTypedNotes: state => {
         return state.currentNote.typednotes
     }
-  }
+}
+
+async function parseDate(date) {
+    let prettyDate = ""
+    const yearMonth = date.split('-')
+    let day = yearMonth[2].split('T')
+    prettyDate += yearMonth[1] + " / " + day[0] + " / " + yearMonth[0]
+    return prettyDate
+}
 

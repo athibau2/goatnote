@@ -59,9 +59,9 @@
         &nbsp;{{userData.firstname}} {{userData.lastname}}
       </v-toolbar-title>
     </v-app-bar>
-    <v-main>
-      <v-container>
-        <Nuxt />
+    <v-main class="main">
+      <v-container class="main">
+        <Nuxt class="main" />
       </v-container>
     </v-main>
     <v-navigation-drawer
@@ -137,16 +137,26 @@ export default {
     },
 
     newCollection () {
-      this.$store.commit('users/newNote', false)
-      this.$store.commit('users/newOrg', false)
-      this.$store.commit('users/newCollection', true)
+      if (this.$store.state.users.orgs.length === 0) {
+        alert('You must first create an organization before you can create a collection.')
+      }
+      else {
+        this.$store.commit('users/newNote', false)
+        this.$store.commit('users/newOrg', false)
+        this.$store.commit('users/newCollection', true)
+      }
     },
 
     newNote() {
-      this.$store.commit('users/newOrg', false)
-      this.$store.commit('users/newCollection', false)
-      this.$store.commit('users/newNote', true)
-      this.$store.dispatch('users/allColls')
+      if (this.$store.state.users.collections.length === 0) {
+        alert('You must first create a collection before you can create a note.')
+      }
+      else {
+        this.$store.commit('users/newOrg', false)
+        this.$store.commit('users/newCollection', false)
+        this.$store.commit('users/newNote', true)
+        this.$store.dispatch('users/allColls')
+      }
     }
   },
 
@@ -165,5 +175,9 @@ export default {
 <style scoped>
 .topButton {
   margin-right : 3px;
+}
+
+.main{
+  background-color: rgb(218, 236, 218)
 }
 </style>

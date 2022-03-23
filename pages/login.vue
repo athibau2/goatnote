@@ -1,5 +1,6 @@
 <template>
-    <v-app>
+    <v-app class="app">
+      <v-container>
         <v-col>
             <v-row justify="center" align="center">
                 <v-card color="light yellow lighten-4" elevation="5" width="400">
@@ -26,6 +27,7 @@
                 </v-card>
             </v-row>
         </v-col>
+      </v-container>
     </v-app>
 </template>
 
@@ -62,5 +64,10 @@ export default {
 <style scoped>
 @import '~/assets/styles.css';
 
+.app{
+    background: url('~@/static/goats.png');
+    background-size: 25%;
+    background-repeat: repeat;
+}
 
 </style>

@@ -4,14 +4,15 @@
         <v-row class="text-center">
             <v-col>
                 <v-btn color="light red lighten-2" to="/">&lt; Back</v-btn>
+                <v-btn color="primary" @click="toggleStudy()">Study!</v-btn>
             </v-col>
-            <v-col cols="8">
+            <v-col cols="7">
                 <h2>{{this.currentNote.notename}}</h2>
-                <h6>{{this.currentNote.notedate}}</h6>
+                
             </v-col>
             <v-col>
                 <h3>&nbsp;{{this.currentNote.collectionname}}</h3>
-                <span>{{this.saving}}</span>
+                <h5>{{prettyDate}} &nbsp;--&nbsp; {{this.saving}}</h5>
             </v-col>
         </v-row>
 
@@ -20,15 +21,11 @@
 
         <v-row>
             <v-col cols="10">
-                <v-textarea
-                  background-color="light yellow lighten-5"
-                  rows="18"
-                  auto-grow
-                  outlined
-                  v-model="noteText"
-                  @input="saveNotes()"
-                >
-                </v-textarea>
+              <vue-editor class="editor"
+                @text-change="saveNotes()"
+                v-model="noteText"
+              >
+              </vue-editor>
             </v-col>
             <v-col class="text-center">
                 <div>
@@ -45,6 +42,10 @@
                     <v-btn color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
                     <Links v-show="showLinks" @close-modal="showLinks = false" />
                 </div>
+                <br>
+                <div>
+                    <v-btn color="light grey lighten-1">Study Plan</v-btn>
+                </div>
             </v-col>
         </v-row>
     </v-container>
@@ -56,6 +57,7 @@ import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Words from '~/components/Words.vue'
 import Questions from '~/components/Questions.vue'
 import Links from '~/components/Links.vue'
+import { VueEditor } from "vue2-editor"
 
 export default {
   name: 'NotePage',
@@ -64,7 +66,8 @@ export default {
   components: {
       Words,
       Questions,
-      Links
+      Links,
+      VueEditor
   },
 
   mounted() {
@@ -81,6 +84,8 @@ export default {
         showLinks: false,
         showWords: false,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
+        prettyDate: localStorage.getItem('prettyDate'),
+        studyMode: false
     }
   },
 
@@ -91,8 +96,27 @@ export default {
           noteText: this.noteText,
           noteid: this.currentNote.noteid
         })
-        this.$store.commit('users/saving', "Saved")
+        let hour = new Date().getHours()
+        if (hour > 12) hour -= 12
+        if (hour < 10) hour = '0' + hour.toString()
+        let minute = new Date().getMinutes()
+        if (minute < 10) minute = '0' + minute.toString()
+        let second = new Date().getSeconds()
+        if (second < 10) second = '0' + second.toString()
+
+        const time = hour + ':' + minute + ':' + second
+        this.$store.commit('users/saving', 'Saved at ' + time)
       },
+
+      async toggleStudy () {
+        this.studyMode = !this.studyMode
+        if (!this.studyMode) {
+          alert('Study mode has been turned off.')
+        }
+        else {
+          alert('Study mode has been turned on.')
+        }
+      }
   },
 
   computed: {
@@ -122,3 +146,15 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.editor {
+  background-color: lightyellow;
+}
+
+h2 {
+  border: solid 1px;
+  border-radius: 6px;
+  background-color: #ce93d8;
+}
+</style>

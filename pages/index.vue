@@ -85,6 +85,10 @@
 
       <br>
 
+      <h2 v-if="orgs === null || orgs === undefined || orgs.length === 0" class="notice text-center">
+        You are currently not part of any organizations and have no collections or notes. Create one above!
+      </h2>
+
       <v-col>
         <v-row>
           <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
@@ -284,6 +288,13 @@ export default {
 
 .list-card{
   margin-right: 10px;
+}
+
+.notice{
+  border: solid;
+  border-radius: 8px;
+  padding: 5px;
+  background-color: beige;
 }
 
 </style>

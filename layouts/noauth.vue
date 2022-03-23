@@ -11,17 +11,11 @@
       <v-toolbar-title class="font-weight-bold" v-text="title" />
       <v-spacer />
     </v-app-bar>
-    <v-main>
+    <v-main class="main">
       <v-container>
         <Nuxt />
       </v-container>
     </v-main>
-    <v-footer
-      :absolute="fixed"
-      app
-    >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
-    </v-footer>
   </v-app>
 </template>
 
@@ -37,3 +31,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+main{
+  background-color: rgb(218, 236, 218)
+}
+</style>
