@@ -316,34 +316,49 @@ export const actions = {
     },
 
     async signup({ dispatch }, { firstname, lastname, email, password }) {
-        const response = await axios.post(API_URL + '/rpc/signup', {
-            firstname: firstname, lastname: lastname, 
-            email: email, password: password
-        })
-        if (response.status === 200) {
-            alert("Account created successfully")
-            dispatch('login', {
-                email: email,
-                password: password
+        try {
+            const response = await axios.post(API_URL + '/rpc/signup', {
+                firstname: firstname, lastname: lastname, 
+                email: email, password: password
             })
+            if (response.status === 200) {
+                alert("Account created successfully")
+                dispatch('login', {
+                    email: email,
+                    password: password
+                })
+            }
+        } catch(error) {
+            if (error) {
+                if (error.response.status === 409) alert('An account with that email already exists')
+                else alert('Something went wrong')
+            }
         }
     },
 
     async login ({ dispatch, commit }, { email, password }) {
-        const response = await axios.post(API_URL + "/rpc/login", { 
-            email: email,
-            password: password
-            },
-            {
-                headers: authHeader()
+        try {
+            const response = await axios.post(API_URL + "/rpc/login", { 
+                email: email,
+                password: password
+                },
+                {
+                    headers: authHeader()
+                }
+            );
+            if (response.status === 200) {
+                setJwtToken(response.data[0].token)
+                await commit('setUser', getUserIdFromToken(getJwtToken()))
+                dispatch('userData')
+                dispatch('orgs')
+                this.$router.push('/')
             }
-        );
-        if (response.status === 200) {
-            setJwtToken(response.data[0].token)
-            await commit('setUser', getUserIdFromToken(getJwtToken()))
-            dispatch('userData')
-            dispatch('orgs')
-            this.$router.push('/')
+        } catch(error) {
+            if (error) {
+                if (error.response.status === 403 || error.response.status === 401) alert('Incorrect email or password')
+                else if (error.response.status === 404) alert('No account found with that email')
+                else alert('Something went wrong')
+            }
         }
     },
 
