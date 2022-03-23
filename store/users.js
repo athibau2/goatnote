@@ -19,11 +19,16 @@ export const state = () => ({
     makingNewOrg: false,
     makingNewCollection: false,
     makingNewNote: false,
-    saving: "Saved"
+    saving: "Saved",
+    studyMode: false
   })
   
 // mutations should update state
 export const mutations = {
+    study(state, data) {
+        state.studyMode = data
+    },
+
     saving(state, data) {
         state.saving = data
     },
@@ -167,6 +172,7 @@ export const actions = {
 
     async openNote({ dispatch, commit, state }, { noteid }) {
         localStorage.removeItem('note')
+        localStorage.removeItem('studyMode')
         localStorage.removeItem('prettyDate')
         await commit('currentNote', {})
         const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
@@ -352,6 +358,7 @@ export const actions = {
         localStorage.removeItem('words')
         localStorage.removeItem('questions')
         localStorage.removeItem('links')
+        localStorage.removeItem('studyMode')
         deleteJwtToken()
         await commit('setUser', null)
         this.$router.push('/login')

@@ -1,6 +1,6 @@
 <template>
     <div class="modal-overlay" @click="$emit('close-modal')">
-        <div class="modal" @click.stop>
+        <div v-if="!studyMode" class="modal" @click.stop>
             <h6>Words</h6>
             <v-divider />
             <span v-for="(word, i) in words" :key="i">
@@ -29,6 +29,46 @@
             </v-btn>
             <v-btn color="primary" @click="addWord()">Add</v-btn>
         </div>
+
+        <div v-else class="modal" @click.stop>
+            <h6>Words</h6>
+            <v-divider />
+
+            <v-col>
+              <v-row justify="center" align="center">
+                <div>
+                  <v-btn icon @click="prev()">
+                    <v-icon size="50">
+                      mdi-chevron-left
+                    </v-icon>
+                  </v-btn>
+                  <v-btn elevation="10" @click="onWord = !onWord" :style="{
+                    'background-color': onWord ? '#87CEFA' : '#FAFAD2',
+                    'height': '250px',
+                    'width': '375px',
+                    'margin-top': '20px',
+                  }"
+                  >
+                    <h1 v-if="onWord">{{words[index].vocabword}}</h1>
+                    <p class="text-wrap" v-else :style="{
+                      'width': '325px',
+                    }">
+                      {{words[index].definition}}
+                    </p>
+                  </v-btn>
+                  <v-btn @click="next()" icon>
+                    <v-icon size="50">
+                      mdi-chevron-right
+                    </v-icon>
+                  </v-btn>
+                </div>
+              </v-row>
+            </v-col>
+            <br>
+            <v-btn color="light red lighten-2" @click="$emit('close-modal')">
+                Exit
+            </v-btn>
+        </div>
     </div>
 </template>
 
@@ -39,12 +79,15 @@
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
         this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
+        this.$store.commit('users/study', localStorage.getItem('studyMode'))
       },
 
       data () {
         return {
           newWord: "",
-          newDef: ""
+          newDef: "",
+          onWord: true,
+          index: 0,
         }
       },
 
@@ -64,10 +107,24 @@
           })
           this.newWord = ""
           this.newDef = ""
+        },
+
+        next () {
+          if (this.index === this.words.length - 1) this.index = 0
+          else this.index++
+        },
+
+        prev () {
+          if (this.index === 0) this.index = this.words.length - 1
+          else this.index--
         }
       },
 
       computed: {
+          studyMode () {
+            return this.$store.state.users.studyMode
+          },
+
           words () {
               return this.$store.state.users.words
           },

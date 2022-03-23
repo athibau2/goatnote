@@ -1,6 +1,6 @@
 <template>
     <div class="modal-overlay" @click="$emit('close-modal')">
-        <div class="modal" @click.stop>
+        <div v-if="!studyMode" class="modal" @click.stop>
             <h6>Links</h6>
             <v-divider />
             <span v-for="(link, i) in links" :key="i">
@@ -23,6 +23,19 @@
             </v-btn>
             <v-btn color="primary" @click="addLink()">Add</v-btn>
         </div>
+
+        <div v-else class="modal" @click.stop>
+            <h6>Links</h6>
+            <v-divider />
+            <span v-for="(link, i) in links" :key="i">
+                <a @click="launchUrl(link.url)">{{link.url}}</a>
+                <v-divider />
+            </span>
+            <br>
+            <v-btn color="light red lighten-2" @click="$emit('close-modal')">
+                Exit
+            </v-btn>
+        </div>
     </div>
 </template>
 
@@ -33,6 +46,7 @@
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
         this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
+        this.$store.commit('users/study', localStorage.getItem('studyMode'))
       },
 
       data () {
@@ -55,10 +69,18 @@
             noteid: this.currentNote.noteid
           })
           this.newLink = ""
+        },
+
+        launchUrl (url) {
+          window.open(url)
         }
       },
 
       computed: {
+          studyMode () {
+            return this.$store.state.users.studyMode
+          },
+
           links () {
               return this.$store.state.users.links
           },
@@ -102,5 +124,6 @@ p {
   font-size: 16px;
   margin: 10px 15px;
 }
+
 
 </style>

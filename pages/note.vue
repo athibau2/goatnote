@@ -4,7 +4,21 @@
         <v-row class="text-center">
             <v-col>
                 <v-btn color="light red lighten-2" to="/">&lt; Back</v-btn>
-                <v-btn color="primary" @click="toggleStudy()">Study!</v-btn>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      dark
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="toggleStudy()"
+                    >
+                      Study!
+                    </v-btn>
+                  </template>
+                  <span v-if="studyMode">Turn off study mode</span>
+                  <span v-else>Begin study</span>
+                </v-tooltip>
             </v-col>
             <v-col cols="7">
                 <h2>{{this.currentNote.notename}}</h2>
@@ -76,6 +90,7 @@ export default {
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
+    this.$store.commit('users/study', localStorage.getItem('studyMode'))
   },
 
   data () {
@@ -85,7 +100,6 @@ export default {
         showWords: false,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
-        studyMode: false
     }
   },
 
@@ -109,7 +123,8 @@ export default {
       },
 
       async toggleStudy () {
-        this.studyMode = !this.studyMode
+        localStorage.setItem('studyMode', !this.studyMode)
+        await this.$store.commit('users/study', !this.studyMode)
         if (!this.studyMode) {
           alert('Study mode has been turned off.')
         }
@@ -120,6 +135,10 @@ export default {
   },
 
   computed: {
+    studyMode () {
+      return this.$store.state.users.studyMode
+    },
+
     saving () {
       return this.$store.state.users.saving
     },
@@ -156,5 +175,6 @@ h2 {
   border: solid 1px;
   border-radius: 6px;
   background-color: #ce93d8;
+  box-shadow: 3px 3px 3px;
 }
 </style>
