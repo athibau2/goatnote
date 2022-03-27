@@ -1,5 +1,12 @@
 <template>
   <v-app>
+    <!-- <!DOCTYPE html>
+    <html>
+      <head> -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <!-- </head>
+    </html> -->
+    
     <v-container>
 
       <v-col v-if="makingNewOrg">
@@ -9,7 +16,16 @@
               Create a New Organization
           </v-card-title>
           <v-card-text>
-              <input v-model="newOrgName" placeholder="New Organization Name" required>
+              <v-text-field
+                class="selector"
+                dense
+                solo
+                rounded
+                background-color="light blue lighten-4"
+                v-model="newOrgName" 
+                placeholder="New Organization Name"
+              >
+              </v-text-field>
           </v-card-text>
           <v-card-actions>
               <v-spacer />
@@ -32,22 +48,53 @@
               Create a New Collection
           </v-card-title>
           <v-card-text>
-              <input v-model="newCollName" placeholder="New Collection Name" required>
+              <v-text-field
+                class="selector"
+                dense
+                solo
+                rounded
+                background-color="light green lighten-3"
+                v-model="newCollName" 
+                placeholder="New Collection Name"
+              >
+              </v-text-field>
+              <v-menu
+                bottom
+                :close-on-content-click="true"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    class="selector"
+                    dense
+                    solo
+                    rounded
+                    readonly
+                    background-color="light blue lighten-4"
+                    append-icon="mdi-chevron-down"
+                    v-bind="attrs" 
+                    v-on="on" 
+                    v-model="orgToAddTo" 
+                    placeholder="Add to Organization"
+                  >
+                  </v-text-field>
+                </template>
+                <v-list>
+                  <v-list-item v-for="(org, i) in orgs" :key="i">
+                    <v-btn color="light blue lighten-4" @click="setOrgToAddTo(org)">
+                      {{org.orgname}}
+                    </v-btn>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
           </v-card-text>
-          <v-card-subtitle>
-            Add your new Collection to an Organization:
-          </v-card-subtitle>
-          <v-list>
-            <v-list-item v-for="(org, i) in orgs" :key="i">
-              <v-btn color="light blue lighten-4" @click="createCollection(org.orgid)">
-                {{org.orgname}}
-              </v-btn>
-            </v-list-item>
-          </v-list>
+          
           <v-card-actions>
               <v-spacer />
               <v-btn color="light red lighten-2" nuxt @click="newCollection()">
                   Cancel
+              </v-btn>
+              <v-btn color="primary" @click="createCollection()">
+                  Add
               </v-btn>
           </v-card-actions>
           </v-card>
@@ -61,22 +108,52 @@
               Create a New Note
           </v-card-title>
           <v-card-text>
-              <input v-model="newNoteName" placeholder="New Note Name" required>
+              <v-text-field
+                class="selector"
+                dense
+                solo
+                rounded
+                background-color="light purple lighten-3"
+                v-model="newNoteName" 
+                placeholder="New Note Name"
+              >
+              </v-text-field>
+              <v-menu
+                bottom
+                :close-on-content-click="true"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    class="selector"
+                    dense
+                    solo
+                    rounded
+                    readonly
+                    background-color="light green lighten-3"
+                    append-icon="mdi-chevron-down"
+                    v-bind="attrs" 
+                    v-on="on" 
+                    v-model="collToAddTo" 
+                    placeholder="Add to Collection"
+                  >
+                  </v-text-field>
+                </template>
+                <v-list>
+                  <v-list-item v-for="(coll, i) in allColls" :key="i">
+                    <v-btn color="light green lighten-3" @click="setCollToAddTo(coll)">
+                      {{coll.collectionname}}
+                    </v-btn>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
           </v-card-text>
-          <v-card-subtitle>
-            Add your new Note to a Collection:
-          </v-card-subtitle>
-          <v-list>
-            <v-list-item v-for="(coll, i) in allColls" :key="i">
-              <v-btn color="light green lighten-3" @click="createNote(coll.collectionid)">
-                {{coll.collectionname}}
-              </v-btn>
-            </v-list-item>
-          </v-list>
           <v-card-actions>
               <v-spacer />
               <v-btn color="light red lighten-2" nuxt @click="newNote()">
                   Cancel
+              </v-btn>
+              <v-btn color="primary" @click="createNote()">
+                  Add
               </v-btn>
           </v-card-actions>
           </v-card>
@@ -109,7 +186,7 @@
       <v-col>
         <v-row>
           <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
-            <v-card-title class="headline">
+            <v-card-title >
                 {{coll.collectionname}}
             </v-card-title>
             <v-card-actions>
@@ -125,8 +202,8 @@
 
       <v-col>
         <v-row>
-          <v-card class="list-card" color="light purple lighten-3" elevation="5" width="250" v-for="(note, i) in notes" :key="i">
-            <v-card-title class="headline">
+          <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
+            <v-card-title>
                 {{note.notename}}
             </v-card-title>
             <v-card-actions>
@@ -160,6 +237,11 @@ export default {
       newOrgName: "",
       newCollName: "",
       newNoteName: "",
+      orgToAddTo: "",
+      orgIdToAddTo: null,
+      collToAddTo: "",
+      collIdToAddTo: null,
+      orgOfCollBeingAddedTo: null
     }
   },
 
@@ -182,30 +264,51 @@ export default {
       })
     },
 
+    setOrgToAddTo (org) {
+      this.orgToAddTo = org.orgname
+      this.orgIdToAddTo = org.orgid
+    },
+
+    setCollToAddTo (coll) {
+      this.orgOfCollBeingAddedTo = coll.orgid
+      this.collToAddTo = coll.collectionname
+      this.collIdToAddTo = coll.collectionid
+    },
+
     createOrg () {
-      this.$store.dispatch('users/createOrg', {
-        orgname: this.newOrgName
-      })
-      this.newOrgName = ""
-      this.newOrg()
+      if (this.newOrgName === "") alert('No field may be left empty')
+      else {
+        this.$store.dispatch('users/createOrg', {
+          orgname: this.newOrgName
+        })
+        this.newOrgName = ""
+        this.newOrg()
+      }
     },
 
-    createCollection (orgid) {
-      this.$store.dispatch('users/createCollection', {
-        collectionname: this.newCollName,
-        orgid: orgid
-      })
-      this.newCollName = ""
-      this.newCollection()
+    createCollection () {
+      if (this.newCollName === "") alert('No field may be left empty')
+      else {
+        this.$store.dispatch('users/createCollection', {
+          collectionname: this.newCollName,
+          orgid: this.orgIdToAddTo
+        })
+        this.newCollName = ""
+        this.newCollection()
+      }
     },
 
-    createNote (collectionid) {
-      this.$store.dispatch('users/createNote', {
-        notename: this.newNoteName,
-        collectionid: collectionid
-      })
-      this.newNoteName = ""
-      this.newNote()
+    createNote () {
+      if (this.newNoteName === "") alert('No field may be left empty')
+      else {
+        this.$store.dispatch('users/createNote', {
+          notename: this.newNoteName,
+          collectionid: this.collIdToAddTo,
+          orgid: this.orgOfCollBeingAddedTo
+        })
+        this.newNoteName = ""
+        this.newNote()
+      }
     },
 
     leaveOrg(orgid) {
@@ -236,14 +339,22 @@ export default {
 
     newOrg () {
       this.$store.commit('users/newOrg', false)
+      this.newOrgName = ""
     },
 
     newCollection () {
       this.$store.commit('users/newCollection', false)
+      this.orgToAddTo = ""
+      this.orgIdToAddTo = null
+      this.newCollName = ""
     },
 
     newNote () {
       this.$store.commit('users/newNote', false)
+      this.collToAddTo = ""
+      this.collIdToAddTo = null
+      this.newNoteName = ""
+      this.orgOfCollBeingAddedTo = null
     },
   },
 

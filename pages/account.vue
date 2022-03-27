@@ -10,8 +10,32 @@
                 {{userData.email}}
             </v-card-subtitle>
             <v-card-text>
-                <input v-model="currentPass" type="password" placeholder="Current Password">
-                <input v-model="newPass" type="password" placeholder="New Password">
+                <v-text-field
+                  class="selector"
+                  dense
+                  solo
+                  rounded
+                  background-color="light blue lighten-5"
+                  :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="show1 ? 'text' : 'password'"
+                  @click:append="show1 = !show1"
+                  v-model="currentPass" 
+                  placeholder="Current Password"
+                >
+                </v-text-field>
+                <v-text-field
+                  class="selector"
+                  dense
+                  solo
+                  rounded
+                  background-color="light blue lighten-5"
+                  :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="show2 ? 'text' : 'password'"
+                  @click:append="show2 = !show2"
+                  v-model="newPass" 
+                  placeholder="New Password"
+                >
+                </v-text-field>
             </v-card-text>
             <v-card-actions>
                 <v-spacer />
@@ -33,24 +57,29 @@ export default {
   mounted () {
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     this.$store.dispatch('users/userData')
+    this.$store.dispatch('users/orgs')
   },
 
   data () {
     return {
       currentPass: "",
       newPass: "",
+      show1: false,
+      show2: false,
     }
   },
 
   methods: {
     updatePass () {
-      this.$store.dispatch('users/updatePass', {
-        newPass: this.newPass,
-        currentPass: this.currentPass
-
-      })
-      this.currentPass = ""
-      this.newPass = ""
+      if (this.currentPass === "" || this.newPass === "") alert('No field may be left empty')
+      else {
+        this.$store.dispatch('users/updatePass', {
+          newPass: this.newPass,
+          currentPass: this.currentPass
+        })
+        this.currentPass = ""
+        this.newPass = ""
+      }
     },
 
     deleteAccount () {

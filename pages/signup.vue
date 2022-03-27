@@ -11,17 +11,52 @@
                         Sign Up Here
                     </v-card-subtitle>
                     <v-card-text>
-                        <input class="name" v-model="firstname" placeholder="Enter your first name" required>
-                        <input class="name" v-model="lastname" placeholder="Enter your last name" required>
-                        <div>
-                            <input v-model="email" placeholder="Enter your email" required>
-                        </div>
-                        <div>
-                            <input v-model="password" type="password" placeholder="Enter your password" required>
-                            <div>
-                                <i><h5>&nbsp;Password must be at least 8 characters</h5></i>
-                            </div>
-                        </div>
+                        <v-text-field
+                            class="selector"
+                            dense
+                            solo
+                            rounded
+                            background-color="light blue lighten-5"
+                            v-model="firstname"
+                            placeholder="First name"
+                        >
+                        </v-text-field>
+                        <v-text-field
+                            class="selector"
+                            dense
+                            solo
+                            rounded
+                            background-color="light blue lighten-5"
+                            v-model="lastname"
+                            placeholder="Last name"
+                        >
+                        </v-text-field>
+                        <v-text-field
+                            class="selector"
+                            dense
+                            solo
+                            rounded
+                            background-color="light blue lighten-5"
+                            v-model="email"
+                            :append-icon="'mdi-email'"
+                            placeholder="Enter your email"
+                        >
+                        </v-text-field>
+                        <v-text-field
+                            class="selector"
+                            dense
+                            solo
+                            rounded
+                            background-color="light blue lighten-5"
+                            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                            :type="show ? 'text' : 'password'"
+                            @click:append="show = !show"
+                            v-model="password"
+                            @keyup.enter="signup()"
+                            placeholder="Enter your password"
+                        >
+                        </v-text-field>
+                        <em><h5>&nbsp;Password must be at least 8 characters</h5></em>
                     </v-card-text>
                     <v-card-actions>
                         <v-spacer />
@@ -48,18 +83,24 @@ export default {
         firstname: "",
         lastname: "",
         email: "",
-        password: ""
+        password: "",
+        show: false,
     }
   },
 
   methods: {
     signup() {
-        this.$store.dispatch('users/signup', {
-            firstname: this.firstname,
-            lastname: this.lastname,
-            email: this.email,
-            password: this.password
-        })
+        if (this.firstname === "" || this.lastname === "" || this.email === "" || this.password === "") {
+            alert('No field may be left empty')
+        }
+        else {
+            this.$store.dispatch('users/signup', {
+                firstname: this.firstname,
+                lastname: this.lastname,
+                email: this.email,
+                password: this.password
+            })
+        }
     },
   },
 
@@ -74,10 +115,6 @@ export default {
 
 <style scoped>
 @import '~/assets/styles.css';
-
-.name{
-    width: 39.5%;
-}
 
 .app{
     background: url('~@/static/goats.png');

@@ -133,7 +133,7 @@ export const actions = {
         dispatch('allColls')
     },
 
-    async createNote({ dispatch }, { notename, collectionid }) {
+    async createNote({ dispatch }, { notename, collectionid, orgid }) {
         const response = await axios.post(API_URL + '/note', {
             notename: notename,
             collectionid: collectionid,
@@ -141,6 +141,7 @@ export const actions = {
         {
             headers: authHeader()
         })
+        dispatch('collections', { orgid })
         dispatch('notes', { collectionid })
     },
 

@@ -89,6 +89,7 @@ export default {
 
   mounted() {
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
+    this.$store.dispatch('users/orgs')
     this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))

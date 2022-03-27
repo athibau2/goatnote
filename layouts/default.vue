@@ -80,6 +80,7 @@ export default {
 
   mounted () {
     this.$store.dispatch('users/userData')
+    this.$store.dispatch('users/allColls')
   },
 
   data () {
@@ -137,7 +138,7 @@ export default {
     },
 
     newCollection () {
-      if (this.$store.state.users.orgs.length === 0) {
+      if (this.orgs.length === 0) {
         alert('You must first create an organization before you can create a collection.')
       }
       else {
@@ -148,7 +149,7 @@ export default {
     },
 
     newNote() {
-      if (this.$store.state.users.collections.length === 0) {
+      if (this.allColls.length === 0) {
         alert('You must first create a collection before you can create a note.')
       }
       else {
@@ -167,7 +168,15 @@ export default {
 
     userData() {
       return this.$store.state.users.userData
-    }
+    },
+
+    orgs () {
+      return this.$store.state.users.orgs
+    },
+
+    allColls () {
+      return this.$store.state.users.allColls
+    },
   }
 }
 </script>

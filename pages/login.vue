@@ -11,10 +11,31 @@
                     Sign In Here
                 </v-card-subtitle>
                 <v-card-text>
-                    <input type="email" v-model="email" placeholder="Enter your email" required> 
-                    <div class="entry1" >
-                        <input v-model="password" type="password" placeholder="Enter your password" required>
-                    </div>
+                    <v-text-field
+                      class="selector"
+                      dense
+                      solo
+                      rounded
+                      background-color="light blue lighten-5"
+                      :append-icon="'mdi-email'"
+                      v-model="email"
+                      placeholder="Enter your email"
+                    >
+                    </v-text-field>
+                    <v-text-field
+                      class="selector"
+                      dense
+                      solo
+                      rounded
+                      background-color="light blue lighten-5"
+                      :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                      :type="show ? 'text' : 'password'"
+                      @click:append="show = !show"
+                      v-model="password"
+                      @keyup.enter="login()"
+                      placeholder="Enter your password"
+                    >
+                    </v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer />
@@ -39,16 +60,20 @@ export default {
   data () {
     return {
       email: "",
-      password: ""
+      password: "",
+      show: false
     }
   },
 
   methods: {
     login() {
-      this.$store.dispatch('users/login', {
-        email: this.email,
-        password: this.password
-      })
+      if (this.email === "" || this.password === "") alert('No field may be left empty')
+      else {
+        this.$store.dispatch('users/login', {
+          email: this.email,
+          password: this.password
+        })
+      }
     },
   },
 

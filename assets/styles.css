@@ -7,3 +7,7 @@ input{
     padding-left: 5px;
     margin-top: 10px;
 }
+
+.selector {
+    width: 80%;
+}
