@@ -61,16 +61,11 @@
 </template>
 
 <script>
-import ToggleButton from 'vue-js-toggle-button'
   export default {
       name: "StudyPlanComponent",
 
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
-      },
-
-      components: {
-        ToggleButton
       },
 
       data () {
