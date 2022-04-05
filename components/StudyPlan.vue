@@ -1,12 +1,12 @@
 <template>
     <div class="modal-overlay" @click="$emit('close-modal')">
-        <div class="modal" @click.stop>
+        <div v-if="studyPlan === null || studyPlan === undefined" class="modal" @click.stop>
             <h6>Study Plan</h6>
             <v-divider />
             <div class="eachRow">
                 <v-btn color="light green lighten-2" @click="clearDate()">Date</v-btn>
                 <input class="when text-center" v-if="this.date.length !== 0" :placeholder="this.date">
-                <v-date-picker 
+                <v-date-picker
                     v-if="showDate"
                     v-model="date"
                     elevation="6"
@@ -33,7 +33,7 @@
                 <input class="when text-center" v-if="this.time.length !== 0" :placeholder="this.time">
             </div>
             <div class="eachRow">
-                <h4>Study Time Amount (minutes)</h4>
+                <h4>Study Duration (minutes)</h4>
                 <input class="text-center" type="number" min="5" max="120" v-model="timeAmount">
             </div>
             <div class="eachRow">
@@ -45,7 +45,6 @@
                 <v-layout row wrap justify-center>
                   <v-switch
                     inset 
-                    v-model="completed" 
                     @click="completed = !completed"
                   >
                   </v-switch>
@@ -55,7 +54,7 @@
             <v-btn color="light red lighten-2" @click="$emit('close-modal')">
                 Exit
             </v-btn>
-            <v-btn color="primary" @click="addPlan()">Add</v-btn>
+            <v-btn color="primary" @click="addPlan()">Save</v-btn>
         </div>
     </div>
 </template>
@@ -66,6 +65,7 @@
 
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
+        // this.$store.commit('users/studyPlan', JSON.parse(localStorage.getItem('studyPlan')))
       },
 
       data () {
@@ -123,6 +123,10 @@
           currentNote () {
             return this.$store.state.users.currentNote
           },
+
+          studyPlan () {
+              return this.$store.state.users.studyPlan
+          }
       }
 }
 </script>

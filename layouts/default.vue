@@ -90,10 +90,25 @@ export default {
       fixed: false,
       items: [
         {
-          icon: 'mdi-apps',
+          icon: 'mdi-home',
           title: 'Home',
           to: '/',
           click: this.loadOrgs
+        },
+        {
+          icon: 'mdi-domain',
+          title: 'Join Organization',
+          to: '/joinOrg'
+        },
+        {
+          icon: 'mdi-calendar-alert',
+          title: 'My Study Plans',
+          to: '/plans'
+        },
+        {
+          icon: 'mdi-share-variant',
+          title: 'Shared With Me',
+          to: '/shared'
         },
         {
           icon: 'mdi-account-cog',

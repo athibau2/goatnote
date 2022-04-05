@@ -6,7 +6,7 @@ CREATE TABLE "user"
   Email varchar(100) NOT NULL,
   Password varchar(50) NOT NULL,
   IsAdmin BOOLEAN DEFAULT false,
-  LoggedIn BOOLEAN DEFAULT false,
+  loggedin BOOLEAN DEFAULT false,
   PRIMARY KEY (UserId),
   UNIQUE (Email)
 );

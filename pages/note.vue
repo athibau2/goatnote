@@ -21,8 +21,54 @@
                 </v-tooltip>
             </v-col>
             <v-col cols="7">
-                <h2>{{this.currentNote.notename}}</h2>
-                
+                <v-text-field v-if="editNote"
+                  class="noteselector"
+                  dense
+                  solo
+                  rounded
+                  background-color="light purple lighten-3"
+                  append-icon="mdi-chevron-down"
+                  append-outer-icon="mdi-pencil"
+                  @click:append-outer="editNote = !editNote"
+                  v-model="newNoteName"
+                  @keyup.enter="updateNoteName()"
+                >
+                </v-text-field>
+                <v-menu
+                  v-if="!editNote"
+                  top
+                  transition="slide-y-transition"
+                  :offset-y="true"
+                  :close-on-content-click="true"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      class="noteselector"
+                      dense
+                      solo
+                      rounded
+                      readonly
+                      background-color="light purple lighten-3"
+                      append-icon="mdi-chevron-down"
+                      append-outer-icon="mdi-pencil"
+                      @click:append-outer="editNote = !editNote"
+                      v-bind="attrs"
+                      v-on="on" 
+                      :placeholder="currentNote.notename"
+                    >
+                    </v-text-field>
+                  </template>
+                  <v-list>
+                    <v-list-item v-for="(n, i) in notes" :key="i" link>
+                        <v-list-item-title
+                          v-text="n.notename"
+                          style='font-size: 10pt;'
+                          @click="switchNote(n.noteid)"
+                        >
+                        </v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>                
             </v-col>
             <v-col>
                 <h3>&nbsp;{{this.currentNote.collectionname}}</h3>
@@ -43,22 +89,22 @@
             </v-col>
             <v-col class="text-center">
                 <div>
-                    <v-btn color="light grey lighten-1" @click="showWords = true">Words</v-btn>
+                    <v-btn width="100%" color="light grey lighten-1" @click="showWords = true">Words</v-btn>
                     <Words v-show="showWords" @close-modal="showWords = false" />
                 </div>
                 <br>
                 <div>
-                    <v-btn color="light grey lighten-1" @click="showQuestions = true">Questions</v-btn>
+                    <v-btn width="100%" color="light grey lighten-1" @click="showQuestions = true">Questions</v-btn>
                     <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
                 </div>
                 <br>
                 <div>
-                    <v-btn color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
+                    <v-btn width="100%" color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
                     <Links v-show="showLinks" @close-modal="showLinks = false" />
                 </div>
                 <br>
                 <div>
-                    <v-btn color="light grey lighten-1" @click="showStudyPlan = true">Study Plan</v-btn>
+                    <v-btn width="100%" color="light grey lighten-1" @click="showStudyPlan = true">Study Plan</v-btn>
                     <StudyPlan v-show="showStudyPlan" @close-modal="showStudyPlan = false" />
                 </div>
             </v-col>
@@ -94,7 +140,9 @@ export default {
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
+    // this.$store.commit('users/studyPlan', JSON.parse(localStorage.getItem('studyPlan')))
     this.$store.commit('users/study', localStorage.getItem('studyMode'))
+    this.$store.commit('users/setNotes', JSON.parse(localStorage.getItem('collNotes')))
   },
 
   data () {
@@ -105,10 +153,20 @@ export default {
         showStudyPlan: false,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
+        editNote: false,
+        newNoteName: JSON.parse(localStorage.getItem('note')).notename
     }
   },
 
   methods: {
+      async updateNoteName () {
+        await this.$store.dispatch('users/updateNoteName', {
+          newNoteName: this.newNoteName,
+          noteid: this.currentNote.noteid
+        })
+        this.editNote = !this.editNote
+      },
+
       async saveNotes () {
         this.$store.commit('users/saving', "Saving...")
         await this.$store.dispatch('users/saveNotes', {
@@ -136,6 +194,14 @@ export default {
         else {
           alert('Study mode has been turned on.')
         }
+      },
+
+      async switchNote(noteid) {
+        await this.$store.dispatch('users/openNote', {
+          noteid: noteid
+        })
+        console.log(this.currentNote.typednotes)
+        this.noteText = this.currentNote.typednotes
       }
   },
 
@@ -166,7 +232,11 @@ export default {
 
     links () {
       return this.$store.state.users.links
-    }
+    },
+
+    notes () {
+      return this.$store.state.users.notes
+    },
   }
 }
 </script>
@@ -174,6 +244,12 @@ export default {
 <style scoped>
 .editor {
   background-color: lightyellow;
+}
+
+.noteselector {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 500;
 }
 
 h2 {

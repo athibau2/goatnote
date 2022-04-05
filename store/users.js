@@ -16,11 +16,12 @@ export const state = () => ({
     words: {},
     questions: {},
     links: {},
+    studyPlan: {},
     makingNewOrg: false,
     makingNewCollection: false,
     makingNewNote: false,
     saving: "Saved",
-    studyMode: false
+    studyMode: false,
   })
   
 // mutations should update state
@@ -84,6 +85,10 @@ export const mutations = {
         state.links = data
     },
 
+    studyPlan(state, data) {
+        state.studyPlan = data
+    }
+
 }
 
 // actions should call mutations
@@ -133,16 +138,19 @@ export const actions = {
         dispatch('allColls')
     },
 
-    async createNote({ dispatch }, { notename, collectionid, orgid }) {
+    async createNote({ commit, dispatch }, { notename, collectionid, orgid }) {
         const response = await axios.post(API_URL + '/note', {
             notename: notename,
             collectionid: collectionid,
         },
         {
-            headers: authHeader()
+            headers: { ...authHeader(), Prefer: "return=representation" }
         })
-        dispatch('collections', { orgid })
-        dispatch('notes', { collectionid })
+        if (response.status === 201) {
+            dispatch('openNote', { noteid: response.data[0].noteid })
+            // dispatch('collections', { orgid })
+            // dispatch('notes', { collectionid })
+        }
     },
 
     async orgs({ commit, state }) {
@@ -175,11 +183,11 @@ export const actions = {
         const response = await axios.get(API_URL + '/see_notes?email=eq.' + state.user.email + '&collectionid=eq.' + collectionid)
         if (response.status === 200) {
             commit('setNotes', response.data)
+            localStorage.setItem('collNotes', JSON.stringify(response.data))
         }
     },
 
     async openNote({ dispatch, commit, state }, { noteid }) {
-        localStorage.removeItem('note')
         localStorage.removeItem('studyMode')
         localStorage.removeItem('prettyDate')
         await commit('currentNote', {})
@@ -192,6 +200,7 @@ export const actions = {
             dispatch('getWords', { noteid })
             dispatch('getQuestions', { noteid })
             dispatch('getLinks', { noteid })
+            dispatch('getStudyPlan', { noteid })
             this.$router.push('/note')
         }
     },
@@ -206,6 +215,20 @@ export const actions = {
         if (response.status === 204) {
             let temp = JSON.parse(localStorage.getItem('note'))
             temp.typednotes = noteText
+            commit('currentNote', temp)
+            localStorage.setItem('note', JSON.stringify(temp))
+        }
+    },
+
+    async updateNoteName({ commit, state }, { newNoteName, noteid }) {
+        const res = await axios.patch(API_URL + '/note?noteid=eq.' + noteid, {
+            notename: newNoteName
+        },
+        {
+            headers: { ...authHeader(), Prefer: "return=representation" }
+        })
+        if (res.status === 200) {
+            let temp = { ...res.data[0], "collectionname": state.currentNote.collectionname }
             commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
         }
@@ -316,11 +339,28 @@ export const actions = {
             time: time
         },
         {
-            headers: authHeader()
+            headers: { ...authHeader(), Prefer: "return=representation" }
         })
         if (res.status === 201) {
+            commit('studyPlan', res.data[0])
+            localStorage.setItem('studyPlan', JSON.stringify(res.data[0]))
             alert('Your study plan has been saved')
-            // finish this
+            // change type of study plan viewing, set state to response data
+        }
+    },
+
+    async getStudyPlan({ commit }, { noteid }) {
+        try {
+            const res = await axios.get(API_URL + '/study_plan?noteid=eq.' + noteid)
+            if (res.status === 200) {
+                commit('studyPlan', res.data[0])
+                localStorage.setItem('studyPlan', JSON.stringify(res.data[0]))
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                commit('studyPlan', {})
+                localStorage.setItem('studyPlan', JSON.stringify({}))
+            }
         }
     },
 
@@ -392,14 +432,17 @@ export const actions = {
         commit('setCollections', [])
         commit('setNotes', [])
         commit('currentNote', {})
+        commit('studyPlan', {})
         commit('newOrg', false)
         commit('newCollection', false)
         commit('newNote', false)
         localStorage.removeItem('note')
+        localStorage.removeItem('collNotes')
         localStorage.removeItem('words')
         localStorage.removeItem('questions')
         localStorage.removeItem('links')
         localStorage.removeItem('studyMode')
+        localStorage.removeItem('studyPlan')
         deleteJwtToken()
         await commit('setUser', null)
         this.$router.push('/login')
@@ -417,6 +460,7 @@ export const actions = {
         let words = []
         let questions = []
         let links = []
+        let plans = []
         for (let i = 0; i < notes.length; ++i) {
             let w = await axios.get(API_URL + '/see_words?noteid=eq.' + notes[i].noteid)
             for (let j = 0; j < w.data.length; ++j) {
@@ -430,14 +474,18 @@ export const actions = {
             for (let j = 0; j < l.data.length; ++j) {
                 links.push(l.data[j])
             }
+            let p = await axios.get(API_URL + '/study_plan?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < p.data.length; ++j) {
+                plans.push(p.data[j])
+            }
         }
 
         for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
         for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
         for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+        for (let i = 0; i < plans.length; ++i) { await axios.delete(API_URL + '/study_plan?planid=eq.' + plans[i].planid)}
         for (let i = 0; i < notes.length; ++i) { await axios.delete(API_URL + '/note?noteid=eq.' + notes[i].noteid) }
         for (let i = 0; i < collections.data.length; ++i) { await axios.delete(API_URL + '/collection?collectionid=eq.' + collections.data[i].collectionid) }
-
 
         const response = await axios.delete(API_URL + `/part_of?orgid=eq.${orgid}&userid=eq.${state.user.user_id}`)
         if (response.status === 204) {
@@ -451,6 +499,7 @@ export const actions = {
         let words = []
         let questions = []
         let links = []
+        let plans = []
 
         for (let i = 0; i < notes.length; ++i) {
             let w = await axios.get(API_URL + '/see_words?noteid=eq.' + notes[i].noteid)
@@ -465,11 +514,16 @@ export const actions = {
             for (let j = 0; j < l.data.length; ++j) {
                 links.push(l.data[j])
             }
+            let p = await axios.get(API_URL + '/study_plan?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < p.data.length; ++j) {
+                plans.push(p.data[j])
+            }
         }
 
         for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
         for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
         for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+        for (let i = 0; i < plans.length; ++i) { await axios.delete(API_URL + '/study_plan?planid=eq.' + plans[i].planid)}
         for (let i = 0; i < notes.length; ++i) { await axios.delete(API_URL + '/note?noteid=eq.' + notes[i].noteid) }
 
         const response = await axios.delete(API_URL + `/collection?collectionid=eq.${collectionid}`)
@@ -489,6 +543,7 @@ export const actions = {
         for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
         for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
         for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+        await axios.delete(API_URL + '/study_plan?noteid=eq.' + noteid)
 
         const response = await axios.delete(API_URL + `/note?noteid=eq.${noteid}`)
         if (response.status === 204) {
@@ -508,6 +563,8 @@ export const actions = {
         let words = []
         let questions = []
         let links = []
+        let plans = []
+
         for (let i = 0; i < notes.length; ++i) {
             let w = await axios.get(API_URL + '/see_words?noteid=eq.' + notes[i].noteid)
             for (let j = 0; j < w.data.length; ++j) {
@@ -521,11 +578,16 @@ export const actions = {
             for (let j = 0; j < l.data.length; ++j) {
                 links.push(l.data[j])
             }
+            let p = await axios.get(API_URL + '/study_plan?noteid=eq.' + notes[i].noteid)
+            for (let j = 0; j < p.data.length; ++j) {
+                plans.push(p.data[j])
+            }
         }
 
         for (let i = 0; i < links.length; ++i) { await axios.delete(API_URL + '/links?linkid=eq.' + links[i].linkid) }
         for (let i = 0; i < questions.length; ++i) { await axios.delete(API_URL + '/questions?questionid=eq.' + questions[i].questionid) }
         for (let i = 0; i < words.length; ++i) { await axios.delete(API_URL + '/words?wordid=eq.' + words[i].wordid) }
+        for (let i = 0; i < plans.length; ++i) { await axios.delete(API_URL + '/study_plan?planid=eq.' + plans[i].planid)}
         for (let i = 0; i < notes.length; ++i) { await axios.delete(API_URL + '/note?noteid=eq.' + notes[i].noteid) }
         for (let i = 0; i < collections.data.length; ++i) { await axios.delete(API_URL + '/collection?collectionid=eq.' + collections.data[i].collectionid) }
 
