@@ -350,15 +350,16 @@ export const actions = {
     },
 
     async getStudyPlan({ commit }, { noteid }) {
+        await commit('studyPlan', {})
         try {
             const res = await axios.get(API_URL + '/study_plan?noteid=eq.' + noteid)
             if (res.status === 200) {
-                commit('studyPlan', res.data[0])
+                await commit('studyPlan', res.data[0])
                 localStorage.setItem('studyPlan', JSON.stringify(res.data[0]))
             }
         } catch (err) {
             if (err.response.status === 404) {
-                commit('studyPlan', {})
+                await commit('studyPlan', {})
                 localStorage.setItem('studyPlan', JSON.stringify({}))
             }
         }
