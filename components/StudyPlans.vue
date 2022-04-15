@@ -3,7 +3,7 @@
         <div class="modal" @click.stop>
             <h6>Study Plans</h6>
             <v-divider />
-            <div>
+            <div v-if="studyPlans.length !== 0">
               <v-list class="modal-list">
                 <v-list-item v-for="(p, i) in studyPlans" :key="i">
                 <v-card height="190px" class="modal-list-item" elevation="2" color="#fcfcfc" flat>

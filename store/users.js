@@ -330,7 +330,7 @@ export const actions = {
 
     async addPlan({ dispatch }, { date, time, amount, priority, noteid}) {
         const res = await axios.post(API_URL + '/study_plan', {
-            studydate: date,
+            studydate: date + 'T00:00:00.000Z',
             timeamount: amount,
             prioritylevel: priority,
             noteid: noteid,
@@ -361,6 +361,7 @@ export const actions = {
         try {
             const res = await axios.get(API_URL + '/see_study_plans?noteid=eq.' + noteid)
             if (res.status === 200) {
+                console.log(res)
                 for (let i = 0; i < res.data.length; ++i) {
                     let timeOfDay = " AM"
                     let time = res.data[i].time

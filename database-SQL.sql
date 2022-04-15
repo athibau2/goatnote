@@ -134,7 +134,8 @@ create or replace view see_links as
 create or replace view see_study_plans as
   select n.noteName, n.notedate, s.studydate, s.timeamount, 
   	s.prioritylevel, s.studycompleted, s.time, s.planid, n.noteid
-  from note n inner join study_plan s on n.noteid = s.noteid;
+  from note n inner join study_plan s on n.noteid = s.noteid
+  order by s.studydate asc;
   --this will be filtered later
 
 create view see_personal_data as
