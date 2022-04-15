@@ -4,23 +4,31 @@
             <h6>Questions</h6>
             <v-divider />
             <div v-if="questions !== null && questions !== undefined && questions.length !== 0">
-              <span v-for="(q, i) in questions" :key="i">
-                  <strong>{{q.questiontext}}</strong>
-                  &nbsp;{{q.answer}}&nbsp;
-                  <v-icon @click="deleteQuestion(q.questionid)">mdi-delete</v-icon>
-                  <v-divider />
-              </span>
+              <v-list>
+                <v-list-item v-for="(q, i) in questions" :key="i">
+                  <span>
+                      <strong>{{q.questiontext}}</strong>
+                      &nbsp;{{q.answer}}&nbsp;
+                      <v-icon @click="deleteQuestion(q.questionid)">mdi-delete</v-icon>
+                      <v-divider />
+                  </span>
+                </v-list-item>
+              </v-list>
             </div>
             <br>
-            <p>
+            <p class="modal-bottom-content">
               <v-row>
                 <v-text-field 
-                  v-model="newQuestion" 
+                  v-model="newQuestion"
+                  counter
+                  maxlength="350"
                   placeholder="Enter New Question"
                 >
                 </v-text-field>
-                <v-text-field 
-                  v-model="newAnswer" 
+                <v-text-field
+                  v-model="newAnswer"
+                  counter
+                  maxlength="350"
                   placeholder="Enter Question Answer"
                 >
                 </v-text-field>
@@ -32,6 +40,7 @@
             <v-btn color="primary" @click="addQuestion()">Add</v-btn>
         </div>
 
+        <!-- Study Mode ON -->
         <div v-else class="modal" @click.stop>
             <h6>Questions</h6>
             <v-divider />
@@ -71,7 +80,7 @@
               </v-row>
             </v-col>
             <br>
-            <v-btn color="light red lighten-2" @click="$emit('close-modal')">
+            <v-btn class="modal-bottom-content" color="light red lighten-2" @click="$emit('close-modal')">
                 Exit
             </v-btn>
         </div>
@@ -143,6 +152,7 @@
 </script>
 
 <style scoped>
+@import '~/assets/styles.css';
 
 .modal-overlay {
   position: fixed;

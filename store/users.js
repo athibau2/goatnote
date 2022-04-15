@@ -16,7 +16,7 @@ export const state = () => ({
     words: {},
     questions: {},
     links: {},
-    studyPlan: {},
+    studyPlans: [],
     makingNewOrg: false,
     makingNewCollection: false,
     makingNewNote: false,
@@ -85,8 +85,8 @@ export const mutations = {
         state.links = data
     },
 
-    studyPlan(state, data) {
-        state.studyPlan = data
+    studyPlans(state, data) {
+        state.studyPlans = data
     }
 
 }
@@ -188,7 +188,6 @@ export const actions = {
     },
 
     async openNote({ dispatch, commit, state }, { noteid }) {
-        localStorage.removeItem('studyMode')
         localStorage.removeItem('prettyDate')
         await commit('currentNote', {})
         const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
@@ -200,7 +199,7 @@ export const actions = {
             dispatch('getWords', { noteid })
             dispatch('getQuestions', { noteid })
             dispatch('getLinks', { noteid })
-            dispatch('getStudyPlan', { noteid })
+            dispatch('getStudyPlans', { noteid })
             this.$router.push('/note')
         }
     },
@@ -227,7 +226,7 @@ export const actions = {
         {
             headers: { ...authHeader(), Prefer: "return=representation" }
         })
-        if (res.status === 200) {
+        if (res.status === 204) {
             let temp = { ...res.data[0], "collectionname": state.currentNote.collectionname }
             commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
@@ -235,7 +234,7 @@ export const actions = {
     },
 
     async getLinks({ commit, state }, { noteid }) {
-        await commit('links', {})
+        await commit('links', [])
         const links = await axios.get(API_URL + '/see_links?noteid=eq.' + noteid)
         if (links.status === 200) {
             await commit('links', links.data)
@@ -266,7 +265,7 @@ export const actions = {
     },
 
     async getQuestions({ commit, state }, { noteid }) {
-        await commit('questions', {})
+        await commit('questions', [])
         const questions = await axios.get(API_URL + '/see_questions?noteid=eq.' + noteid)
         if (questions.status === 200) {
             await commit('questions', questions.data)
@@ -298,7 +297,7 @@ export const actions = {
     },
 
     async getWords({ commit, state }, { noteid }) {
-        await commit('words', {})
+        await commit('words', [])
         const words = await axios.get(API_URL + '/see_words?noteid=eq.' + noteid)
         if (words.status === 200) {
             await commit('words', words.data)
@@ -325,43 +324,73 @@ export const actions = {
             headers: authHeader()
         })
         if (res.status === 204) {
-            dispatch('getWords', { noteid: noteid})
+            dispatch('getWords', { noteid: noteid })
         }
     },
 
-    async addPlan({dispatch, commit }, { date, time, amount, priority, completed, noteid}) {
+    async addPlan({ dispatch }, { date, time, amount, priority, noteid}) {
         const res = await axios.post(API_URL + '/study_plan', {
             studydate: date,
             timeamount: amount,
             prioritylevel: priority,
-            studycompleted: completed,
             noteid: noteid,
             time: time
         },
         {
-            headers: { ...authHeader(), Prefer: "return=representation" }
+            headers: authHeader()
         })
         if (res.status === 201) {
-            commit('studyPlan', res.data[0])
-            localStorage.setItem('studyPlan', JSON.stringify(res.data[0]))
-            alert('Your study plan has been saved')
-            // change type of study plan viewing, set state to response data
+            dispatch('getStudyPlans', { noteid })
         }
     },
 
-    async getStudyPlan({ commit }, { noteid }) {
-        await commit('studyPlan', {})
+    async updatePlan({ dispatch }, { planid, completed, noteid }) {
+        const res = await axios.patch(API_URL + '/study_plan?planid=eq.' + planid, {
+            studycompleted: completed
+        },
+        {
+            headers: authHeader()
+        })
+        if (res.status === 204) {
+            dispatch('getStudyPlans', { noteid })
+        }
+    },
+
+    async getStudyPlans({ commit }, { noteid }) {
+        await commit('studyPlans', [])
         try {
-            const res = await axios.get(API_URL + '/study_plan?noteid=eq.' + noteid)
+            const res = await axios.get(API_URL + '/see_study_plans?noteid=eq.' + noteid)
             if (res.status === 200) {
-                await commit('studyPlan', res.data[0])
-                localStorage.setItem('studyPlan', JSON.stringify(res.data[0]))
+                for (let i = 0; i < res.data.length; ++i) {
+                    let timeOfDay = " AM"
+                    let time = res.data[i].time
+                    time = time.split(':')
+                    if (parseInt(time[0]) > 12) {
+                        time[0] = parseInt(time[0]) - 12
+                        timeOfDay = " PM"
+                    }
+                    if (timeOfDay === " AM" && parseInt(time[0]) < 10) time[0] = parseInt(time[0])
+                    res.data[i].time = time[0].toString() + ":" + time[1] + timeOfDay
+                    let date = res.data[i].studydate
+                    res.data[i].studydate = new Date(date).toDateString()
+                }
+                await commit('studyPlans', res.data)
+                localStorage.setItem('studyPlans', JSON.stringify(res.data))
             }
         } catch (err) {
             if (err.response.status === 404) {
-                await commit('studyPlan', {})
-                localStorage.setItem('studyPlan', JSON.stringify({}))
+                await commit('studyPlans', [])
+                localStorage.setItem('studyPlans', JSON.stringify([]))
             }
+        }
+    },
+
+    async deletePlan({ dispatch }, { planid, noteid }) {
+        const res = await axios.delete(API_URL + '/study_plan?planid=eq.' + planid, {
+            headers: authHeader()
+        })
+        if (res.status === 204) {
+            dispatch('getStudyPlans', { noteid: noteid })
         }
     },
 
@@ -433,7 +462,7 @@ export const actions = {
         commit('setCollections', [])
         commit('setNotes', [])
         commit('currentNote', {})
-        commit('studyPlan', {})
+        commit('studyPlans', {})
         commit('newOrg', false)
         commit('newCollection', false)
         commit('newNote', false)
@@ -442,8 +471,7 @@ export const actions = {
         localStorage.removeItem('words')
         localStorage.removeItem('questions')
         localStorage.removeItem('links')
-        localStorage.removeItem('studyMode')
-        localStorage.removeItem('studyPlan')
+        localStorage.removeItem('studyPlans')
         deleteJwtToken()
         await commit('setUser', null)
         this.$router.push('/login')

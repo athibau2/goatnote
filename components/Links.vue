@@ -4,7 +4,7 @@
             <h6>Links</h6>
             <v-divider />
             <div v-if="links !== null && links !== undefined && links.length !== 0">
-              <span v-for="(link, i) in links" :key="i">
+              <span class="link" v-for="(link, i) in links" :key="i">
                   {{link.url}}&nbsp;
                   <v-icon @click="deleteLink(link.linkid)">mdi-delete</v-icon>
                   <v-divider />
@@ -30,7 +30,7 @@
             <h6>Links</h6>
             <v-divider />
             <div v-if="links !== null && links !== undefined && links.length !== 0">
-              <span v-for="(link, i) in links" :key="i">
+              <span class="link" v-for="(link, i) in links" :key="i">
                   <a @click="launchUrl(link.url)">{{link.url}}</a>
                   <v-divider />
               </span>
@@ -129,5 +129,8 @@ p {
   margin: 10px 15px;
 }
 
+.link {
+  overflow-wrap: break-word;
+}
 
 </style>

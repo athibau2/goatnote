@@ -15,12 +15,16 @@
             <p>
               <v-row>
                 <v-text-field 
-                  v-model="newWord" 
+                  v-model="newWord"
+                  counter
+                  maxlength="50"
                   placeholder="Enter New Word"
                 >
                 </v-text-field>
                 <v-text-field 
-                  v-model="newDef" 
+                  v-model="newDef"
+                  counter
+                  maxlength="200"
                   placeholder="Enter Word Definition"
                 >
                 </v-text-field>

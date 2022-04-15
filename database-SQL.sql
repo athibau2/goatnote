@@ -64,7 +64,7 @@ CREATE TABLE Study_Plan
 CREATE TABLE Questions
 (
   QuestionId SERIAL NOT NULL,
-  QuestionText varchar(100) NOT NULL,
+  QuestionText TEXT NOT NULL,
   Answer TEXT,
   NoteId SERIAL NOT NULL,
   PRIMARY KEY (QuestionId),
@@ -83,7 +83,7 @@ CREATE TABLE Links
 CREATE TABLE Words
 (
   WordId SERIAL NOT NULL,
-  VocabWord varchar(40) NOT NULL,
+  VocabWord TEXT NOT NULL,
   Definition TEXT NOT NULL,
   NoteId SERIAL NOT NULL,
   PRIMARY KEY (WordId),
@@ -131,9 +131,10 @@ create or replace view see_links as
  	select * from links;
 	--this will be filtered later
   
-create view see_study_plans as
-  select n.noteName, n.notedate, s.studydate, s.timeamount, s.prioritylevel, s.studycompleted
-  from note n inner join study_plan s on n.noteId = s.noteId;
+create or replace view see_study_plans as
+  select n.noteName, n.notedate, s.studydate, s.timeamount, 
+  	s.prioritylevel, s.studycompleted, s.time, s.planid, n.noteid
+  from note n inner join study_plan s on n.noteid = s.noteid;
   --this will be filtered later
 
 create view see_personal_data as

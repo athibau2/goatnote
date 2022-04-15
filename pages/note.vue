@@ -104,8 +104,8 @@
                 </div>
                 <br>
                 <div>
-                    <v-btn width="100%" color="light grey lighten-1" @click="showStudyPlan = true">Study Plan</v-btn>
-                    <StudyPlan v-show="showStudyPlan" @close-modal="showStudyPlan = false" />
+                    <v-btn width="100%" color="light grey lighten-1" @click="openPlans()">Study Plans</v-btn>
+                    <StudyPlans v-show="showStudyPlans" @close-modal="showStudyPlans = false" />
                 </div>
             </v-col>
         </v-row>
@@ -118,7 +118,7 @@ import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Words from '~/components/Words.vue'
 import Questions from '~/components/Questions.vue'
 import Links from '~/components/Links.vue'
-import StudyPlan from '~/components/StudyPlan.vue'
+import StudyPlans from '~/components/StudyPlans.vue'
 import { VueEditor } from "vue2-editor"
 
 export default {
@@ -129,7 +129,7 @@ export default {
       Words,
       Questions,
       Links,
-      StudyPlan,
+      StudyPlans,
       VueEditor
   },
 
@@ -140,9 +140,9 @@ export default {
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
-    // this.$store.commit('users/studyPlan', JSON.parse(localStorage.getItem('studyPlan')))
-    this.$store.commit('users/study', localStorage.getItem('studyMode'))
+    this.$store.commit('users/studyPlans', JSON.parse(localStorage.getItem('studyPlans')))
     this.$store.commit('users/setNotes', JSON.parse(localStorage.getItem('collNotes')))
+    this.$store.commit('users/study', false)
   },
 
   data () {
@@ -150,7 +150,7 @@ export default {
         showQuestions: false,
         showLinks: false,
         showWords: false,
-        showStudyPlan: false,
+        showStudyPlans: false,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
         editNote: false,
@@ -159,6 +159,13 @@ export default {
   },
 
   methods: {
+      openPlans () {
+        this.showStudyPlans = true
+        this.$store.dispatch('users/getStudyPlans', {
+          noteid: this.currentNote.noteid
+        })
+      },
+
       async updateNoteName () {
         await this.$store.dispatch('users/updateNoteName', {
           newNoteName: this.newNoteName,
@@ -186,7 +193,6 @@ export default {
       },
 
       async toggleStudy () {
-        localStorage.setItem('studyMode', !this.studyMode)
         await this.$store.commit('users/study', !this.studyMode)
         if (!this.studyMode) {
           alert('Study mode has been turned off.')
