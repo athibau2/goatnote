@@ -8,10 +8,6 @@ input{
     margin-top: 10px;
 }
 
-.selector {
-    width: 80%;
-}
-
 .modal-overlay {
     position: fixed;
     top: 0;

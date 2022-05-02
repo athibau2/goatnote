@@ -36,7 +36,7 @@
                 </v-text-field>
                 <v-menu
                   v-if="!editNote"
-                  top
+                  bottom
                   transition="slide-y-transition"
                   :offset-y="true"
                   :close-on-content-click="true"
@@ -206,7 +206,6 @@ export default {
         await this.$store.dispatch('users/openNote', {
           noteid: noteid
         })
-        console.log(this.currentNote.typednotes)
         this.noteText = this.currentNote.typednotes
       }
   },

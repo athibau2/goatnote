@@ -148,8 +148,8 @@ export const actions = {
         })
         if (response.status === 201) {
             dispatch('openNote', { noteid: response.data[0].noteid })
-            // dispatch('collections', { orgid })
-            // dispatch('notes', { collectionid })
+            dispatch('collections', { orgid })
+            dispatch('notes', { collectionid })
         }
     },
 
@@ -361,7 +361,6 @@ export const actions = {
         try {
             const res = await axios.get(API_URL + '/see_study_plans?noteid=eq.' + noteid)
             if (res.status === 200) {
-                console.log(res)
                 for (let i = 0; i < res.data.length; ++i) {
                     let timeOfDay = " AM"
                     let time = res.data[i].time

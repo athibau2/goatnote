@@ -13,7 +13,7 @@
     </v-app-bar>
     <v-main class="main">
       <v-container>
-        <Nuxt />
+        <Nuxt class="main" />
       </v-container>
     </v-main>
   </v-app>
@@ -33,7 +33,8 @@ export default {
 </script>
 
 <style scoped>
-main{
+
+.main{
   background-color: rgb(218, 236, 218)
 }
 </style>
