@@ -200,6 +200,7 @@ export default {
 }
 
 .card {
+  background-color: #faf9e2;
   position: fixed;
   top: 15%;
   right: 30px;
@@ -211,7 +212,7 @@ export default {
 }
 
 .full-intro {
-  background-color: #FAF9F6;
+  background-color: #faf9e2;
   border-radius: 20px;
   box-shadow: 0px 0px 6px #575757;
 }

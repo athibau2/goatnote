@@ -27,10 +27,10 @@
                     </table>
                     <v-card-actions>
                         <v-switch
-                            :label="plans[i].studycompleted ? 'Completed' : 'Not Completed'"
+                            :label="p.studycompleted ? 'Completed' : 'Not Completed'"
                             inset
                             v-model="plans[i].studycompleted"
-                            @click="updatePlan(plans[i])"
+                            @click="updatePlan(p)"
                         >
                         </v-switch>
                         <v-spacer />
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Add Plan Modal -->
-        <div class="modal" v-if="showAddPlan" @click.stop>
+        <div class="modal" style="margin-left: 3px;" v-if="showAddPlan" @click.stop>
             <h6>Add Plan</h6>
             <v-divider />
             <div class="eachRow">
@@ -221,7 +221,7 @@ p {
 }
 
 .eachRow {
-    margin-top: 15px;
+    margin-top: 25px;
 }
 
 .when {

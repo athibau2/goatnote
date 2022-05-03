@@ -1,11 +1,11 @@
 <template>
   <v-app dark>
     <v-navigation-drawer
-      v-model="drawer"
       :mini-variant="miniVariant"
-      :clipped="clipped"
+      :clipped="true"
       fixed
       app
+      color="light grey lighten-5"
     >
       <v-list>
         <v-list-item
@@ -26,24 +26,21 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar
-      :clipped-left="clipped"
+      :clipped-left="true"
       fixed
       app
-      color="light grey lighten-1"
+      color="light grey lighten-2"
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn
-        icon
-        @click.stop="miniVariant = !miniVariant"
-      >
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click.stop="clipped = !clipped"
-      >
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-app-bar-nav-icon 
+            @click.stop="miniVariant = !miniVariant"
+            v-on="on"
+            v-bind="attrs"
+          />
+        </template>
+        <span>{{miniVariant ? 'Expand' : 'Collapse'}}</span>
+      </v-tooltip>
       <v-toolbar-title class="font-weight-bold" v-text="title" />
       <v-spacer/>
       <div class="topButton">
@@ -85,8 +82,6 @@ export default {
 
   data () {
     return {
-      clipped: false,
-      drawer: false,
       fixed: false,
       items: [
         {

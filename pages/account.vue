@@ -2,7 +2,7 @@
     <v-app>
         <v-col v-if="(userData !== null && userData !== undefined)">
           <v-row justify="center" align="center">
-            <v-card color="light yellow lighten-4" elevation="5" width="400">
+            <v-card class="account-card" elevation="5" width="400">
             <v-card-title class="headline">
                 {{userData.firstname}} {{userData.lastname}}
             </v-card-title>
@@ -104,5 +104,9 @@ export default {
 
 <style scoped>
 @import '~/assets/styles.css';
+
+.account-card {
+  background-color: #faf9e2;
+}
 
 </style>

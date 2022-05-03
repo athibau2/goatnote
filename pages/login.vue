@@ -3,7 +3,7 @@
       <v-row>
         <v-col class="intro-page" cols="8">
           <div class="full-intro">
-            <h3 class="text-center">GOAT Notes will help you ace your classes</h3>
+            <h3 class="text-center">GOAT Notes is your one stop for academic success!</h3>
             <div class="intro text-center">
               No more wasted time in note-taking.
             </div>
@@ -17,7 +17,7 @@
           <v-row class="intro-rows" align="center">
             <v-col cols="4">
               <span class="intro">
-                This no-excuses app prompts you to keep track of your feelings, hopes, and dreams. Don't like the prompt? <em>Generate a new one!</em>
+                Join with others in your organizations and something something something
               </span>
             </v-col>
             <v-col cols="8">
@@ -170,6 +170,7 @@ export default {
 }
 
 .card {
+  background-color: #faf9e2;
   position: fixed;
   top: 15%;
   right: 30px;
@@ -181,13 +182,13 @@ export default {
 }
 
 .full-intro {
-  background-color: #FAF9F6;
+  background-color: #faf9e2;
   border-radius: 20px;
   box-shadow: 0px 0px 6px #575757;
 }
 
 h3 {
-  font-size: 25px;
+  font-size: 22px;
   color: #575757;
   font-family: Georgia, 'Times New Roman', Times, serif;
 }
