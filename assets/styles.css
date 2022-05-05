@@ -8,6 +8,14 @@ input{
     margin-top: 10px;
 }
 
+.notice{
+    font-family: Cochon;
+    border: solid grey 1.5px;
+    border-radius: 8px;
+    padding: 8px;
+    background-color: #faf9e2;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;

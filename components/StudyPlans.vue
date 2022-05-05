@@ -134,7 +134,7 @@
             async updatePlan(p) {
                 await this.$store.dispatch('users/updatePlan', {
                     planid: p.planid,
-                    completed: p.studycompleted,
+                    completed: !p.studycompleted,
                     noteid: this.currentNote.noteid
                 })
             },
@@ -151,11 +151,7 @@
                         priority: this.priority,
                         noteid: this.currentNote.noteid
                     })
-                    this.date = ""
-                    this.time = ""
-                    this.timeAmount = 5
-                    this.priority = 1
-                    this.showAddPlan = false
+                    this.close()
                 }
             },
 

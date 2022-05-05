@@ -401,11 +401,5 @@ export default {
   margin-right: 10px;
 }
 
-.notice{
-  border: solid;
-  border-radius: 8px;
-  padding: 5px;
-  background-color: beige;
-}
 
 </style>

@@ -136,8 +136,18 @@ create or replace view see_study_plans as
   select n.notename, n.notedate, s.studydate, s.timeamount, 
   	s.prioritylevel, s.studycompleted, s.time, s.planid, n.noteid
   from note n inner join study_plan s on n.noteid = s.noteid
-  order by s.studydate asc;
+  order by s.studydate asc, s.time asc;
   --this will be filtered later
+
+create or replace view see_all_plans as
+	select n.notename, n.notedate, s.studydate, s.timeamount,
+  		s.prioritylevel, s.studycompleted, s.time, s.planid, n.noteid, u.userid
+	from note n inner join study_plan s on n.noteid = s.noteid
+	inner join collection c on n.collectionid = c.collectionid
+	inner join "user" u on c.userid = u.userid
+	where s.studycompleted = false
+	order by n.notename asc, s.studydate asc, s.time asc;
+	--this will be filtered later
 
 create view see_personal_data as
   select firstname, lastname, email, "password"

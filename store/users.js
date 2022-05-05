@@ -17,6 +17,7 @@ export const state = () => ({
     questions: {},
     links: {},
     studyPlans: [],
+    allPlans: [],
     makingNewOrg: false,
     makingNewCollection: false,
     makingNewNote: false,
@@ -87,6 +88,10 @@ export const mutations = {
 
     studyPlans(state, data) {
         state.studyPlans = data
+    },
+
+    allPlans(state, data) {
+        state.allPlans = data
     }
 
 }
@@ -352,12 +357,38 @@ export const actions = {
             headers: authHeader()
         })
         if (res.status === 204) {
+            console.log(res)
             dispatch('getStudyPlans', { noteid })
         }
     },
 
+    async getAllPlans({ commit, state }) {
+        try {
+            const res = await axios.get(API_URL + `/see_all_plans?userid=eq.${state.user.user_id}&studycompleted=eq.false`)
+            if (res.status === 200) {
+                for (let i = 0; i < res.data.length; ++i) {
+                    let timeOfDay = " AM"
+                    let time = res.data[i].time
+                    time = time.split(':')
+                    if (parseInt(time[0]) > 12) {
+                        time[0] = parseInt(time[0]) - 12
+                        timeOfDay = " PM"
+                    }
+                    if (timeOfDay === " AM" && parseInt(time[0]) < 10) time[0] = parseInt(time[0])
+                    res.data[i].time = time[0].toString() + ":" + time[1] + timeOfDay
+                    let date = res.data[i].studydate
+                    res.data[i].studydate = new Date(date).toDateString()
+                }
+                await commit('allPlans', res.data)
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('allPlans', [])
+            }
+        }
+    },
+
     async getStudyPlans({ commit }, { noteid }) {
-        await commit('studyPlans', [])
         try {
             const res = await axios.get(API_URL + '/see_study_plans?noteid=eq.' + noteid)
             if (res.status === 200) {
@@ -374,8 +405,8 @@ export const actions = {
                     let date = res.data[i].studydate
                     res.data[i].studydate = new Date(date).toDateString()
                 }
+                await localStorage.setItem('studyPlans', JSON.stringify(res.data))
                 await commit('studyPlans', res.data)
-                localStorage.setItem('studyPlans', JSON.stringify(res.data))
             }
         } catch (err) {
             if (err.response.status === 404) {
@@ -390,7 +421,8 @@ export const actions = {
             headers: authHeader()
         })
         if (res.status === 204) {
-            dispatch('getStudyPlans', { noteid: noteid })
+            if (noteid === null) dispatch('getAllPlans')
+            else dispatch('getStudyPlans', { noteid: noteid })
         }
     },
 
@@ -462,7 +494,7 @@ export const actions = {
         commit('setCollections', [])
         commit('setNotes', [])
         commit('currentNote', {})
-        commit('studyPlans', {})
+        commit('studyPlans', [])
         commit('newOrg', false)
         commit('newCollection', false)
         commit('newNote', false)
