@@ -16,6 +16,21 @@ input{
     background-color: #faf9e2;
 }
 
+.modal, .modal-overlay {
+    animation: fadeInAnimation ease 1s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -24,7 +39,7 @@ input{
     right: 0;
     display: flex;
     justify-content: center;
-    background-color: #000000da;
+    background-color: #222222da;
 }
 
 .modal {

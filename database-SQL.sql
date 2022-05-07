@@ -157,7 +157,7 @@ create or replace view admin_see_all_users as
   select * from "user" order by isadmin desc, firstname asc;
 
 create or replace view admin_see_all_orgs as
-  select o.orgid, o.orgname, count(p.orgid)
+  select o.orgid, o.orgname, count(p.orgid) as members
   from organization o inner join part_of p
   on o.orgid = p.orgid
   group by o.orgid
@@ -176,18 +176,28 @@ create or replace view admin_see_all_notes as
   inner join "user" u on c.userid = u.userid
   order by u.firstname asc, c.collectionname asc;
 
-create view admin_see_user_orgs_collections as
-  select o.orgid, o.orgname, c.collectionname, firstname, lastname 
-  from collection c inner join organization o 
-  on c.orgid = o.orgid inner join "user" on c.userid = "user".userid;
+create or replace view admin_see_user_orgs as
+  select o.orgid, o.orgname, u.userid
+  from organization o inner join part_of p on o.orgid = p.orgid
+  inner join "user" u on p.userid = u.userid;
   --this will be filtered later
 
-create view admin_see_org_users as
-  select o.orgname, firstname, lastname
-  from organization o inner join part_of p
-  on o.orgid = p.orgid inner join "user"
-  on p.userid = "user".userid
-  order by o.orgname;
+create or replace view admin_see_user_colls as
+	select c.collectionname, c.collectionid, c.userid, c.orgid
+	from collection c;
+  --this will be filtered later
+
+create or replace view admin_see_user_notes as
+	select n.noteid, n.notename, n.collectionid, n.notedate, u.userid
+	from note n inner join collection c on n.collectionid = c.collectionid
+	inner join "user" u on c.userid = u.userid;
+  --this will be filtered later
+
+create or replace view admin_see_org_users as
+  select u.firstname, u.lastname, u.email, u.userid, p.orgid
+  from "user" u inner join part_of p
+  on p.userid = u.userid
+  order by u.firstname asc;
   --this will be filtered later
 
 create view admin_see_user_collections_notes as

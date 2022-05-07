@@ -15,6 +15,7 @@
           @click="item.click"
           router
           exact
+          :disabled="item.title !== 'Admin' ? false : userData.isadmin ? false : true"
         >
           <v-list-item-action>
             <v-icon>{{ item.icon }}</v-icon>
@@ -111,11 +112,6 @@ export default {
           title: 'My Account',
           to: '/account',
           click: this.loadUserData
-        },
-        {
-          icon: 'mdi-email',
-          title: 'Contact Us',
-          to: '/contact'
         },
         {
           icon: 'mdi-account-key',

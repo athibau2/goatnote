@@ -27,6 +27,11 @@ export const state = () => ({
     adminOrgs: [],
     adminColls: [],
     adminNotes: [],
+    adminUserData: {},
+    adminUserOrgs: [],
+    adminUserColls: [],
+    adminUserNotes: [],
+    orgUsers: []
   })
   
 // mutations should update state
@@ -114,6 +119,25 @@ export const mutations = {
         state.adminNotes = data
     },
 
+    adminUserData(state, data) {
+        state.adminUserData = data
+    },
+
+    adminUserOrgs(state, data) {
+        state.adminUserOrgs = data
+    },
+
+    adminUserColls(state, data) {
+        state.adminUserColls = data
+    },
+
+    adminUserNotes(state, data) {
+        state.adminUserNotes = data
+    },
+
+    orgUsers(state, data) {
+        state.orgUsers = data
+    },
 }
 
 // actions should call mutations
@@ -158,6 +182,75 @@ export const actions = {
             const res = await axios.get(API_URL + '/admin_see_all_notes')
             if (res.status === 200) await commit('adminNotes', res.data)
         } catch (err) { if (err.response.status === 404) commit('adminNotes', []) }
+    },
+
+    async loadAdminUserData({ commit }, { userid }) {
+        try {
+            const res = await axios.get(API_URL + `/see_personal_data?userid=eq.${userid}`)
+            if (res.status === 200) await commit('adminUserData', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminUserData', []) }
+
+        try {
+            const res = await axios.get(API_URL + `/admin_see_user_orgs?userid=eq.${userid}`)
+            if (res.status === 200) await commit('adminUserOrgs', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminUserOrgs', []) }
+
+        try {
+            const res = await axios.get(API_URL + `/admin_see_user_colls?userid=eq.${userid}`)
+            if (res.status === 200) await commit('adminUserColls', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminUserColls', []) }
+
+        try {
+            const res = await axios.get(API_URL + `/admin_see_user_notes?userid=eq.${userid}`)
+            if (res.status === 200) await commit('adminUserNotes', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminUserNotes', []) }
+    },
+
+    async deleteUser({ dispatch }, { userid }) {
+        try {
+            const res = await axios.delete(API_URL + `/user?userid=eq.${userid}`, {
+                headers: authHeader()
+            })
+            if (res.status === 204 || res.status === 404) {
+                await dispatch('loadAdminData')
+                this.$router.push('/admin')
+            }
+        } catch (err) {
+            if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
+    async deleteOrg({ dispatch }, { orgid }) {
+        try {
+            const res = await axios.delete(API_URL + `/organization?orgid=eq.${orgid}`, {
+                headers: authHeader()
+            })
+            if (res.status === 204 || res.status === 404) {
+                await dispatch('loadAdminData')
+                this.$router.push('/admin')
+            }
+        } catch (err) {
+            if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
+    async loadOrgUsers({ commit }, { orgid }) {
+        try {
+            const res = await axios.get(API_URL + `/admin_see_org_users?orgid=eq.${orgid}`)
+            if (res.status === 200) {
+                await commit('orgUsers', res.data)
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('orgUsers', [])
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
     },
 
     async userData({ commit, state }) {
@@ -512,7 +605,6 @@ export const actions = {
                 email: email, password: password
             })
             if (response.status === 200) {
-                alert("Account created successfully")
                 dispatch('login', {
                     email: email,
                     password: password
