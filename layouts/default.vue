@@ -83,6 +83,7 @@ export default {
   data () {
     return {
       fixed: false,
+      isadmin: this.$store.state.users.userData.isadmin,
       items: [
         {
           icon: 'mdi-home',
@@ -107,9 +108,19 @@ export default {
         },
         {
           icon: 'mdi-account-cog',
-          title: 'Account',
+          title: 'My Account',
           to: '/account',
           click: this.loadUserData
+        },
+        {
+          icon: 'mdi-email',
+          title: 'Contact Us',
+          to: '/contact'
+        },
+        {
+          icon: 'mdi-account-key',
+          title: 'Admin',
+          to: '/admin',
         },
         {
           icon: 'mdi-logout-variant',
@@ -197,6 +208,6 @@ export default {
 }
 
 .main{
-  background-color: rgb(218, 236, 218)
+  background-color: #DAECDA;
 }
 </style>

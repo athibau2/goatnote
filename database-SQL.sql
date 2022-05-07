@@ -150,12 +150,31 @@ create or replace view see_all_plans as
 	--this will be filtered later
 
 create view see_personal_data as
-  select firstname, lastname, email, "password"
-  from "user";
+  select * from "user";
   --this will be filtered later
   
-create view admin_see_all_users as
-  select * from "user";
+create or replace view admin_see_all_users as
+  select * from "user" order by isadmin desc, firstname asc;
+
+create or replace view admin_see_all_orgs as
+  select o.orgid, o.orgname, count(p.orgid)
+  from organization o inner join part_of p
+  on o.orgid = p.orgid
+  group by o.orgid
+  order by o.orgname asc;
+
+create or replace view admin_see_all_colls as
+  select c.collectionname, c.collectionid, c.userid, c.orgid, o.orgname, u.firstname, u.lastname
+  from collection c inner join organization o
+  on c.orgid = o.orgid
+  inner join "user" u on c.userid = u.userid
+  order by u.firstname asc;
+
+create or replace view admin_see_all_notes as
+  select n.noteid, n.notename, n.notedate, n.collectionid, c.collectionname, c.userid, u.firstname, u.lastname
+  from note n inner join collection c on n.collectionid = c.collectionid
+  inner join "user" u on c.userid = u.userid
+  order by u.firstname asc, c.collectionname asc;
 
 create view admin_see_user_orgs_collections as
   select o.orgid, o.orgname, c.collectionname, firstname, lastname 

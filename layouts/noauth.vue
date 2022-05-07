@@ -35,6 +35,6 @@ export default {
 <style scoped>
 
 .main{
-  background-color: rgb(218, 236, 218)
+  background-color: #DAECDA;
 }
 </style>

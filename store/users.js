@@ -23,6 +23,10 @@ export const state = () => ({
     makingNewNote: false,
     saving: "Saved",
     studyMode: false,
+    adminUsers: [],
+    adminOrgs: [],
+    adminColls: [],
+    adminNotes: [],
   })
   
 // mutations should update state
@@ -92,12 +96,70 @@ export const mutations = {
 
     allPlans(state, data) {
         state.allPlans = data
-    }
+    },
+
+    adminUsers(state, data) {
+        state.adminUsers = data
+    },
+
+    adminOrgs(state, data) {
+        state.adminOrgs = data
+    },
+
+    adminColls(state, data) {
+        state.adminColls = data
+    },
+
+    adminNotes(state, data) {
+        state.adminNotes = data
+    },
 
 }
 
 // actions should call mutations
 export const actions = {
+    async toggleAdmin({ dispatch }, { userid, isadmin }) {
+        try {
+            const res = await axios.patch(API_URL + `/user?userid=eq.${userid}`, {
+                isadmin: isadmin
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                dispatch('loadAdminData')
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                alert('User is not found')
+            } else if (err.response.status === 400) {
+                alert('Something went wront, please try again')
+            }
+        }
+    },
+
+    async loadAdminData({ commit }) {
+        try {
+            const res = await axios.get(API_URL + '/admin_see_all_users')
+            if (res.status === 200) await commit('adminUsers', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminUsers', []) }
+
+        try {
+            const res = await axios.get(API_URL + '/admin_see_all_orgs')
+            if (res.status === 200) await commit('adminOrgs', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminOrgs', []) }
+
+        try {
+            const res = await axios.get(API_URL + '/admin_see_all_colls')
+            if (res.status === 200) await commit('adminColls', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminColls', []) }
+
+        try {
+            const res = await axios.get(API_URL + '/admin_see_all_notes')
+            if (res.status === 200) await commit('adminNotes', res.data)
+        } catch (err) { if (err.response.status === 404) commit('adminNotes', []) }
+    },
+
     async userData({ commit, state }) {
         const response = await axios.get(API_URL + '/see_personal_data?email=eq.' + state.user.email)
         if (response.status === 200) {
