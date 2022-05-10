@@ -164,11 +164,13 @@ create or replace view admin_see_all_orgs as
   order by o.orgname asc;
 
 create or replace view admin_see_all_colls as
-  select c.collectionname, c.collectionid, c.userid, c.orgid, o.orgname, u.firstname, u.lastname
-  from collection c inner join organization o
-  on c.orgid = o.orgid
-  inner join "user" u on c.userid = u.userid
-  order by u.firstname asc;
+	select c.collectionname, c.collectionid, c.userid, c.orgid, o.orgname, u.firstname, u.lastname,
+		count(n.noteid) as numnotes
+	from note n inner join collection c on n.collectionid = c.collectionid
+	inner join organization o on c.orgid = o.orgid
+	inner join "user" u on c.userid = u.userid
+	group by c.collectionname, c.collectionid, o.orgname, u.firstname, u.lastname
+	order by u.firstname asc;
 
 create or replace view admin_see_all_notes as
   select n.noteid, n.notename, n.notedate, n.collectionid, c.collectionname, c.userid, u.firstname, u.lastname
@@ -183,12 +185,16 @@ create or replace view admin_see_user_orgs as
   --this will be filtered later
 
 create or replace view admin_see_user_colls as
-	select c.collectionname, c.collectionid, c.userid, c.orgid
-	from collection c;
+	select c.collectionname, c.collectionid, c.userid, c.orgid, 
+		o.orgname, count(n.noteid) as numnotes
+	from collection c inner join note n on c.collectionid = n.collectionid
+	inner join organization o on o.orgid = c.orgid
+	group by c.collectionname, c.collectionid, o.orgname
+	order by c.collectionname asc;
   --this will be filtered later
 
 create or replace view admin_see_user_notes as
-	select n.noteid, n.notename, n.collectionid, n.notedate, u.userid
+	select n.noteid, n.notename, n.collectionid, n.notedate, u.userid, c.collectionname
 	from note n inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on c.userid = u.userid;
   --this will be filtered later
@@ -200,23 +206,11 @@ create or replace view admin_see_org_users as
   order by u.firstname asc;
   --this will be filtered later
 
-create view admin_see_user_collections_notes as
-  select o.orgid, c.collectionname, n.notename, firstname, lastname
-  from organization o inner join collection c on o.orgid = c.orgid
-  inner join note n on c.collectionid = n.collectionid
-  inner join "user" on c.userid = "user".userid
-  order by "user".userid;
-  --this will be filtered later
-
-create view admin_see_user_note_data as
-  select u.userid, u.firstname, u.lastname, c.collectionid, n.notename, n.typednotes, n.notedate,
-    q.questiontext, q.answer, w.vocabword, w.definition, l.url
-  from "user" u inner join collection c on c.userid = u.userid 
-  inner join note n on c.collectionid = n.collectionid
-  inner join questions q on n.noteid = q.noteid
-  inner join words w on n.noteid = w.noteid
-  inner join links l on n.noteid = l.noteid
-  order by u.userid;
+create or replace view admin_see_coll_notes as
+  select c.collectionname, n.noteid, n.notename, n.notedate, n.collectionid
+  from collection c inner join note n
+  on c.collectionid = n.collectionid
+  order by n.notename asc;
   --this will be filtered later
 
 

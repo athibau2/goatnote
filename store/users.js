@@ -31,7 +31,8 @@ export const state = () => ({
     adminUserOrgs: [],
     adminUserColls: [],
     adminUserNotes: [],
-    orgUsers: []
+    orgUsers: [],
+    collNotes: [],
   })
   
 // mutations should update state
@@ -138,6 +139,10 @@ export const mutations = {
     orgUsers(state, data) {
         state.orgUsers = data
     },
+
+    collNotes(state, data) {
+        state.collNotes = data
+    }
 }
 
 // actions should call mutations
@@ -238,6 +243,22 @@ export const actions = {
         }
     },
 
+    async removeFromOrg({ dispatch }, { userid, orgid }) {
+        try {
+            const res = await axios.delete(API_URL + `/part_of?userid=eq.${userid}&orgid=eq.${orgid}`, {
+                headers: authHeader()
+            })
+            if (res.status === 204 || res.status === 404) {
+                await dispatch('loadOrgUsers', { orgid })
+                await dispatch('loadAdminUserData', { userid })
+            }
+        } catch (err) {
+            if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
     async loadOrgUsers({ commit }, { orgid }) {
         try {
             const res = await axios.get(API_URL + `/admin_see_org_users?orgid=eq.${orgid}`)
@@ -247,6 +268,21 @@ export const actions = {
         } catch (err) {
             if (err.response.status === 404) {
                 await commit('orgUsers', [])
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
+    async loadCollNotes({ commit }, { collectionid }) {
+        try {
+            const res = await axios.get(API_URL +  `/admin_see_coll_notes?collectionid=eq.${collectionid}`)
+            if (res.status == 200) {
+                await commit('collNotes', res.data)
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('collNotes', [])
             } else if (err.response.status === 400) {
                 alert('Something went wrong, please refresh the page and try again.')
             }
@@ -364,7 +400,7 @@ export const actions = {
         }
     },
 
-    async saveNotes({ dispatch, commit }, { noteText, noteid }) {
+    async saveNotes({ commit }, { noteText, noteid }) {
         const response = await axios.patch(API_URL + '/note?noteid=eq.' + noteid, {
             typednotes: noteText
         },
@@ -686,7 +722,8 @@ export const actions = {
             headers: authHeader()
         })
         if (response.status === 204) {
-            dispatch('notes', { collectionid: collectionid })
+            if (collectionid === undefined) await dispatch('loadAdminData')
+            else await dispatch('notes', { collectionid: collectionid })
         }
     },
 

@@ -52,14 +52,14 @@
           <table v-else-if="tab === 1"> <!--orgs-->
               <tr>
                 <th style="width: 50%">Name</th>
-                <th>Members</th>
-                <th>Status</th>
+                <th v-if="$route.query.userid === undefined">Members</th>
+                <th>{{$route.query.userid === undefined ? 'Status' : 'Remove User'}}</th>
               </tr>
               <tr v-for="(o, i) in $route.query.userid === undefined ? adminOrgs : adminUserOrgs" :key="i">
                   <td>
                     {{o.orgname}}
                   </td>
-                  <td>
+                  <td v-if="$route.query.userid === undefined">
                     <v-btn
                       icon @click="loadOrgUsers(o)" 
                       :to="{ name: 'admin', query: { orgid: o.orgid }, params: { org: o }}"
@@ -68,8 +68,10 @@
                     </v-btn>
                   </td>
                   <td>
-                    <v-btn color="light red lighten-2" @click="deleteOrg(o)">
-                      Delete
+                    <v-btn color="light red lighten-2"
+                      @click="$route.query.userid === undefined ? deleteOrg(o) : removeUserFromOrg($route.params.user, o)"
+                    >
+                      {{$route.query.userid === undefined ? 'Delete' : 'Remove'}}
                     </v-btn>
                   </td>
               </tr>
@@ -77,11 +79,24 @@
 
           <table v-else-if="tab === 2"> <!--collections-->
               <tr>
-                <th>Name</th>
+                <th style="width: 33%">Name</th>
+                <th style="width: 30%">Organization</th>
+                <th v-if="$route.query.userid === undefined" style="width: 26%">User</th>
                 <th>Status</th>
               </tr>
               <tr v-for="(c, i) in $route.query.userid === undefined ? adminColls : adminUserColls" :key="i">
-                  <td>{{c.collectionname}}</td>
+                  <td>
+                    {{c.collectionname}}
+                    <v-btn icon @click="loadCollNotes(c)">
+                      ({{c.numnotes}})
+                    </v-btn>
+                  </td>
+                  <td>{{c.orgname}}</td>
+                  <td v-if="$route.query.userid === undefined" @click="loadAdminUserData(c)">
+                    <nuxt-link :to="{ name: 'admin', query: { userid: c.userid }, params: { user: c }}">
+                      {{c.firstname}} {{c.lastname}}
+                    </nuxt-link>
+                  </td>
                   <td>
                     <v-btn color="light red lighten-2" @click="deleteColl(c)">
                       Delete
@@ -92,11 +107,21 @@
 
           <table v-else-if="tab === 3"> <!--notes-->
               <tr>
-                <th>Name</th>
+                <th style="width: 31%">Name</th>
+                <th style="width: 15%">Date</th>
+                <th style="width: 22%">Collection</th>
+                <th v-if="$route.query.userid === undefined" style="width: 22%">User</th>
                 <th>Status</th>
               </tr>
               <tr v-for="(n, i) in $route.query.userid === undefined ? adminNotes : adminUserNotes" :key="i">
                   <td>{{n.notename}}</td>
+                  <td>{{parseDate(n.notedate)}}</td>
+                  <td>{{n.collectionname}}</td>
+                  <td v-if="$route.query.userid === undefined" @click="loadAdminUserData(n)">
+                    <nuxt-link :to="{ name: 'admin', query: { userid: n.userid }, params: { user: n }}">
+                      {{n.firstname}} {{n.lastname}}
+                    </nuxt-link>
+                  </td>
                   <td>
                     <v-btn color="light red lighten-2" @click="deleteNote(n)">
                       Delete
@@ -110,7 +135,7 @@
       <!-- List of org users -->
       <div class="modal-overlay" v-if="showOrgUsers" @click="showOrgUsers = false">
         <div class="modal" @click.stop>
-            <h6>Members of {{$route.params.org.orgname}}</h6>
+            <h6 v-if="$route.params.org !== undefined">Members of {{$route.params.org.orgname}}</h6>
             <v-divider />
             <div class="table-list">
               <table>
@@ -120,10 +145,14 @@
                   <th>Remove</th>
                 </tr>
                 <tr v-for="(m, i) in orgUsers" :key="i">
-                    <td>{{m.firstname}} {{m.lastname}}</td>
+                    <td @click="loadAdminUserData(m)">
+                      <nuxt-link :to="{ name: 'admin', query: { userid: m.userid }, params: { user: m }}">
+                        {{m.firstname}} {{m.lastname}}
+                      </nuxt-link>
+                    </td>
                     <td>{{m.email}}</td>
                     <td>
-                      <v-btn color="light red lighten-2" @click="removeUserFromOrg(m, $route.params.org.orgname)">
+                      <v-btn color="light red lighten-2" @click="removeUserFromOrg(m, $route.params.org)">
                         Remove
                       </v-btn>
                     </td>
@@ -132,6 +161,37 @@
             </div>
             <div class="modal-bottom-content">
                 <v-btn color="light red lighten-2" @click="showOrgUsers = false">
+                    Exit
+                </v-btn>
+            </div>
+        </div>
+      </div>
+
+      <!-- List of coll notes -->
+      <div class="modal-overlay" v-if="showCollNotes" @click="showCollNotes = false">
+        <div class="modal" @click.stop>
+            <h6 v-if="collOpened !== {}">Notes in {{collOpened.collectionname}}</h6>
+            <v-divider />
+            <div class="table-list">
+              <table>
+                <tr>
+                  <th style="width: 35%">Name</th>
+                  <th style="width: 45%">Date</th>
+                  <th>Delete</th>
+                </tr>
+                <tr v-for="(n, i) in collNotes" :key="i">
+                    <td>{{n.notename}}</td>
+                    <td>{{parseDate(n.notedate)}}</td>
+                    <td>
+                      <v-btn color="light red lighten-2" @click="deleteNote(n)">
+                        Delete
+                      </v-btn>
+                    </td>
+                </tr>
+              </table>
+            </div>
+            <div class="modal-bottom-content">
+                <v-btn color="light red lighten-2" @click="showCollNotes = false">
                     Exit
                 </v-btn>
             </div>
@@ -165,11 +225,14 @@ export default {
         { tab: 'notes' },
       ],
       showOrgUsers: false,
+      showCollNotes: false,
+      collOpened: {},
     }
   },
 
   methods: {
     loadAdminUserData (u) {
+      this.showOrgUsers = false
       this.$store.dispatch('users/loadAdminUserData', {
         userid: u.userid
       })
@@ -179,6 +242,14 @@ export default {
       this.showOrgUsers = true
       this.$store.dispatch('users/loadOrgUsers', {
         orgid: o.orgid
+      })
+    },
+
+    loadCollNotes(c) {
+      this.collOpened = c
+      this.showCollNotes = true
+      this.$store.dispatch('users/loadCollNotes', {
+        collectionid: c.collectionid
       })
     },
 
@@ -205,11 +276,30 @@ export default {
       }
     },
 
-    removeUserFromOrg(m, orgname) {
-      if (confirm(`Are you sure you want to remove ${m.firstname} from ${orgname}? They will lose access to all collections and notes they have in this organization.`)) {
-        // call remove from org
+    removeUserFromOrg(m, org) {
+      if (confirm(`Are you sure you want to remove ${m.firstname} from ${org.orgname}? They will lose access to all collections and notes they have in this organization.`)) {
+        this.$store.dispatch('users/removeFromOrg', {
+          userid: m.userid,
+          orgid: org.orgid
+        })
       }
     },
+
+    deleteNote(n) {
+      if (confirm(`Are you sure you want to delete ${n.notename}? All words, questions, links, and study plans will also be deleted.`)) {
+        this.$store.dispatch('users/deleteNote', {
+          noteid: n.noteid
+        })
+      }
+    },
+
+    parseDate(date) {
+      let prettyDate = ""
+      const yearMonth = date.split('-')
+      let day = yearMonth[2].split('T')
+      prettyDate += yearMonth[1] + " / " + day[0] + " / " + yearMonth[0]
+      return prettyDate
+    }
   },
 
   computed: {
@@ -252,6 +342,10 @@ export default {
     orgUsers () {
       return this.$store.state.users.orgUsers
     },
+
+    collNotes () {
+      return this.$store.state.users.collNotes
+    }
   }
 }
 </script>
@@ -260,7 +354,7 @@ export default {
 @import '~/assets/styles.css';
 
 .modal {
-  width: 600px;
+  width: 650px;
 }
 
 h6 {
