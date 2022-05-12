@@ -97,7 +97,8 @@ CREATE TABLE words
 create or replace view see_orgs as
   select o.orgname, u.email, o.orgid
   from organization o inner join part_of p on o.orgid = p.orgid 
-  inner join "user" u on p.userid = u.userid order by o.orgid;
+  inner join "user" u on p.userid = u.userid
+  order by o.orgid asc;
   --this will be filtered later
 
 create or replace view see_collections as
@@ -105,14 +106,14 @@ create or replace view see_collections as
   from collection c inner join organization o
   on c.orgid = o.orgid inner join "user" u
   on c.userid = u.userid
-  order by o.orgid;
+  order by c.collectionid asc;
   --this will be filtered later
 
 create or replace view see_notes as
 	select n.noteid, n.notename, c.collectionid, u.email
 	from note n inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on c.userid = u.userid
-	order by n.collectionid;
+	order by n.noteid asc;
 	--this will be filtered later
   
 create or replace view see_note_with_data as

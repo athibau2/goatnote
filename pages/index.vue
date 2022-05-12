@@ -9,6 +9,7 @@
     
     <v-container>
 
+      <!-- Creating a new org -->
       <v-col v-if="makingNewOrg">
         <v-row justify="center" align="center">
           <v-card elevation="5" width="400">
@@ -41,6 +42,7 @@
         </v-row>
       </v-col>
 
+      <!-- Creating a new collection -->
       <v-col v-if="makingNewCollection">
         <v-row justify="center" align="center">
           <v-card elevation="5" width="400">
@@ -87,7 +89,6 @@
                 </v-list>
               </v-menu>
           </v-card-text>
-          
           <v-card-actions>
               <v-spacer />
               <v-btn color="light red lighten-2" nuxt @click="newCollection()">
@@ -101,6 +102,7 @@
         </v-row>
       </v-col>
 
+      <!-- Creating a new note -->
       <v-col v-if="makingNewNote">
         <v-row justify="center" align="center">
           <v-card elevation="5" width="400">
@@ -166,6 +168,7 @@
         You are currently not part of any organizations and have no collections or notes. Create one above!
       </h2>
 
+      <!-- List of orgs -->
       <v-col>
         <v-row>
           <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
@@ -183,11 +186,29 @@
 
       <br>
 
+      <!-- List of collections -->
       <v-col>
         <v-row>
           <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
-            <v-card-title >
+            <v-card-title v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)">
                 {{coll.collectionname}}
+                <v-spacer />
+                <v-btn 
+                  :disabled="(editingColl && coll.collectionid !== collBeingEdited) ? true : false" 
+                  icon @click="setEditColl(coll)"
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+            </v-card-title>
+            <v-card-title v-else>
+              <v-text-field
+                :value="coll.collectionname"
+                append-icon="mdi-pencil"
+                @click:append="editingColl = !editingColl"
+                @input="textChanged($event)"
+                @keyup.enter="updateColl(coll)"
+              >
+              </v-text-field>
             </v-card-title>
             <v-card-actions>
               <v-spacer />
@@ -200,6 +221,7 @@
 
       <br>
 
+      <!-- List of notes -->
       <v-col>
         <v-row>
           <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
@@ -241,11 +263,33 @@ export default {
       orgIdToAddTo: null,
       collToAddTo: "",
       collIdToAddTo: null,
-      orgOfCollBeingAddedTo: null
+      orgOfCollBeingAddedTo: null,
+      collBeingEdited: null,
+      editingColl: false,
+      newName: "",
     }
   },
 
   methods: {
+    textChanged (event) {
+      this.newName = event
+    },
+
+    setEditColl (coll) {
+      this.editingColl = !this.editingColl
+      if (this.editingColl) this.collBeingEdited = coll.collectionid
+      else this.collBeingEdited = null
+    },
+
+    async updateColl (coll) {
+      await this.$store.dispatch('users/updateCollName', {
+        collectionid: coll.collectionid,
+        newName: this.newName,
+        orgid: coll.orgid
+      })
+      this.setEditColl()
+    },
+
     loadCollections (orgid) {
       this.$store.dispatch('users/collections', {
         orgid

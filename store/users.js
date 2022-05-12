@@ -13,9 +13,9 @@ export const state = () => ({
     collections: [],
     notes: [],
     currentNote: {},
-    words: {},
-    questions: {},
-    links: {},
+    words: [],
+    questions: [],
+    links: [],
     studyPlans: [],
     allPlans: [],
     makingNewOrg: false,
@@ -321,6 +321,23 @@ export const actions = {
         }
     },
 
+    async updateCollName({ dispatch }, { collectionid, newName, orgid }) {
+        try {
+            const res = await axios.patch(API_URL + `/collection?collectionid=eq.${collectionid}`, {
+                collectionname: newName
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                dispatch('collections', { orgid })
+            }
+        } catch (err) {
+            if (err.response.status === 404) alert('Collection not found')
+            else if (err.response.status === 400) alert('Something went wrong, please refresh the page and try again.')
+        }
+    },
+
     async createCollection({ dispatch, state }, { collectionname, orgid }) {
         const response = await axios.post(API_URL + '/collection', {
             collectionname: collectionname,
@@ -334,7 +351,7 @@ export const actions = {
         dispatch('allColls')
     },
 
-    async createNote({ commit, dispatch }, { notename, collectionid, orgid }) {
+    async createNote({ dispatch }, { notename, collectionid, orgid }) {
         const response = await axios.post(API_URL + '/note', {
             notename: notename,
             collectionid: collectionid,
@@ -430,11 +447,16 @@ export const actions = {
     },
 
     async getLinks({ commit, state }, { noteid }) {
-        await commit('links', [])
-        const links = await axios.get(API_URL + '/see_links?noteid=eq.' + noteid)
-        if (links.status === 200) {
-            await commit('links', links.data)
-            localStorage.setItem('links', JSON.stringify(state.links))
+        try {
+            const links = await axios.get(API_URL + '/see_links?noteid=eq.' + noteid)
+            if (links.status === 200) {
+                await commit('links', links.data)
+                localStorage.setItem('links', JSON.stringify(state.links))
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('links', [])
+            }
         }
     },
 
@@ -461,11 +483,16 @@ export const actions = {
     },
 
     async getQuestions({ commit, state }, { noteid }) {
-        await commit('questions', [])
-        const questions = await axios.get(API_URL + '/see_questions?noteid=eq.' + noteid)
-        if (questions.status === 200) {
-            await commit('questions', questions.data)
-            localStorage.setItem('questions', JSON.stringify(state.questions))
+        try {
+            const questions = await axios.get(API_URL + '/see_questions?noteid=eq.' + noteid)
+            if (questions.status === 200) {
+                await commit('questions', questions.data)
+                localStorage.setItem('questions', JSON.stringify(state.questions))
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('questions', [])
+            }
         }
     },
 
@@ -493,11 +520,16 @@ export const actions = {
     },
 
     async getWords({ commit, state }, { noteid }) {
-        await commit('words', [])
-        const words = await axios.get(API_URL + '/see_words?noteid=eq.' + noteid)
-        if (words.status === 200) {
-            await commit('words', words.data)
-            localStorage.setItem('words', JSON.stringify(state.words))
+        try {
+            const words = await axios.get(API_URL + '/see_words?noteid=eq.' + noteid)
+            if (words.status === 200) {
+                await commit('words', words.data)
+                localStorage.setItem('words', JSON.stringify(state.words))
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('words', [])
+            }
         }
     },
 
