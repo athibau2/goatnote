@@ -122,15 +122,18 @@ create or replace view see_note_with_data as
   --this will be filtered later
 
 create or replace view see_words as
- 	select * from words;
+ 	select * from words
+	order by wordid asc;
 	--this will be filtered later
 
 create or replace view see_questions as
- 	select * from questions;
+ 	select * from questions
+	order by questionid asc;
 	--this will be filtered later
 
 create or replace view see_links as
- 	select * from links;
+ 	select * from links
+	order by linkid asc;
 	--this will be filtered later
   
 create or replace view see_study_plans as

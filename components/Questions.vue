@@ -6,12 +6,39 @@
             <div v-if="questions.length !== 0">
               <v-list class="modal-list">
                 <v-list-item v-for="(q, i) in questions" :key="i">
-                  <span class="modal-list-item">
+                  <span class="modal-list-item" v-if="!editingQuestion || (editingQuestion && q.questionid !== questionBeingEdited)">
                       <strong>{{q.questiontext}}</strong>
                       &nbsp;{{q.answer}}&nbsp;
+                      <v-btn 
+                        :disabled="(editingQuestion && q.questionid !== questionBeingEdited) ? true : false" 
+                        icon @click="setEditQuestion(q)"
+                      >
+                        <v-icon>mdi-pencil</v-icon>
+                      </v-btn>
                       <v-icon @click="deleteQuestion(q.questionid)">mdi-delete</v-icon>
                       <v-divider />
                   </span>
+                  <v-row align="center" justify="center" v-else>
+                    <v-text-field
+                      :value="q.questiontext"
+                      counter
+                      maxlength="350"
+                      @input="questionChanged($event)"
+                      @keyup.enter="updateQuestion(q)"
+                    >
+                    </v-text-field>
+                    &nbsp;&nbsp;
+                    <v-text-field
+                      :value="q.answer"
+                      counter
+                      maxlength="350"
+                      append-icon="mdi-pencil"
+                      @click:append="editingQuestion = !editingQuestion"
+                      @input="answerChanged($event)"
+                      @keyup.enter="updateQuestion(q)"
+                    >
+                    </v-text-field>
+                  </v-row>
                 </v-list-item>
               </v-list>
             </div>
@@ -104,10 +131,42 @@
           newAnswer: "",
           onQuestion: true,
           index: 0,
+          editingQuestion: false,
+          questionBeingEdited: null,
+          editQuestion: "",
+          editAnswer: "",
         }
       },
 
       methods: {
+        questionChanged (event) {
+          this.editQuestion = event
+        },
+
+        answerChanged (event) {
+          this.editAnswer = event
+        },
+
+        setEditQuestion (question) {
+          this.editingQuestion = !this.editingQuestion
+          if (this.editingQuestion) {
+            this.questionBeingEdited = question.questionid
+            this.questionChanged(question.questiontext)
+            this.answerChanged(question.answer)
+          }
+          else this.questionBeingEdited = null
+        },
+
+        async updateQuestion (q) {
+          await this.$store.dispatch('users/updateQuestion', {
+            questionid: q.questionid,
+            editQuestion: this.editQuestion,
+            editAnswer: this.editAnswer,
+            noteid: q.noteid
+          })
+          this.setEditQuestion()
+        },
+
         deleteQuestion (questionid) {
           this.$store.dispatch('users/deleteQuestion', {
             questionid: questionid,

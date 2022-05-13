@@ -29,7 +29,7 @@
                         <v-switch
                             :label="p.studycompleted ? 'Completed' : 'Not Completed'"
                             inset
-                            v-model="plans[i].studycompleted"
+                            :value="p.studycompleted"
                             @click="updatePlan(p)"
                         >
                         </v-switch>

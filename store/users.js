@@ -473,6 +473,26 @@ export const actions = {
         }
     },
 
+    async updateLink({ dispatch }, { linkid, editLink, noteid }) {
+        try {
+            const res = await axios.patch(API_URL + `/links?linkid=eq.${linkid}`, {
+                url: editLink
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                dispatch('getLinks', { noteid: noteid })
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                alert('Link not found')
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
     async deleteLink({ dispatch }, { linkid, noteid }) {
         const res = await axios.delete(API_URL + '/links?linkid=eq.' + linkid, {
             headers: authHeader()
@@ -510,6 +530,27 @@ export const actions = {
         }
     },
 
+    async updateQuestion({ dispatch }, { questionid, editQuestion, editAnswer, noteid }) {
+        try {
+            const res = await axios.patch(API_URL + `/questions?questionid=eq.${questionid}`, {
+                questiontext: editQuestion,
+                answer: editAnswer
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                dispatch('getQuestions', { noteid: noteid })
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                alert('Question not found')
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
     async deleteQuestion({ dispatch }, { questionid, noteid }) {
         const res = await axios.delete(API_URL + '/questions?questionid=eq.' + questionid, {
             headers: authHeader()
@@ -544,6 +585,27 @@ export const actions = {
         })
         if (response.status === 201) {
             dispatch('getWords', { noteid: noteid })
+        }
+    },
+
+    async updateWord({ dispatch }, { wordid, editWord, editDef, noteid }) {
+        try {
+            const res = await axios.patch(API_URL + `/words?wordid=eq.${wordid}`, {
+                vocabword: editWord,
+                definition: editDef
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                dispatch('getWords', { noteid: noteid })
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                alert('Word not found')
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
         }
     },
 

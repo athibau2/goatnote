@@ -6,12 +6,39 @@
             <div v-if="words.length !== 0">
               <v-list class="modal-list">
                 <v-list-item v-for="(word, i) in words" :key="i">
-                  <span class="modal-list-item">
+                  <span class="modal-list-item" v-if="!editingWord || (editingWord && word.wordid !== wordBeingEdited)">
                       <strong>{{word.vocabword}}:</strong>
                       &nbsp;{{word.definition}}&nbsp;
+                      <v-btn 
+                        :disabled="(editingWord && word.wordid !== wordBeingEdited) ? true : false" 
+                        icon @click="setEditWord(word)"
+                      >
+                        <v-icon>mdi-pencil</v-icon>
+                      </v-btn>
                       <v-icon @click="deleteWord(word.wordid)">mdi-delete</v-icon>
                       <v-divider />
                   </span>
+                  <v-row align="center" justify="center" v-else>
+                    <v-text-field
+                      :value="word.vocabword"
+                      counter
+                      maxlength="50"
+                      @input="wordChanged($event)"
+                      @keyup.enter="updateWord(word)"
+                    >
+                    </v-text-field>
+                    &nbsp;&nbsp;
+                    <v-text-field
+                      :value="word.definition"
+                      counter
+                      maxlength="200"
+                      append-icon="mdi-pencil"
+                      @click:append="editingWord = !editingWord"
+                      @input="defChanged($event)"
+                      @keyup.enter="updateWord(word)"
+                    >
+                    </v-text-field>
+                  </v-row>
                 </v-list-item>
               </v-list>
             </div>
@@ -99,10 +126,42 @@
           newDef: "",
           onWord: true,
           index: 0,
+          editingWord: false,
+          wordBeingEdited: null,
+          editWord: "",
+          editDef: "",
         }
       },
 
       methods: {
+        wordChanged (event) {
+          this.editWord = event
+        },
+
+        defChanged (event) {
+          this.editDef = event
+        },
+
+        setEditWord (word) {
+          this.editingWord = !this.editingWord
+          if (this.editingWord) {
+            this.wordBeingEdited = word.wordid
+            this.wordChanged(word.vocabword)
+            this.defChanged(word.definiton)
+          }
+          else this.wordBeingEdited = null
+        },
+
+        async updateWord (word) {
+          await this.$store.dispatch('users/updateWord', {
+            wordid: word.wordid,
+            editWord: this.editWord,
+            editDef: this.editDef,
+            noteid: word.noteid
+          })
+          this.setEditWord()
+        },
+
         deleteWord (wordid) {
           this.$store.dispatch('users/deleteWord', {
             wordid: wordid,

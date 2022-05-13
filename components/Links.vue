@@ -6,11 +6,27 @@
             <div v-if="links.length !== 0">
               <v-list class="modal-list">
                 <v-list-item v-for="(link, i) in links" :key="i">
-                  <span class="modal-list-item">
+                  <span class="modal-list-item" v-if="!editingLink || (editingLink && link.linkid !== linkBeingEdited)">
                       {{link.url}}&nbsp;
+                      <v-btn 
+                        :disabled="(editingLink && link.linkid !== linkBeingEdited) ? true : false" 
+                        icon @click="setEditLink(link)"
+                      >
+                        <v-icon>mdi-pencil</v-icon>
+                      </v-btn>
                       <v-icon @click="deleteLink(link.linkid)">mdi-delete</v-icon>
                       <v-divider />
                   </span>
+                  <v-row align="center" justify="center" v-else>
+                    <v-text-field
+                      :value="link.url"
+                      append-icon="mdi-pencil"
+                      @click:append="editingLink = !editingLink"
+                      @input="linkChanged($event)"
+                      @keyup.enter="updateLink(link)"
+                    >
+                    </v-text-field>
+                  </v-row>
                 </v-list-item>
               </v-list>
             </div>
@@ -64,11 +80,36 @@
 
       data () {
         return {
-          newLink: ""
+          newLink: "",
+          editingLink: false,
+          linkBeingEdited: null,
+          editLink: ""
         }
       },
 
       methods: {
+        linkChanged (event) {
+          this.editLink = event
+        },
+
+        setEditLink (link) {
+          this.editingLink = !this.editingLink
+          if (this.editingLink) {
+            this.linkBeingEdited = link.linkid
+            this.linkChanged(link.url)
+          }
+          else this.linkBeingEdited = null
+        },
+
+        async updateLink (link) {
+          await this.$store.dispatch('users/updateLink', {
+            linkid: link.linkid,
+            editLink: this.editLink,
+            noteid: link.noteid
+          })
+          this.setEditLink()
+        },
+
         deleteLink (linkid) {
           this.$store.dispatch('users/deleteLink', {
             linkid: linkid,
