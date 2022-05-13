@@ -53,7 +53,7 @@
       <div class="topButton">
       <v-btn color="light purple lighten-3" @click="newNote()" to="/">Add Note </v-btn>
       </div>
-      <v-toolbar-title v-if="user !== null && user !== undefined">
+      <v-toolbar-title class="name-display" v-if="user !== null && user !== undefined">
         &nbsp;{{userData.firstname}} {{userData.lastname}}
       </v-toolbar-title>
     </v-app-bar>
@@ -206,4 +206,9 @@ export default {
 .main{
   background-color: #DAECDA;
 }
+
+.name-display {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
 </style>

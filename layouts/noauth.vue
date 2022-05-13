@@ -4,7 +4,7 @@
       :clipped-left="clipped"
       fixed
       app
-      color="light grey lighten-1"
+      color="#DAECDA"
     >
     <v-spacer />   
 
@@ -35,6 +35,6 @@ export default {
 <style scoped>
 
 .main{
-  background-color: #DAECDA;
+  background-color: #fdfdfd;
 }
 </style>

@@ -409,10 +409,10 @@ export const actions = {
             localStorage.setItem('prettyDate', prettyDate)
             await commit('currentNote', response.data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
-            dispatch('getWords', { noteid })
-            dispatch('getQuestions', { noteid })
-            dispatch('getLinks', { noteid })
-            dispatch('getStudyPlans', { noteid })
+            await dispatch('getWords', { noteid })
+            await dispatch('getQuestions', { noteid })
+            await dispatch('getLinks', { noteid })
+            await dispatch('getStudyPlans', { noteid })
             this.$router.push('/note')
         }
     },

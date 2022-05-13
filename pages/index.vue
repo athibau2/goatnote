@@ -12,32 +12,32 @@
       <!-- Creating a new org -->
       <v-col v-if="makingNewOrg">
         <v-row justify="center" align="center">
-          <v-card elevation="5" width="400">
-          <v-card-title class="headline">
-              Create a New Organization
-          </v-card-title>
-          <v-card-text>
-              <v-text-field
-                class="selector"
-                dense
-                solo
-                rounded
-                background-color="light blue lighten-4"
-                v-model="newOrgName" 
-                placeholder="New Organization Name"
-              >
-              </v-text-field>
-          </v-card-text>
-          <v-card-actions>
-              <v-spacer />
-              <v-btn color="light red lighten-2" nuxt @click="newOrg()">
-                  Cancel
-              </v-btn>
-              <span>&nbsp;</span>
-              <v-btn color="primary" nuxt @click="createOrg()">
-                  Submit
-              </v-btn>
-          </v-card-actions>
+          <v-card color="#faf9e2" elevation="5" width="400">
+            <v-card-title class="headline">
+                Create a New Organization
+            </v-card-title>
+            <v-card-text>
+                <v-text-field
+                  class="selector"
+                  dense
+                  solo
+                  rounded
+                  background-color="light blue lighten-4"
+                  v-model="newOrgName" 
+                  placeholder="New Organization Name"
+                >
+                </v-text-field>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn color="light red lighten-2" nuxt @click="newOrg()">
+                    Cancel
+                </v-btn>
+                <span>&nbsp;</span>
+                <v-btn color="primary" nuxt @click="createOrg()">
+                    Submit
+                </v-btn>
+            </v-card-actions>
           </v-card>
         </v-row>
       </v-col>
@@ -45,59 +45,59 @@
       <!-- Creating a new collection -->
       <v-col v-if="makingNewCollection">
         <v-row justify="center" align="center">
-          <v-card elevation="5" width="400">
-          <v-card-title class="headline">
-              Create a New Collection
-          </v-card-title>
-          <v-card-text>
-              <v-text-field
-                class="selector"
-                dense
-                solo
-                rounded
-                background-color="light green lighten-3"
-                v-model="newCollName" 
-                placeholder="New Collection Name"
-              >
-              </v-text-field>
-              <v-menu
-                bottom
-                :close-on-content-click="true"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    class="selector"
-                    dense
-                    solo
-                    rounded
-                    readonly
-                    background-color="light blue lighten-4"
-                    append-icon="mdi-chevron-down"
-                    v-bind="attrs" 
-                    v-on="on" 
-                    v-model="orgToAddTo" 
-                    placeholder="Add to Organization"
-                  >
-                  </v-text-field>
-                </template>
-                <v-list>
-                  <v-list-item v-for="(org, i) in orgs" :key="i">
-                    <v-btn color="light blue lighten-4" @click="setOrgToAddTo(org)">
-                      {{org.orgname}}
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-          </v-card-text>
-          <v-card-actions>
-              <v-spacer />
-              <v-btn color="light red lighten-2" nuxt @click="newCollection()">
-                  Cancel
-              </v-btn>
-              <v-btn color="primary" @click="createCollection()">
-                  Add
-              </v-btn>
-          </v-card-actions>
+          <v-card color="#faf9e2" elevation="5" width="400">
+            <v-card-title class="headline">
+                Create a New Collection
+            </v-card-title>
+            <v-card-text>
+                <v-text-field
+                  class="selector"
+                  dense
+                  solo
+                  rounded
+                  background-color="light green lighten-3"
+                  v-model="newCollName" 
+                  placeholder="New Collection Name"
+                >
+                </v-text-field>
+                <v-menu
+                  bottom
+                  :close-on-content-click="true"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      class="selector"
+                      dense
+                      solo
+                      rounded
+                      readonly
+                      background-color="light blue lighten-4"
+                      append-icon="mdi-chevron-down"
+                      v-bind="attrs" 
+                      v-on="on" 
+                      v-model="orgToAddTo" 
+                      placeholder="Add to Organization"
+                    >
+                    </v-text-field>
+                  </template>
+                  <v-list>
+                    <v-list-item v-for="(org, i) in orgs" :key="i">
+                      <v-btn color="light blue lighten-4" @click="setOrgToAddTo(org)">
+                        {{org.orgname}}
+                      </v-btn>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn color="light red lighten-2" nuxt @click="newCollection()">
+                    Cancel
+                </v-btn>
+                <v-btn color="primary" @click="createCollection()">
+                    Add
+                </v-btn>
+            </v-card-actions>
           </v-card>
         </v-row>
       </v-col>
@@ -105,59 +105,59 @@
       <!-- Creating a new note -->
       <v-col v-if="makingNewNote">
         <v-row justify="center" align="center">
-          <v-card elevation="5" width="400">
-          <v-card-title class="headline">
-              Create a New Note
-          </v-card-title>
-          <v-card-text>
-              <v-text-field
-                class="selector"
-                dense
-                solo
-                rounded
-                background-color="light purple lighten-3"
-                v-model="newNoteName" 
-                placeholder="New Note Name"
-              >
-              </v-text-field>
-              <v-menu
-                bottom
-                :close-on-content-click="true"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    class="selector"
-                    dense
-                    solo
-                    rounded
-                    readonly
-                    background-color="light green lighten-3"
-                    append-icon="mdi-chevron-down"
-                    v-bind="attrs" 
-                    v-on="on" 
-                    v-model="collToAddTo" 
-                    placeholder="Add to Collection"
-                  >
-                  </v-text-field>
-                </template>
-                <v-list>
-                  <v-list-item v-for="(coll, i) in allColls" :key="i">
-                    <v-btn color="light green lighten-3" @click="setCollToAddTo(coll)">
-                      {{coll.collectionname}}
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-          </v-card-text>
-          <v-card-actions>
-              <v-spacer />
-              <v-btn color="light red lighten-2" nuxt @click="newNote()">
-                  Cancel
-              </v-btn>
-              <v-btn color="primary" @click="createNote()">
-                  Add
-              </v-btn>
-          </v-card-actions>
+          <v-card color="#faf9e2" elevation="5" width="400">
+            <v-card-title class="headline">
+                Create a New Note
+            </v-card-title>
+            <v-card-text>
+                <v-text-field
+                  class="selector"
+                  dense
+                  solo
+                  rounded
+                  background-color="light purple lighten-3"
+                  v-model="newNoteName" 
+                  placeholder="New Note Name"
+                >
+                </v-text-field>
+                <v-menu
+                  bottom
+                  :close-on-content-click="true"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      class="selector"
+                      dense
+                      solo
+                      rounded
+                      readonly
+                      background-color="light green lighten-3"
+                      append-icon="mdi-chevron-down"
+                      v-bind="attrs" 
+                      v-on="on" 
+                      v-model="collToAddTo" 
+                      placeholder="Add to Collection"
+                    >
+                    </v-text-field>
+                  </template>
+                  <v-list>
+                    <v-list-item v-for="(coll, i) in allColls" :key="i">
+                      <v-btn color="light green lighten-3" @click="setCollToAddTo(coll)">
+                        {{coll.collectionname}}
+                      </v-btn>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn color="light red lighten-2" nuxt @click="newNote()">
+                    Cancel
+                </v-btn>
+                <v-btn color="primary" @click="createNote()">
+                    Add
+                </v-btn>
+            </v-card-actions>
           </v-card>
         </v-row>
       </v-col>

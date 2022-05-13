@@ -3,15 +3,13 @@
         <v-row>
             <v-col class="intro-page" cols="8">
                 <div class="full-intro">
-                    <h3 class="text-center">Write on, Write now: the new way to journal!</h3>
+                    <h3 class="text-center">GOAT Notes is your one stop for academic success!</h3>
                     <div class="intro text-center">
-                    Don't know what to write? <em>We'll tell you.</em>
-                    </div>
-                    <div class="intro text-center">
-                    Can't remember to write? <em>We'll remind you.</em>
-                    </div>
-                    <div class="intro text-center">
-                    Don't have a lot to say? <em>That's just fine.</em>
+                         No more wasted time in 
+                            <div class="slidingVertical">
+                                <span><b>note-taking.</b></span>
+                                <span><b>studying.</b></span>
+                            </div>
                     </div>
                 </div>
                 <v-divider class="intro-divider" />
@@ -19,12 +17,12 @@
                 <!-- Row 1 -->
                 <v-row class="intro-rows" align="center">
                     <v-col cols="4">
-                    <span class="intro">
-                        This no-excuses app prompts you to keep track of your feelings, hopes, and dreams. Don't like the prompt? <em>Generate a new one!</em>
-                    </span>
+                        <span class="intro">
+                            Join or create organizations to connect and share notes with friends and peers!
+                        </span>
                     </v-col>
                     <v-col cols="8">
-                        <!-- <img class="intro-img" src="~/assets/images/home-screen.png" height="250px"> -->
+                        <img class="intro-img" src="~/assets/home.png" height="250px" width="500px">
                     </v-col>
                 </v-row>
 
@@ -33,12 +31,12 @@
                 <!-- Row 2 -->
                 <v-row class="intro-rows" align="center">
                     <v-col cols="8">
-                        <!-- <img class="intro-img" src="~/assets/images/my-entries.png" height="250px"> -->
+                        <img class="intro-img" src="~/assets/note.png" height="250px" width="500px">
                     </v-col>
                     <v-col cols="4">
-                    <span class="intro">
-                        Head to the "My Entries" page to see all of your journal submissions. Filter them by date or topic!
-                    </span>
+                        <span class="intro">
+                            Create collections to organize your notes. In your notes, you have a dedicated space for vocab words, study questions, links to helpful content, and study plans!
+                        </span>
                     </v-col>
                 </v-row>
 
@@ -47,12 +45,12 @@
                 <!-- Row 3 -->
                 <v-row class="intro-rows" align="center">
                     <v-col cols="4">
-                    <span class="intro">
-                        Stay connected with those you love by sharing your entry submissions with them. Or, share the prompt itself to see how they respond!
-                    </span>
+                        <span class="intro">
+                            When it's time to study, the study mode button changes the layout of your notes page and lets you review your vocab words and study questions as flashcards!
+                        </span>
                     </v-col>
                     <v-col cols="8">
-                        <!-- <img class="intro-img" src="~/assets/images/share.png" height="250px"> -->
+                        <img class="intro-img" src="~/assets/goatnotes-study.gif" height="250px" width="500px">
                     </v-col>
                 </v-row>
 
@@ -61,12 +59,12 @@
                 <!-- Row 4 -->
                 <v-row class="intro-rows" align="center">
                     <v-col cols="8">
-                        <!-- <img class="intro-img" src="~/assets/images/shared-with-me.png" height="250px"> -->
+                        <img class="intro-img" src="~/assets/plans.png" height="250px" width="500px">
                     </v-col>
                     <v-col cols="4">
-                    <span class="intro">
-                        Check out the "Shared With Me" page to see what your loved ones have sent you! Respond to shared prompts and they will immediately see your response!
-                    </span>
+                        <span class="intro">
+                            Keep track of which notes you haven't studied yet on the My Study Plans page!
+                        </span>
                     </v-col>
                 </v-row>
             </v-col>
@@ -197,6 +195,44 @@ export default {
     100% {
         opacity: 1;
     }
+}
+
+/*Vertical Sliding*/
+.slidingVertical{
+	display: inline;
+	text-indent: 8px;
+}
+.slidingVertical span{
+	animation: topToBottom 12.5s linear infinite 0s;
+	-webkit-animation: topToBottom 12.5s linear infinite 0s;
+	color: #385b69;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+}
+.slidingVertical span:nth-child(2){
+	animation-delay: 2.5s;
+	-webkit-animation-delay: 2.5s;
+}
+
+/*topToBottom Animation*/
+@-moz-keyframes topToBottom{
+	0% { opacity: 0; }
+	5% { opacity: 0; -moz-transform: translateY(-50px); }
+	10% { opacity: 1; -moz-transform: translateY(0px); }
+	25% { opacity: 1; -moz-transform: translateY(0px); }
+	30% { opacity: 0; -moz-transform: translateY(50px); }
+	80% { opacity: 0; }
+	100% { opacity: 0; }
+}
+@-webkit-keyframes topToBottom{
+	0% { opacity: 0; }
+	5% { opacity: 0; -webkit-transform: translateY(-50px); }
+	10% { opacity: 1; -webkit-transform: translateY(0px); }
+	25% { opacity: 1; -webkit-transform: translateY(0px); }
+	30% { opacity: 0; -webkit-transform: translateY(50px); }
+	80% { opacity: 0; }
+	100% { opacity: 0; }
 }
 
 .card {
