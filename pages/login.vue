@@ -244,11 +244,11 @@ h3 {
 }
 
 .intro-rows {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .intro-divider {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .intro-img {

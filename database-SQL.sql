@@ -93,6 +93,28 @@ CREATE TABLE words
   UNIQUE (vocabword)
 );
 
+CREATE TABLE shared_collection
+(
+	collectionid SERIAL NOT NULL,
+	userid SERIAL NOT NULL,
+	ownerid SERIAL NOT NULL,
+	PRIMARY KEY (collectionid, userid, ownerid),
+	FOREIGN KEY (collectionid) REFERENCES collection (collectionid) ON DELETE CASCADE,
+	FOREIGN KEY (userid) REFERENCES "user" (userid) ON DELETE CASCADE,
+	FOREIGN KEY (ownerid) REFERENCES "user" (userid) ON DELETE CASCADE
+);
+
+CREATE TABLE shared_note
+(
+	noteid SERIAL NOT NULL,
+	userid SERIAL NOT NULL,
+	ownerid SERIAL NOT NULL,
+	PRIMARY KEY (noteid, userid, ownerid),
+	FOREIGN KEY (noteid) REFERENCES note (noteid) ON DELETE CASCADE,
+	FOREIGN KEY (userid) REFERENCES "user" (userid) ON DELETE CASCADE,
+	FOREIGN KEY (ownerid) REFERENCES "user" (userid) ON DELETE CASCADE
+);
+
 
 create or replace view see_orgs as
   select o.orgname, u.email, o.orgid
