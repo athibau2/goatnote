@@ -239,6 +239,19 @@ create or replace view admin_see_coll_notes as
   order by n.notename asc;
   --this will be filtered later
 
+create or replace view search_users as
+	select u.firstname, u.lastname, u.userid, u.email, p.orgid
+	from "user" u inner join part_of p
+	on u.userid = p.userid
+	order by u.firstname asc, u.lastname asc;
+	--this will be filtered later
+
+create or replace view see_shared_colls as
+	select s.collectionid, s.userid, s.ownerid, u.email
+	from shared_collection s inner join "user" u
+	on s.userid = u.userid;
+	--this will be filtered later
+
 
 
 CREATE OR REPLACE FUNCTION trigger_set_last_modified_timestamp()

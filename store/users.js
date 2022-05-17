@@ -33,6 +33,11 @@ export const state = () => ({
     adminUserNotes: [],
     orgUsers: [],
     collNotes: [],
+    collBeingShared: null,
+    noteBeingShared: null,
+    results: [],
+    sharedCollList: [],
+    sharedNoteList: [],
   })
   
 // mutations should update state
@@ -142,7 +147,27 @@ export const mutations = {
 
     collNotes(state, data) {
         state.collNotes = data
-    }
+    },
+
+    collBeingShared(state, data) {
+        state.collBeingShared = data
+    },
+
+    noteBeingShared(state, data) {
+        state.noteBeingShared = data
+    },
+
+    results(state, data) {
+        state.results = data
+    },
+
+    sharedCollList(state, data) {
+        state.sharedCollList = data
+    },
+
+    sharedNoteList(state, data) {
+        state.sharedNoteList = data
+    },
 }
 
 // actions should call mutations
@@ -335,6 +360,69 @@ export const actions = {
         } catch (err) {
             if (err.response.status === 404) alert('Collection not found')
             else if (err.response.status === 400) alert('Something went wrong, please refresh the page and try again.')
+        }
+    },
+
+    async search({ commit }, { searchText, orgid }) {
+        try {
+            const res = await axios.get(API_URL + `/search_users?orgid=eq.${orgid}&email=like.${searchText}%`)
+            if (res.status === 200) {
+                await commit('results', res.data)
+            }
+        } catch(err) {
+            if (err.response.status === 404 || err.response.status === 400) {
+                await commit('results', [])
+            }
+        }
+    },
+
+    async getSharedCollList({ commit }, { collection }) {
+        await commit('collBeingShared', collection)
+        try {
+            const res = await axios.get(API_URL + `/see_shared_colls?collectionid=eq.${collection.collectionid}`)
+            if (res.status === 200) {
+                await commit('sharedCollList', res.data)
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('sharedCollList', [])
+            }
+        }
+    },
+
+    async shareColl({ dispatch, state }, { collection, users }) {
+        try {
+            for (let i = 0; i < users.length; ++i) {
+                const res = await axios.post(API_URL + '/shared_collection', {
+                    collectionid: collection.collectionid,
+                    ownerid: state.user.user_id,
+                    userid: users[i]
+                })
+                if (res.status === 201) continue
+            }
+            await dispatch('getSharedCollList', { collection })
+            alert('Your collection has successfully been shared')
+        } catch (err) {
+            if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again')
+            }
+        }
+    },
+
+    async unshareColl({ dispatch }, { collection, userid, type }) {
+        try {
+            const res = await axios.delete(API_URL + `/shared_collection?collectionid=eq.${collection.collectionid}&userid=eq.${userid}`, {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                (type === "owner")
+                    ? await dispatch('getSharedCollList', { collection })
+                    : await dispatch('getSharedWithMe', { userid })
+            }
+        } catch (err) {
+            if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again')
+            }
         }
     },
 

@@ -212,6 +212,19 @@
             </v-card-title>
             <v-card-actions>
               <v-spacer />
+              <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      color="#cccccc"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="getSharedList(coll)"
+                    >
+                      <v-icon>mdi-share-variant</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Share</span>
+                </v-tooltip>
               <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
               <v-btn color="primary" @click="loadNotes(coll.collectionid)">Go</v-btn>
             </v-card-actions>
@@ -236,13 +249,14 @@
           </v-card>
         </v-row>
       </v-col>
-
+      <ShareColl v-show="showShareColl" @close-modal="showShareColl = false" />
     </v-container>
   </v-app>
 </template>
 
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
+import ShareColl from "~/components/ShareColl.vue"
 
 export default {
   name: 'IndexPage',
@@ -252,6 +266,10 @@ export default {
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     this.$store.dispatch('users/orgs')
     this.$store.dispatch('users/allColls')
+  },
+
+  components: {
+    ShareColl
   },
 
   data () {
@@ -267,10 +285,18 @@ export default {
       collBeingEdited: null,
       editingColl: false,
       newName: "",
+      showShareColl: false
     }
   },
 
   methods: {
+    getSharedList (coll) {
+      this.showShareColl = true
+      this.$store.dispatch('users/getSharedCollList', {
+        collection: coll
+      })
+    },
+
     textChanged (event) {
       this.newName = event
     },
