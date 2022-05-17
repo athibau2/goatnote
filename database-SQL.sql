@@ -132,15 +132,15 @@ create or replace view see_collections as
   --this will be filtered later
 
 create or replace view see_notes as
-	select n.noteid, n.notename, c.collectionid, u.email
+	select n.noteid, n.notename, c.collectionid, u.email, c.orgid
 	from note n inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on c.userid = u.userid
 	order by n.noteid asc;
 	--this will be filtered later
   
 create or replace view see_note_with_data as
-  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname
-  from note n left join collection c on n.collectionid = c.collectionid
+  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid
+  from note n left join collection c on n.collectionid = c.collectionid;
   --this will be filtered later
 
 create or replace view see_words as
@@ -249,6 +249,12 @@ create or replace view search_users as
 create or replace view see_shared_colls as
 	select s.collectionid, s.userid, s.ownerid, u.email
 	from shared_collection s inner join "user" u
+	on s.userid = u.userid;
+	--this will be filtered later
+
+create or replace view see_shared_notes as
+	select s.noteid, s.userid, s.ownerid, u.email
+	from shared_note s inner join "user" u
 	on s.userid = u.userid;
 	--this will be filtered later
 

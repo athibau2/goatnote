@@ -89,24 +89,31 @@
             </v-col>
             <v-col class="text-center">
                 <div>
+                    <v-btn width="100%" color="light grey lighten-1" @click="getSharedNoteList(currentNote)">
+                      Share Note
+                    </v-btn>
+                </div>
+                <br>
+                <div>
                     <v-btn width="100%" color="light grey lighten-1" @click="showWords = true">Words</v-btn>
-                    <Words v-show="showWords" @close-modal="showWords = false" />
                 </div>
                 <br>
                 <div>
                     <v-btn width="100%" color="light grey lighten-1" @click="showQuestions = true">Questions</v-btn>
-                    <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
                 </div>
                 <br>
                 <div>
                     <v-btn width="100%" color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
-                    <Links v-show="showLinks" @close-modal="showLinks = false" />
                 </div>
                 <br>
                 <div>
                     <v-btn width="100%" color="light grey lighten-1" @click="openPlans()">Study Plans</v-btn>
-                    <StudyPlans v-show="showStudyPlans" @close-modal="showStudyPlans = false" />
                 </div>
+                <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
+                <Words v-show="showWords" @close-modal="showWords = false" />
+                <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
+                <Links v-show="showLinks" @close-modal="showLinks = false" />
+                <StudyPlans v-show="showStudyPlans" @close-modal="showStudyPlans = false" />
             </v-col>
         </v-row>
     </v-container>
@@ -119,6 +126,7 @@ import Words from '~/components/Words.vue'
 import Questions from '~/components/Questions.vue'
 import Links from '~/components/Links.vue'
 import StudyPlans from '~/components/StudyPlans.vue'
+import ShareNote from '~/components/ShareNote.vue'
 import { VueEditor } from "vue2-editor"
 
 export default {
@@ -130,6 +138,7 @@ export default {
       Questions,
       Links,
       StudyPlans,
+      ShareNote,
       VueEditor
   },
 
@@ -154,11 +163,19 @@ export default {
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
         editNote: false,
-        newNoteName: JSON.parse(localStorage.getItem('note')).notename
+        newNoteName: JSON.parse(localStorage.getItem('note')).notename,
+        showShareNote: false,
     }
   },
 
   methods: {
+      getSharedNoteList (note) {
+        this.showShareNote = true
+        this.$store.dispatch('users/getSharedNoteList', {
+          note: note
+        })
+      },
+
       openPlans () {
         this.showStudyPlans = true
         this.$store.dispatch('users/getStudyPlans', {

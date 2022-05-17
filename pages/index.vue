@@ -218,7 +218,7 @@
                       color="#cccccc"
                       v-bind="attrs"
                       v-on="on"
-                      @click="getSharedList(coll)"
+                      @click="getSharedCollList(coll)"
                     >
                       <v-icon>mdi-share-variant</v-icon>
                     </v-btn>
@@ -243,6 +243,19 @@
             </v-card-title>
             <v-card-actions>
               <v-spacer />
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    color="#cccccc"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="getSharedNoteList(note)"
+                  >
+                    <v-icon>mdi-share-variant</v-icon>
+                  </v-btn>
+                </template>
+                <span>Share</span>
+              </v-tooltip>
               <v-btn color="light red lighten-2" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
               <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
             </v-card-actions>
@@ -250,6 +263,7 @@
         </v-row>
       </v-col>
       <ShareColl v-show="showShareColl" @close-modal="showShareColl = false" />
+      <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
     </v-container>
   </v-app>
 </template>
@@ -257,6 +271,7 @@
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import ShareColl from "~/components/ShareColl.vue"
+import ShareNote from "~/components/ShareNote.vue"
 
 export default {
   name: 'IndexPage',
@@ -269,7 +284,8 @@ export default {
   },
 
   components: {
-    ShareColl
+    ShareColl,
+    ShareNote
   },
 
   data () {
@@ -285,15 +301,23 @@ export default {
       collBeingEdited: null,
       editingColl: false,
       newName: "",
-      showShareColl: false
+      showShareColl: false,
+      showShareNote: false,
     }
   },
 
   methods: {
-    getSharedList (coll) {
+    getSharedCollList (coll) {
       this.showShareColl = true
       this.$store.dispatch('users/getSharedCollList', {
         collection: coll
+      })
+    },
+
+    getSharedNoteList (note) {
+      this.showShareNote = true
+      this.$store.dispatch('users/getSharedNoteList', {
+         note: note
       })
     },
 

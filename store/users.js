@@ -390,6 +390,21 @@ export const actions = {
         }
     },
 
+    async getSharedNoteList({ commit }, { note }) {
+        console.log(note)
+        await commit('noteBeingShared', note)
+        try {
+            const res = await axios.get(API_URL + `/see_shared_notes?noteid=eq.${note.noteid}`)
+            if (res.status === 200) {
+                await commit('sharedNoteList', res.data)
+            }
+        } catch (err) {
+            if (err.response.status === 404) {
+                await commit('sharedNoteList', [])
+            }
+        }
+    },
+
     async shareColl({ dispatch, state }, { collection, users }) {
         try {
             for (let i = 0; i < users.length; ++i) {
@@ -409,6 +424,25 @@ export const actions = {
         }
     },
 
+    async shareNote({ dispatch, state }, { note, users }) {
+        try {
+            for (let i = 0; i < users.length; ++i) {
+                const res = await axios.post(API_URL + '/shared_note', {
+                    noteid: note.noteid,
+                    ownerid: state.user.user_id,
+                    userid: users[i]
+                })
+                if (res.status === 201) continue
+            }
+            await dispatch('getSharedNoteList', { note })
+            alert('Your note has successfully been shared')
+        } catch (err) {
+            if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again')
+            }
+        }
+    },
+
     async unshareColl({ dispatch }, { collection, userid, type }) {
         try {
             const res = await axios.delete(API_URL + `/shared_collection?collectionid=eq.${collection.collectionid}&userid=eq.${userid}`, {
@@ -417,6 +451,23 @@ export const actions = {
             if (res.status === 204) {
                 (type === "owner")
                     ? await dispatch('getSharedCollList', { collection })
+                    : await dispatch('getSharedWithMe', { userid })
+            }
+        } catch (err) {
+            if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again')
+            }
+        }
+    },
+
+    async unshareNote({ dispatch }, { note, userid, type }) {
+        try {
+            const res = await axios.delete(API_URL + `/shared_note?noteid=eq.${note.noteid}&userid=eq.${userid}`, {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                (type === "owner")
+                    ? await dispatch('getSharedNoteList', { note })
                     : await dispatch('getSharedWithMe', { userid })
             }
         } catch (err) {
