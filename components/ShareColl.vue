@@ -171,7 +171,7 @@ export default {
   background-color: #eeeeee;
   position: inherit;
   margin-top: 35%;
-  height: 125px;
+  height: 150px;
   overflow: auto;
   text-align: left;
   width: 100%;
