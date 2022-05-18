@@ -29,11 +29,12 @@
                 </v-text-field>
             </v-card-text>
             <v-card-actions>
+                <label id="checkbox-label" for="private">Make Private</label>
+                <input id="checkbox" type="checkbox" name="private" v-model="isPrivate" />
                 <v-spacer />
                 <v-btn color="light red lighten-2" nuxt @click="newOrg()">
                     Cancel
                 </v-btn>
-                <span>&nbsp;</span>
                 <v-btn color="primary" nuxt @click="createOrg()">
                     Submit
                 </v-btn>
@@ -303,6 +304,7 @@ export default {
       newName: "",
       showShareColl: false,
       showShareNote: false,
+      isPrivate: false,
     }
   },
 
@@ -373,7 +375,8 @@ export default {
       if (this.newOrgName === "") alert('No field may be left empty')
       else {
         this.$store.dispatch('users/createOrg', {
-          orgname: this.newOrgName
+          orgname: this.newOrgName,
+          isPrivate: this.isPrivate
         })
         this.newOrgName = ""
         this.newOrg()
@@ -434,6 +437,7 @@ export default {
     newOrg () {
       this.$store.commit('users/newOrg', false)
       this.newOrgName = ""
+      this.isPrivate = false
     },
 
     newCollection () {
@@ -493,7 +497,18 @@ export default {
 
 .list-card{
   margin-right: 10px;
+  margin-bottom: 10px;
 }
 
+#checkbox-label {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#checkbox {
+  width: 20px;
+  height: 20px;
+}
 
 </style>

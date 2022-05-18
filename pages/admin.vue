@@ -52,6 +52,7 @@
           <table v-else-if="tab === 1"> <!--orgs-->
               <tr>
                 <th style="width: 50%">Name</th>
+                <th>Private</th>
                 <th v-if="$route.query.userid === undefined">Members</th>
                 <th>{{$route.query.userid === undefined ? 'Status' : 'Remove User'}}</th>
               </tr>
@@ -59,6 +60,7 @@
                   <td>
                     {{o.orgname}}
                   </td>
+                  <td><input type="checkbox" :checked="o.isprivate" /></td>
                   <td v-if="$route.query.userid === undefined">
                     <v-btn
                       icon @click="loadOrgUsers(o)" 

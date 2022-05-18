@@ -15,6 +15,8 @@ CREATE TABLE organization
 (
   orgid SERIAL NOT NULL,
   orgname text NOT NULL,
+  isprivate BOOLEAN DEFAULT false,
+  joincode text unique,
   PRIMARY KEY (orgid)
 );
 
@@ -184,7 +186,7 @@ create or replace view admin_see_all_users as
   select * from "user" order by isadmin desc, firstname asc;
 
 create or replace view admin_see_all_orgs as
-  select o.orgid, o.orgname, count(p.orgid) as members
+  select o.orgid, o.orgname, count(p.orgid) as members, o.joincode, o.isprivate
   from organization o inner join part_of p
   on o.orgid = p.orgid
   group by o.orgid
@@ -206,7 +208,7 @@ create or replace view admin_see_all_notes as
   order by u.firstname asc, c.collectionname asc;
 
 create or replace view admin_see_user_orgs as
-  select o.orgid, o.orgname, u.userid
+  select o.orgid, o.orgname, u.userid, o.isprivate, o.joincode
   from organization o inner join part_of p on o.orgid = p.orgid
   inner join "user" u on p.userid = u.userid;
   --this will be filtered later
@@ -272,6 +274,21 @@ create or replace view see_notes_shared_with_me as
 	inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on u.userid = c.userid
 	order by n.notename asc;
+	--this will be filtered later
+
+create or replace view see_public_orgs as
+	select o.orgname, o.orgid, o.isprivate, o.joincode, count(p.orgid) as members
+	from organization o inner join part_of p
+	on o.orgid = p.orgid
+	where isprivate = false
+	group by o.orgname, o.orgid
+	order by o.orgname asc;
+
+create or replace view search_org_by_code as
+	select o.orgname, o.orgid, o.isprivate, o.joincode, count(p.orgid) as members
+	from organization o inner join part_of p
+	on o.orgid = p.orgid
+	group by o.orgname, o.orgid;
 	--this will be filtered later
 
 

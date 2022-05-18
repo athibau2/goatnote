@@ -1,6 +1,7 @@
 import axios from "axios";
 import auth from "~/middleware/auth";
 import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
+const short = require('short-uuid');
 
 
 const API_URL = "http://ec2-3-88-53-104.compute-1.amazonaws.com:8000";
@@ -40,6 +41,8 @@ export const state = () => ({
     sharedNoteList: [],
     collsSharedWithMe: [],
     notesSharedWithMe: [],
+    publicOrgs: [],
+    foundOrg: null,
   })
   
 // mutations should update state
@@ -177,6 +180,14 @@ export const mutations = {
 
     notesSharedWithMe(state, data) {
         state.notesSharedWithMe = data
+    },
+
+    publicOrgs(state, data) {
+        state.publicOrgs = data
+    },
+
+    foundOrg(state, data) {
+        state.foundOrg = data
     },
 }
 
@@ -331,28 +342,74 @@ export const actions = {
         }
     },
 
-    async createOrg({ dispatch  }, { orgname }) {
+    async loadPublicOrgs({ commit }) {
+        await commit('foundOrg', null)
+        try {
+            const res = await axios.get(API_URL + `/see_public_orgs`)
+            if (res.status === 200) {
+                await commit('publicOrgs', res.data)
+            }
+        } catch(err) {
+            if (err.response.status === 404 || err.response.status === 400) {
+                await commit('publicOrgs', [])
+            }
+        }
+    },
+
+    async searchOrg({ commit }, { searchText }) {
+        try {
+            const res = await axios.get(API_URL + `/search_org_by_code?joincode=eq.${searchText}`)
+            if (res.status === 200) {
+                if (res.data.length === 0) await commit('foundOrg', null)
+                else await commit('foundOrg', res.data[0])
+            }
+        } catch(err) {
+            if (err.response.status === 404) {
+                await commit('foundOrg', null)
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
+    async joinOrg({ dispatch, state }, { orgid }) {
+        try {
+            const res = await axios.post(API_URL + `/part_of`, {
+                userid: state.user.user_id,
+                orgid: orgid
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 201) {
+                dispatch('orgs')
+                alert('You have been successfully added to the organization.')
+            }
+        } catch(err) {
+            if (err.response.status === 409) {
+                alert('You are already a member of this organization or this organization already exists.')
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
+    async createOrg({ dispatch }, { orgname, isPrivate }) {
         try {
             const response = await axios.post(API_URL + '/organization', {
-                orgname: orgname
+                orgname: orgname,
+                isprivate: isPrivate,
+                joincode: short.generate()
             },
             {
-                headers: authHeader()
+                headers: { ...authHeader(), Prefer: "return=representation" }
             })
-            const org = await axios.get(API_URL + '/organization?orgname=eq.' + orgname)
-            const res = await axios.post(API_URL + '/part_of', {
-                userid: getUserIdFromToken(getJwtToken()).user_id,
-                orgid: org.data[0].orgid
-            },
-            {
-                headers: authHeader()
-            })
-            dispatch('orgs')
-        } catch(error) {
-            if (error) {
-                if (error.response.status === 409) alert('An organization with that name already exists')
-                else alert('Something went wrong')
+            if (response.status === 201) {
+                dispatch('joinOrg', { orgid: response.data[0].orgid })
             }
+        } catch(error) {
+            if (error.response.status === 409) alert('An organization with that name already exists')
+            else alert('Something went wrong')
         }
     },
 

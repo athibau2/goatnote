@@ -234,7 +234,11 @@ p {
 input {
     width: 50px;
     background-color: rgba(215, 236, 243, 0.781);
+    border: solid 1px;
+    border-radius: 8px;
+    height: 30px;
+    padding-left: 5px;
+    margin-top: 10px;
 }
-
 
 </style>

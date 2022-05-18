@@ -6,9 +6,6 @@
             <v-tab v-for="item in items" :key="item.tab">
               {{item.tab}} ({{item.tab === 'collections' ? collsSharedWithMe.length : notesSharedWithMe.length}})
             </v-tab>
-            <v-tab disabled class="admin-param" v-if="$route.params.user !== undefined">
-              {{$route.params.user.firstname}} {{$route.params.user.lastname}}
-            </v-tab>
         </v-tabs>
       </span>
       <v-tabs-items v-model="tab">

@@ -1,4 +1,4 @@
-input{
+/* input{
     background-color: rgb(224, 229, 238);
     border: solid 1px;
     border-radius: 8px;
@@ -6,7 +6,7 @@ input{
     width: 80%;
     padding-left: 5px;
     margin-top: 10px;
-}
+} */
 
 .notice{
     font-family: Cochon;
