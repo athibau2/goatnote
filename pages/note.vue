@@ -20,7 +20,7 @@
                   <span v-else>Begin study</span>
                 </v-tooltip>
             </v-col>
-            <v-col cols="7">
+            <v-col cols="7" v-if="user.user_id == currentNote.userid">
                 <v-text-field v-if="editNote"
                   class="noteselector"
                   dense
@@ -70,6 +70,20 @@
                   </v-list>
                 </v-menu>                
             </v-col>
+            <v-col cols="7" v-else>
+              <v-text-field
+                class="noteselector"
+                dense
+                solo
+                rounded
+                readonly
+                background-color="light purple lighten-3"
+                v-bind="attrs"
+                v-on="on"
+                :placeholder="currentNote.notename"
+              >
+              </v-text-field>          
+            </v-col>
             <v-col>
                 <h3>&nbsp;{{this.currentNote.collectionname}}</h3>
                 <h5>{{prettyDate}} &nbsp;--&nbsp; {{this.saving}}</h5>
@@ -82,6 +96,7 @@
         <v-row>
             <v-col cols="10">
               <vue-editor class="editor"
+                :disabled="(user.user_id == currentNote.userid) ? false : true"
                 @text-change="saveNotes()"
                 v-model="noteText"
               >
@@ -89,7 +104,10 @@
             </v-col>
             <v-col class="text-center">
                 <div>
-                    <v-btn width="100%" color="light grey lighten-1" @click="getSharedNoteList(currentNote)">
+                    <v-btn width="100%" color="light grey lighten-1" 
+                      @click="getSharedNoteList(currentNote)"
+                      :disabled="user.user_id == currentNote.userid ? false : true"
+                    >
                       Share Note
                     </v-btn>
                 </div>
@@ -107,7 +125,12 @@
                 </div>
                 <br>
                 <div>
-                    <v-btn width="100%" color="light grey lighten-1" @click="openPlans()">Study Plans</v-btn>
+                    <v-btn width="100%" color="light grey lighten-1" 
+                      @click="openPlans()"
+                      :disabled="user.user_id == currentNote.userid ? false : true"
+                    >
+                      Study Plans
+                    </v-btn>
                 </div>
                 <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
                 <Words v-show="showWords" @close-modal="showWords = false" />

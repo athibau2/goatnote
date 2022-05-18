@@ -38,6 +38,8 @@ export const state = () => ({
     results: [],
     sharedCollList: [],
     sharedNoteList: [],
+    collsSharedWithMe: [],
+    notesSharedWithMe: [],
   })
   
 // mutations should update state
@@ -167,6 +169,14 @@ export const mutations = {
 
     sharedNoteList(state, data) {
         state.sharedNoteList = data
+    },
+
+    collsSharedWithMe(state, data) {
+        state.collsSharedWithMe = data
+    },
+
+    notesSharedWithMe(state, data) {
+        state.notesSharedWithMe = data
     },
 }
 
@@ -363,6 +373,30 @@ export const actions = {
         }
     },
 
+    async loadSharedWithMe({ commit, state }) {
+        try {
+            const res = await axios.get(API_URL + `/see_colls_shared_with_me?userid=eq.${state.user.user_id}`)
+            if (res.status === 200) {
+                await commit('collsSharedWithMe', res.data)
+            }
+        } catch(err) {
+            if (err.response.status === 404 || err.response.status === 400) {
+                await commit('collsSharedWithMe', [])
+            }
+        }
+
+        try {
+            const res = await axios.get(API_URL + `/see_notes_shared_with_me?userid=eq.${state.user.user_id}`)
+            if (res.status === 200) {
+                await commit('notesSharedWithMe', res.data)
+            }
+        } catch(err) {
+            if (err.response.status === 404 || err.response.status === 400) {
+                await commit('notesSharedWithMe', [])
+            }
+        }
+    },
+
     async search({ commit }, { searchText, orgid }) {
         try {
             const res = await axios.get(API_URL + `/search_users?orgid=eq.${orgid}&email=like.${searchText}%`)
@@ -391,7 +425,6 @@ export const actions = {
     },
 
     async getSharedNoteList({ commit }, { note }) {
-        console.log(note)
         await commit('noteBeingShared', note)
         try {
             const res = await axios.get(API_URL + `/see_shared_notes?noteid=eq.${note.noteid}`)
@@ -451,7 +484,7 @@ export const actions = {
             if (res.status === 204) {
                 (type === "owner")
                     ? await dispatch('getSharedCollList', { collection })
-                    : await dispatch('getSharedWithMe', { userid })
+                    : await dispatch('loadSharedWithMe')
             }
         } catch (err) {
             if (err.response.status === 400) {
@@ -468,7 +501,7 @@ export const actions = {
             if (res.status === 204) {
                 (type === "owner")
                     ? await dispatch('getSharedNoteList', { note })
-                    : await dispatch('getSharedWithMe', { userid })
+                    : await dispatch('loadSharedWithMe')
             }
         } catch (err) {
             if (err.response.status === 400) {
@@ -530,11 +563,11 @@ export const actions = {
         }
     },
 
-    async notes({ commit, state }, { collectionid }) {
+    async notes({ commit }, { collectionid }) {
         commit('setNotes', [])
-        const response = await axios.get(API_URL + '/see_notes?email=eq.' + state.user.email + '&collectionid=eq.' + collectionid)
+        const response = await axios.get(API_URL + '/see_notes?&collectionid=eq.' + collectionid)
         if (response.status === 200) {
-            commit('setNotes', response.data)
+            await commit('setNotes', response.data)
             localStorage.setItem('collNotes', JSON.stringify(response.data))
         }
     },
@@ -781,7 +814,6 @@ export const actions = {
             headers: authHeader()
         })
         if (res.status === 204) {
-            console.log(res)
             dispatch('getStudyPlans', { noteid })
         }
     },
