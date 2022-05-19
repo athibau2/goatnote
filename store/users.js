@@ -588,16 +588,26 @@ export const actions = {
     },
 
     async createCollection({ dispatch, state }, { collectionname, orgid }) {
-        const response = await axios.post(API_URL + '/collection', {
-            collectionname: collectionname,
-            orgid: orgid,
-            userid: state.user.user_id
-        },
-        {
-            headers: authHeader()
-        })
-        dispatch('collections', { orgid })
-        dispatch('allColls')
+        try {
+            const response = await axios.post(API_URL + '/collection', {
+                collectionname: collectionname,
+                orgid: orgid,
+                userid: state.user.user_id
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 200 || res.status === 201) {
+                dispatch('collections', { orgid })
+                dispatch('allColls')
+            }
+        } catch(err) {
+            if (err.response.status === 404) {
+                alert('Organization or user not found, unable to create collection.')
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
     },
 
     async createNote({ dispatch }, { notename, collectionid, orgid }) {
@@ -1003,7 +1013,7 @@ export const actions = {
     async login ({ dispatch, commit }, { email, password }) {
         try {
             const res = await axios.get(API_URL + `/user?email=eq.${email}`)
-            if (res.status === 200) {
+            if (res.status === 200 && res.data.length > 0) {
                 if (await matchPassword(password, res.data[0].password)) {
                     try {
                         const response = await axios.post(API_URL + "/rpc/login", {
@@ -1031,6 +1041,8 @@ export const actions = {
                 } else {
                     alert('The password you entered was incorrect.')
                 }
+            } else if (res.data.length === 0) {
+                alert('No user found with that email.')
             }
         } catch(err) {
             if (err.response.status === 404) {

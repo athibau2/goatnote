@@ -67,6 +67,65 @@
               </span>
             </v-col>
           </v-row>
+
+          <v-divider class="intro-divider" />
+
+          <!-- Row 5 -->
+          <v-row class="intro-rows" align="center">
+            <v-col cols="4">
+              <span class="intro">
+                On the Join Organization page, you can scroll through all the public organizations to find the right one to join to connect with your peers!
+              </span>
+            </v-col>
+            <v-col cols="8">
+              <img class="intro-img" src="~/assets/join-org.png" height="250px" width="500px">
+            </v-col>
+          </v-row>
+
+          <v-divider class="intro-divider" />
+
+          <!-- Row 6 -->
+          <v-row class="intro-rows" align="center">
+            <v-col cols="8">
+              <img class="intro-img" src="~/assets/join-org-private.png" height="250px" width="500px">
+            </v-col>
+            <v-col cols="4">
+              <span class="intro">
+                Privacy is important, so organizations can be made private. Use a join code to find and become part of the organizations you need.
+              </span>
+            </v-col>
+          </v-row>
+
+          <v-divider class="intro-divider" />
+
+          <!-- Row 7 -->
+          <v-row class="intro-rows" align="center">
+            <v-col cols="4">
+              <span class="intro">
+                Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add study resources!
+              </span>
+            </v-col>
+            <v-col cols="8">
+              <img class="intro-img" src="~/assets/share.png" height="250px" width="500px">
+            </v-col>
+          </v-row>
+
+          <v-divider class="intro-divider" />
+
+          <!-- Row 8 -->
+          <v-row class="intro-rows" align="center">
+            <v-col cols="8">
+              <img class="intro-img" src="~/assets/shared-with-me.png" height="250px" width="500px">
+            </v-col>
+            <v-col cols="4">
+              <span class="intro">
+                The Shared With Me page shows all of the collections and notes you have access to. You can't change the typed notes, but you can add to and study the vocab words and study questions!
+              </span>
+            </v-col>
+          </v-row>
+
+          <v-divider class="intro-divider" />
+
         </v-col>
 
         <!-- Sign in Form -->

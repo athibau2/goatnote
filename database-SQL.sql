@@ -38,7 +38,6 @@ CREATE TABLE collection
   PRIMARY KEY (collectionid),
   FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE,
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE,
-  UNIQUE (collectionname)
 );
 
 CREATE TABLE note
