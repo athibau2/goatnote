@@ -60,7 +60,9 @@
                   <td>
                     {{o.orgname}}
                   </td>
-                  <td><input type="checkbox" :checked="o.isprivate" /></td>
+                  <td>
+                    <input type="checkbox" :checked="o.isprivate" :value="o.isprivate" @click="togglePrivate(o)" />
+                  </td>
                   <td v-if="$route.query.userid === undefined">
                     <v-btn
                       icon @click="loadOrgUsers(o)" 
@@ -233,6 +235,13 @@ export default {
   },
 
   methods: {
+    togglePrivate(org) {
+      this.$store.dispatch('users/toggleOrg', {
+        orgid: org.orgid,
+        isPrivate: !org.isprivate
+      })
+    },
+
     loadAdminUserData (u) {
       this.showOrgUsers = false
       this.$store.dispatch('users/loadAdminUserData', {

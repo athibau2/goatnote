@@ -1,7 +1,9 @@
 import axios from "axios";
+import { apply } from "core-js/fn/reflect";
 import auth from "~/middleware/auth";
 import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
 const short = require('short-uuid');
+const bcrypt = require('bcryptjs')
 
 
 const API_URL = "http://ec2-3-88-53-104.compute-1.amazonaws.com:8000";
@@ -388,6 +390,26 @@ export const actions = {
         } catch(err) {
             if (err.response.status === 409) {
                 alert('You are already a member of this organization or this organization already exists.')
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
+    async toggleOrg({ dispatch }, { orgid, isPrivate }) {
+        try {
+            const res = await axios.patch(API_URL + `/organization?orgid=eq.${orgid}`, {
+                isprivate: isPrivate
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                dispatch('loadAdminData')
+            }
+        } catch(err) {
+            if (err.response.status === 404) {
+                alert('Organization not found.')
             } else if (err.response.status === 400) {
                 alert('Something went wrong, please refresh the page and try again.')
             }
@@ -940,27 +962,33 @@ export const actions = {
     },
 
     async updatePass({ dispatch, state }, { newPass, currentPass }) {
-        const res = await axios.get(API_URL + '/user?userid=eq.' + state.user.user_id)
-        if (res.data.password === currentPass) {
-            const response = await axios.patch(API_URL + '/user?userid=eq.' + state.user.user_id, {
-                password: newPass
-            },
-            {
-                headers: authHeader()
-            })
-            if (response.status === 204) {
-                dispatch('userData')
-                alert("Your password has been updated")
+        try {
+            const res = await axios.get(API_URL + '/user?userid=eq.' + state.user.user_id)
+            if (await matchPassword(currentPass, res.data[0].password)) {
+                const response = await axios.patch(API_URL + '/user?userid=eq.' + state.user.user_id, {
+                    password: await encryptPassword(newPass)
+                },
+                {
+                    headers: authHeader()
+                })
+                if (response.status === 204) {
+                    dispatch('userData')
+                    alert("Your password has been updated")
+                }
+            }
+            else { alert("The current password you entered is incorrect") }
+        } catch(err) {
+            if (err.response.status === 400 || err.response.status === 404) {
+                alert('Something went wrong, please refresh the page and try again.')
             }
         }
-        else { alert("The current password you entered is incorrect") }
     },
 
     async signup({ dispatch }, { firstname, lastname, email, password }) {
         try {
             const response = await axios.post(API_URL + '/rpc/signup', {
-                firstname: firstname, lastname: lastname, 
-                email: email, password: password
+                firstname: firstname, lastname: lastname,
+                email: email, password: await encryptPassword(password)
             })
             if (response.status === 200) {
                 dispatch('login', {
@@ -969,35 +997,48 @@ export const actions = {
                 })
             }
         } catch(error) {
-            if (error) {
-                if (error.response.status === 409) alert('An account with that email already exists')
-                else alert('Something went wrong')
-            }
+            if (error.response.status === 409) alert('An account with that email already exists')
+            else alert('Something went wrong, please refresh the page and try again.')
         }
     },
 
     async login ({ dispatch, commit }, { email, password }) {
         try {
-            const response = await axios.post(API_URL + "/rpc/login", { 
-                email: email,
-                password: password
-                },
-                {
-                    headers: authHeader()
+            const res = await axios.get(API_URL + `/user?email=eq.${email}`)
+            if (res.status === 200) {
+                if (await matchPassword(password, res.data[0].password)) {
+                    try {
+                        const response = await axios.post(API_URL + "/rpc/login", {
+                            email: email,
+                            password: res.data[0].password
+                        },
+                        {
+                            headers: authHeader()
+                        }
+                        );
+                        if (response.status === 200) {
+                            setJwtToken(response.data[0].token)
+                            await commit('setUser', getUserIdFromToken(getJwtToken()))
+                            dispatch('userData')
+                            dispatch('orgs')
+                            this.$router.push('/')
+                        }
+                    } catch(error) {
+                        if (error) {
+                            if (error.response.status === 400) {
+                                alert('Something went wrong, please refresh the page and try again.')
+                            }
+                        }
+                    }
+                } else {
+                    alert('The password you entered was incorrect.')
                 }
-            );
-            if (response.status === 200) {
-                setJwtToken(response.data[0].token)
-                await commit('setUser', getUserIdFromToken(getJwtToken()))
-                dispatch('userData')
-                dispatch('orgs')
-                this.$router.push('/')
             }
-        } catch(error) {
-            if (error) {
-                if (error.response.status === 403 || error.response.status === 401) alert('Incorrect email or password')
-                else if (error.response.status === 404) alert('No account found with that email')
-                else alert('Something went wrong')
+        } catch(err) {
+            if (err.response.status === 404) {
+                alert('No user found with that email.')
+            } else if (err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
             }
         }
     },
@@ -1083,3 +1124,12 @@ async function parseDate(date) {
     return prettyDate
 }
 
+async function encryptPassword (password) {
+    const salt = await bcrypt.genSalt(10)
+    return await bcrypt.hash(password, salt)
+}
+
+async function matchPassword(givenPass, accountPass) {
+    const match = await bcrypt.compare(givenPass, accountPass)
+    return match
+}
