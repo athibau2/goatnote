@@ -2,6 +2,7 @@
     <div class="modal-overlay" @click="close()">
         <div class="modal" @click.stop>
             <h3>Share Note</h3>
+            <h6>You can share this note with anyone in the same organization</h6>
             <v-divider />
             <div>
             <v-menu
@@ -41,8 +42,10 @@
                 {{s.email}}&nbsp;<v-icon size="20" @click="newShareList.splice(i, 1)">mdi-close</v-icon>
             </span>
             </div>
-            <v-btn color="#cccccc" @click="close()">Exit</v-btn>
-            <v-btn color="#abddd0" @click="shareNote()">Share</v-btn>
+            <div class="bottom-buttons">
+              <v-btn color="#cccccc" @click="close()">Exit</v-btn>
+              <v-btn color="#abddd0" @click="shareNote()">Share</v-btn>
+            </div>
         </div>
     </div>
 </template>
@@ -171,7 +174,7 @@ export default {
   background-color: #eeeeee;
   position: inherit;
   margin-top: 35%;
-  height: 150px;
+  height: 140px;
   overflow: auto;
   text-align: left;
   width: 100%;
@@ -209,6 +212,10 @@ export default {
   margin-right: 3px;
   margin-top: 5px;
   border-radius: 10px;
+}
+
+.bottom-buttons {
+  margin-top: 5px;
 }
 
 .name-search {
