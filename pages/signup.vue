@@ -114,15 +114,27 @@
                                 dense
                                 solo
                                 rounded
-                                :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-                                :type="show ? 'text' : 'password'"
-                                @click:append="show = !show"
+                                :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                                :type="show1 ? 'text' : 'password'"
+                                @click:append="show1 = !show1"
                                 v-model="password"
-                                @keyup.enter="signup()"
                                 placeholder="Enter your password"
                             >
                             </v-text-field>
-                            <em><h5>&nbsp;Password must be at least 8 characters</h5></em>
+                            <v-text-field
+                                class="selector"
+                                background-color="#f0f0f0"
+                                dense
+                                solo
+                                rounded
+                                :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                                :type="show2 ? 'text' : 'password'"
+                                @click:append="show2 = !show2"
+                                v-model="confirmPass"
+                                @keyup.enter="signup()"
+                                placeholder="Confirm your password"
+                            >
+                            </v-text-field>
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer />
@@ -150,16 +162,20 @@ export default {
         lastname: "",
         email: "",
         password: "",
-        show: false,
+        confirmPass: "",
+        show1: false,
+        show2: false,
     }
   },
 
   methods: {
     signup() {
-        if (this.firstname === "" || this.lastname === "" || this.email === "" || this.password === "") {
+        if (this.firstname === "" || this.lastname === "" || this.email === "" 
+            || this.password === "" || this.confirmPass === "") {
             alert('No field may be left empty')
-        }
-        else {
+        } else if (this.password !== this.confirmPass) {
+            alert('Provided passwords do not match.')
+        } else {
             this.$store.dispatch('users/signup', {
                 firstname: this.firstname,
                 lastname: this.lastname,

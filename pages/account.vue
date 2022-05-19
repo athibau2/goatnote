@@ -3,7 +3,7 @@
         <v-col v-if="(userData !== null && userData !== undefined)">
           <v-row justify="center" align="center">
             <v-card class="account-card" elevation="5" width="400">
-            <v-card-title class="headline">
+            <v-card-title class="name">
                 {{userData.firstname}} {{userData.lastname}}
             </v-card-title>
             <v-card-subtitle>
@@ -107,6 +107,11 @@ export default {
 
 .account-card {
   background-color: #faf9e2;
+}
+
+.name {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 22px;
 }
 
 </style>
