@@ -119,7 +119,7 @@ CREATE TABLE shared_note
 
 
 create or replace view see_orgs as
-  select o.orgname, u.email, o.orgid
+  select o.orgname, u.email, o.orgid, o.joincode
   from organization o inner join part_of p on o.orgid = p.orgid 
   inner join "user" u on p.userid = u.userid
   order by o.orgid asc;

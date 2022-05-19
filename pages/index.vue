@@ -175,6 +175,26 @@
           <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
             <v-card-title class="headline">
                 {{org.orgname}}
+                <v-spacer />
+                <v-menu
+                  offset-y
+                  top
+                  left
+                  :close-on-content-click="false"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon
+                      v-bind="attrs" 
+                      v-on="on"
+                    >
+                      <v-icon>mdi-dots-vertical</v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list class="joincode-popup">
+                    <span class="joincode-1">Join code:</span>
+                    <span class="joincode-2"> {{org.joincode}}</span>
+                  </v-list>
+                </v-menu>
             </v-card-title>
             <v-card-actions>
               <v-spacer />
@@ -509,6 +529,22 @@ export default {
 #checkbox {
   width: 20px;
   height: 20px;
+}
+
+.joincode-popup {
+  background-color: #dddddd;
+}
+
+.joincode-1 {
+  padding-left: 10px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  text-decoration: underline;
+}
+
+.joincode-2 {
+  padding-right: 10px;
+  font-size: 13px;
+  font-family: cursive;
 }
 
 </style>
