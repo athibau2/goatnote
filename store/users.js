@@ -1,6 +1,4 @@
 import axios from "axios";
-import { apply } from "core-js/fn/reflect";
-import auth from "~/middleware/auth";
 import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
