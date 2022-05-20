@@ -212,7 +212,7 @@
             <v-row justify="center" align="center">
               <v-card class="card" elevation="5" :width="windowWidth < 1060 ? 300 : 350">
                 <v-card-title class="headline" style="color: #575757">
-                    <em>Sign In Here</em> {{windowWidth}}
+                    <em>Sign In Here</em>
                 </v-card-title>
                 <v-card-text>
                     <v-text-field
