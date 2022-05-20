@@ -6,8 +6,7 @@
       app
       color="#DAECDA"
     >
-    <v-spacer />   
-
+      <v-spacer />   
       <v-toolbar-title class="font-weight-bold" v-text="title" />
       <v-spacer />
     </v-app-bar>
@@ -26,7 +25,7 @@ export default {
     return {
       clipped: false,
       fixed: false,
-      title: 'GOAT Notes'
+      title: 'GOAT Notes',
     }
   },
 }

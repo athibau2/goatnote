@@ -3,19 +3,20 @@
       <v-row>
         <v-col class="intro-page" cols="8">
           <div class="full-intro">
-            <h3 class="text-center">GOAT Notes is your one stop for academic success!</h3>
+            <h3 class="text-center" v-if="windowWidth >= 1264">GOAT Notes is your one stop for academic success!</h3>
+            <h4 class="text-center" style="font-size: 20px" v-else-if="windowWidth < 1264">GOAT Notes is your one stop for academic success!</h4>
             <div class="intro text-center">
-              No more wasted time in 
+              No more wasted time 
                 <div class="slidingVertical">
-                  <span><b>note-taking.</b></span>
-                  <span><b>studying.</b></span>
+                  <span><b>in note-taking.</b></span>
+                  <span><b>in studying.</b></span>
                 </div>
             </div>
           </div>
           <v-divider class="intro-divider" />
 
           <!-- Row 1 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="4">
               <span class="intro">
                 Join or create organizations to connect and share notes with friends and peers!
@@ -26,10 +27,20 @@
             </v-col>
           </v-row>
 
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                Join or create organizations to connect and share notes with friends and peers!
+              </p>
+              <img class="intro-img" src="~/assets/home.png" height="250px">
+            </v-col>
+          </v-row>
+
           <v-divider class="intro-divider" />
 
           <!-- Row 2 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="8">
               <img class="intro-img" src="~/assets/note.png" height="250px" width="500px">
             </v-col>
@@ -40,10 +51,20 @@
             </v-col>
           </v-row>
 
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                Create collections to organize your notes. In your notes, you have a dedicated space for vocab words, study questions, links to helpful content, and study plans!
+              </p>
+              <img class="intro-img" src="~/assets/note.png" height="250px">
+            </v-col>
+          </v-row>
+
           <v-divider class="intro-divider" />
 
           <!-- Row 3 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="4">
               <span class="intro">
                 When it's time to study, the study mode button changes the layout of your notes page and lets you review your vocab words and study questions as flashcards!
@@ -54,10 +75,20 @@
             </v-col>
           </v-row>
 
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                When it's time to study, the study mode button changes the layout of your notes page and lets you review your vocab words and study questions as flashcards!
+              </p>
+              <img class="intro-img" src="~/assets/goatnotes-study.gif" height="312px">
+            </v-col>
+          </v-row>
+
           <v-divider class="intro-divider" />
           
           <!-- Row 4 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="8">
               <img class="intro-img" src="~/assets/plans.png" height="250px" width="500px">
             </v-col>
@@ -68,10 +99,20 @@
             </v-col>
           </v-row>
 
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                Keep track of which notes you haven't studied yet on the My Study Plans page!
+              </p>
+              <img class="intro-img" src="~/assets/plans.png" height="250px">
+            </v-col>
+          </v-row>
+
           <v-divider class="intro-divider" />
 
           <!-- Row 5 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="4">
               <span class="intro">
                 On the Join Organization page, you can scroll through all the public organizations to find the right one to join to connect with your peers!
@@ -82,10 +123,20 @@
             </v-col>
           </v-row>
 
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                On the Join Organization page, you can scroll through all the public organizations to find the right one to join to connect with your peers!
+              </p>
+              <img class="intro-img" src="~/assets/join-org.png" height="250px">
+            </v-col>
+          </v-row>
+
           <v-divider class="intro-divider" />
 
           <!-- Row 6 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="8">
               <img class="intro-img" src="~/assets/join-org-private.png" height="250px" width="500px">
             </v-col>
@@ -96,10 +147,20 @@
             </v-col>
           </v-row>
 
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                Privacy is important, so organizations can be made private. Use a join code to find and become part of the organizations you need.
+              </p>
+              <img class="intro-img" src="~/assets/join-org-private.png" height="250px">
+            </v-col>
+          </v-row>
+
           <v-divider class="intro-divider" />
 
           <!-- Row 7 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="4">
               <span class="intro">
                 Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add study resources!
@@ -110,10 +171,20 @@
             </v-col>
           </v-row>
 
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add study resources!
+              </p>
+              <img class="intro-img" src="~/assets/share.png" height="250px">
+            </v-col>
+          </v-row>
+
           <v-divider class="intro-divider" />
 
           <!-- Row 8 -->
-          <v-row class="intro-rows" align="center">
+          <v-row class="intro-rows" align="center" v-if="windowWidth >= 1264">
             <v-col cols="8">
               <img class="intro-img" src="~/assets/shared-with-me.png" height="250px" width="500px">
             </v-col>
@@ -124,16 +195,24 @@
             </v-col>
           </v-row>
 
-          <v-divider class="intro-divider" />
+          <!-- small window -->
+          <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1264">
+            <v-col>
+              <p class="intro text-center">
+                The Shared With Me page shows all of the collections and notes you have access to. You can't change the typed notes, but you can add to and study the vocab words and study questions!
+              </p>
+              <img class="intro-img" src="~/assets/shared-with-me.png" height="250px">
+            </v-col>
+          </v-row>
 
         </v-col>
 
         <!-- Sign in Form -->
         <v-col cols="4">
             <v-row justify="center" align="center">
-              <v-card class="card" elevation="5" width="350">
+              <v-card class="card" elevation="5" :width="windowWidth < 1060 ? 300 : 350">
                 <v-card-title class="headline" style="color: #575757">
-                    <em>Sign In Here</em>
+                    <em>Sign In Here</em> {{windowWidth}}
                 </v-card-title>
                 <v-card-text>
                     <v-text-field
@@ -182,6 +261,10 @@ export default {
   name: 'LoginPage',
   layout: 'noauth',
 
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
   data () {
     return {
       email: "",
@@ -192,6 +275,7 @@ export default {
         "studying."
       ],
       introIndex: 0,
+      windowWidth: window.innerWidth
     }
   },
 
@@ -205,6 +289,10 @@ export default {
         })
       }
     },
+
+    resizeHandler() {
+      this.windowWidth = window.innerWidth
+    }
   },
 
   computed: {
