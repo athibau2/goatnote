@@ -476,6 +476,7 @@ export const actions = {
 
     async search({ commit }, { searchText, orgid }) {
         try {
+            searchText = searchText.toLowerCase()
             const res = await axios.get(API_URL + `/search_users?orgid=eq.${orgid}&email=like.${searchText}%`)
             if (res.status === 200) {
                 await commit('results', res.data)
@@ -994,6 +995,7 @@ export const actions = {
 
     async signup({ dispatch }, { firstname, lastname, email, password }) {
         try {
+            email = email.toLowerCase()
             const response = await axios.post(API_URL + '/rpc/signup', {
                 firstname: firstname, lastname: lastname,
                 email: email, password: await encryptPassword(password)
@@ -1012,6 +1014,7 @@ export const actions = {
 
     async login ({ dispatch, commit }, { email, password }) {
         try {
+            email = email.toLowerCase()
             const res = await axios.get(API_URL + `/user?email=eq.${email}`)
             if (res.status === 200 && res.data.length > 0) {
                 if (await matchPassword(password, res.data[0].password)) {

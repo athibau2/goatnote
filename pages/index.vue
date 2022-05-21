@@ -13,8 +13,8 @@
       <v-col v-if="makingNewOrg">
         <v-row justify="center" align="center">
           <v-card color="#faf9e2" elevation="5" width="400">
-            <v-card-title class="headline">
-                Create a New Organization
+            <v-card-title class="headline" style="word-break: break-word;">
+                Create a New Organization {{windowWidth}}
             </v-card-title>
             <v-card-text>
                 <v-text-field
@@ -47,7 +47,7 @@
       <v-col v-if="makingNewCollection">
         <v-row justify="center" align="center">
           <v-card color="#faf9e2" elevation="5" width="400">
-            <v-card-title class="headline">
+            <v-card-title class="headline" style="word-break: break-word;">
                 Create a New Collection
             </v-card-title>
             <v-card-text>
@@ -106,7 +106,7 @@
       <!-- Creating a new note -->
       <v-col v-if="makingNewNote">
         <v-row justify="center" align="center">
-          <v-card color="#faf9e2" elevation="5" width="400">
+          <v-card color="#faf9e2" elevation="5" width="400" style="word-break: break-word;">
             <v-card-title class="headline">
                 Create a New Note
             </v-card-title>
@@ -328,6 +328,7 @@ export default {
       showShareColl: false,
       showShareNote: false,
       isPrivate: false,
+      windowWidth: window.innerWidth
     }
   },
 

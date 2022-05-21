@@ -28,6 +28,7 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar
+      class="app-bar"
       :clipped-left="true"
       fixed
       app
@@ -219,6 +220,10 @@ export default {
 
 .name-display {
   font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.app-bar {
+  overflow-y: scroll;
 }
 
 </style>

@@ -9,7 +9,9 @@
             <h2 class="notice text-center">Uncompleted Study Plans</h2>
           </v-row>
           <v-row justify="center" align="center" style="margin-top: 20px;">
-            <v-card class="modal-list-item" v-for="(p, i) in allPlans" :key="i" elevation="2" flat>
+            <v-card class="modal-list-item" :style="windowWidth < 850 ? 'width: 200px' : null" 
+              v-for="(p, i) in allPlans" :key="i" elevation="2" flat
+            >
                 <table>
                     <tr>
                         <td>Note:</td>
@@ -79,13 +81,21 @@ export default {
     this.$store.dispatch('users/getAllPlans')
   },
 
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
   data () {
     return {
-
+      windowWidth: window.innerWidth
     }
   },
 
   methods: {
+    resizeHandler() {
+      this.windowWidth = window.innerWidth
+    },
+
     async deletePlan (planid) {
         await this.$store.dispatch('users/deletePlan', {
             planid: planid,
