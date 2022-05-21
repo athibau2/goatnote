@@ -1,10 +1,11 @@
 <template>
   <v-app dark>
     <v-navigation-drawer
-      :mini-variant="miniVariant"
+      :mini-variant="windowWidth < 1161 ? true : miniVariant"
       :clipped="true"
       fixed
       app
+      permanent
       color="light grey lighten-4"
     >
       <v-list>
@@ -81,6 +82,10 @@ export default {
     this.$store.dispatch('users/allColls')
   },
 
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
   data () {
     return {
       fixed: false,
@@ -127,11 +132,16 @@ export default {
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'GOAT Notes'
+      title: 'GOAT Notes',
+      windowWidth: window.innerWidth
     }
   },
 
   methods: {
+    resizeHandler() {
+      this.windowWidth = window.innerWidth
+    },
+
     logout() {
       this.$store.dispatch('users/logout')
     },

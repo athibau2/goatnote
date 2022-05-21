@@ -3,7 +3,19 @@
     <v-container>
         <v-row class="text-center">
             <v-col>
-                <v-btn color="light red lighten-2" to="/">&lt; Back</v-btn>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      v-bind="attrs"
+                      v-on="on"
+                      color="light red lighten-2" 
+                      to="/"
+                    >
+                      <v-icon>mdi-arrow-left</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Back</span>
+                </v-tooltip>
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
@@ -85,7 +97,10 @@
               </v-text-field>          
             </v-col>
             <v-col>
-                <h3>&nbsp;{{this.currentNote.collectionname}}</h3>
+                <span style="font-family: Georgia; font-size: 16px;"
+                >
+                  {{this.currentNote.collectionname}}
+                </span>
                 <h5>{{prettyDate}} &nbsp;--&nbsp; {{this.saving}}</h5>
             </v-col>
         </v-row>
@@ -93,52 +108,106 @@
         <v-divider />
         <br>
 
-        <v-row>
-            <v-col cols="10">
-              <vue-editor class="editor"
-                :disabled="(user.user_id == currentNote.userid) ? false : true"
-                @text-change="saveNotes()"
-                v-model="noteText"
+        <!-- Notes area fullscreen -->
+        <v-row v-if="windowWidth >= 1271">
+          <v-col cols="10">
+            <vue-editor class="editor"
+              :disabled="(user.user_id == currentNote.userid) ? false : true"
+              @text-change="saveNotes()"
+              v-model="noteText"
+            >
+            </vue-editor>
+          </v-col>
+          <v-col class="text-center">
+            <div>
+              <v-btn width="100%" color="light grey lighten-1" 
+                @click="getSharedNoteList(currentNote)"
+                :disabled="user.user_id == currentNote.userid ? false : true"
               >
-              </vue-editor>
-            </v-col>
-            <v-col class="text-center">
-                <div>
-                    <v-btn width="100%" color="light grey lighten-1" 
-                      @click="getSharedNoteList(currentNote)"
-                      :disabled="user.user_id == currentNote.userid ? false : true"
-                    >
-                      Share Note
-                    </v-btn>
-                </div>
-                <br>
-                <div>
-                    <v-btn width="100%" color="light grey lighten-1" @click="showWords = true">Words</v-btn>
-                </div>
-                <br>
-                <div>
-                    <v-btn width="100%" color="light grey lighten-1" @click="showQuestions = true">Questions</v-btn>
-                </div>
-                <br>
-                <div>
-                    <v-btn width="100%" color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
-                </div>
-                <br>
-                <div>
-                    <v-btn width="100%" color="light grey lighten-1" 
-                      @click="openPlans()"
-                      :disabled="user.user_id == currentNote.userid ? false : true"
-                    >
-                      Study Plans
-                    </v-btn>
-                </div>
-                <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
-                <Words v-show="showWords" @close-modal="showWords = false" />
-                <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
-                <Links v-show="showLinks" @close-modal="showLinks = false" />
-                <StudyPlans v-show="showStudyPlans" @close-modal="showStudyPlans = false" />
-            </v-col>
+                Share Note
+              </v-btn>
+            </div>
+            <br>
+            <div>
+              <v-btn width="100%" color="light grey lighten-1" @click="showWords = true">Words</v-btn>
+            </div>
+            <br>
+            <div>
+              <v-btn width="100%" color="light grey lighten-1" @click="showQuestions = true">Questions</v-btn>
+            </div>
+            <br>
+            <div>
+              <v-btn width="100%" color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
+            </div>
+            <br>
+            <div>
+              <v-btn width="100%" color="light grey lighten-1" 
+                @click="openPlans()"
+                :disabled="user.user_id == currentNote.userid ? false : true"
+              >
+                Study Plans
+              </v-btn>
+            </div>
+          </v-col>
         </v-row>
+
+        <!-- Notes area small screen -->
+        <v-col cols="12" v-else-if="windowWidth < 1271">
+          <v-btn 
+            :style="windowWidth < 936 ? 'font-size: 10px' : null"
+            :width="windowWidth < 936 ? '15%' : '20%'" 
+            color="light grey lighten-1" 
+            @click="getSharedNoteList(currentNote)"
+            :disabled="user.user_id == currentNote.userid ? false : true"
+          >
+            Share Note
+          </v-btn>
+          <v-btn 
+            :style="windowWidth < 936 ? 'font-size: 10px' : null"
+            :width="windowWidth < 936 ? '15%' : '20%'" 
+            color="light grey lighten-1" 
+            @click="showWords = true"
+          >
+            Words
+          </v-btn>
+          <v-btn 
+            :style="windowWidth < 936 ? 'font-size: 10px' : null"
+            :width="windowWidth < 936 ? '15%' : '20%'" 
+            color="light grey lighten-1" 
+            @click="showQuestions = true"
+          >
+            Questions
+          </v-btn>
+          <v-btn 
+            :style="windowWidth < 936 ? 'font-size: 10px' : null"
+            :width="windowWidth < 936 ? '15%' : '19%'" 
+            color="light grey lighten-1" 
+            @click="showLinks = true"
+          >
+            Links
+          </v-btn>
+          <v-btn 
+            :style="windowWidth < 936 ? 'font-size: 10px' : null"
+            :width="windowWidth < 936 ? '15%' : '19%'" 
+            color="light grey lighten-1" 
+            @click="openPlans()"
+            :disabled="user.user_id == currentNote.userid ? false : true"
+          >
+            Study Plans
+          </v-btn>
+          <vue-editor class="editor"
+            :disabled="(user.user_id == currentNote.userid) ? false : true"
+            @text-change="saveNotes()"
+            v-model="noteText"
+          >
+          </vue-editor>
+        </v-col>
+
+        <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
+        <Words v-show="showWords" @close-modal="showWords = false" />
+        <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
+        <Links v-show="showLinks" @close-modal="showLinks = false" />
+        <StudyPlans v-show="showStudyPlans" @close-modal="showStudyPlans = false" />
     </v-container>
   </v-app>
 </template>
@@ -177,6 +246,10 @@ export default {
     this.$store.commit('users/study', false)
   },
 
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
   data () {
     return {
         showQuestions: false,
@@ -188,10 +261,16 @@ export default {
         editNote: false,
         newNoteName: JSON.parse(localStorage.getItem('note')).notename,
         showShareNote: false,
+        windowWidth: window.innerWidth,
+        os: navigator.platform
     }
   },
 
   methods: {
+      resizeHandler() {
+        this.windowWidth = window.innerWidth
+      },
+
       getSharedNoteList (note) {
         this.showShareNote = true
         this.$store.dispatch('users/getSharedNoteList', {
@@ -220,16 +299,7 @@ export default {
           noteText: this.noteText,
           noteid: this.currentNote.noteid
         })
-        let hour = new Date().getHours()
-        if (hour > 12) hour -= 12
-        if (hour < 10) hour = '0' + hour.toString()
-        let minute = new Date().getMinutes()
-        if (minute < 10) minute = '0' + minute.toString()
-        let second = new Date().getSeconds()
-        if (second < 10) second = '0' + second.toString()
-
-        const time = hour + ':' + minute + ':' + second
-        this.$store.commit('users/saving', 'Saved at ' + time)
+        this.$store.commit('users/saving', 'Saved')
       },
 
       async toggleStudy () {
@@ -289,6 +359,7 @@ export default {
 <style scoped>
 .editor {
   background-color: lightyellow;
+  margin-top: 5px;
 }
 
 .noteselector {
@@ -303,4 +374,5 @@ h2 {
   background-color: #ce93d8;
   box-shadow: 3px 3px 3px;
 }
+
 </style>

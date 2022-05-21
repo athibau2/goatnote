@@ -173,7 +173,7 @@
       <v-col>
         <v-row>
           <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
-            <v-card-title class="headline">
+            <v-card-title class="headline" style="word-break: break-word;">
                 {{org.orgname}}
                 <v-spacer />
                 <v-menu
@@ -211,7 +211,10 @@
       <v-col>
         <v-row>
           <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
-            <v-card-title v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)">
+            <v-card-title 
+              v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)"
+              style="word-break: break-word;"
+            >
                 {{coll.collectionname}}
                 <v-spacer />
                 <v-btn 
@@ -259,7 +262,7 @@
       <v-col>
         <v-row>
           <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
-            <v-card-title>
+            <v-card-title style="word-break: break-word;">
                 {{note.notename}}
             </v-card-title>
             <v-card-actions>

@@ -597,7 +597,7 @@ export const actions = {
             {
                 headers: authHeader()
             })
-            if (res.status === 200 || res.status === 201) {
+            if (response.status === 200 || response.status === 201) {
                 dispatch('collections', { orgid })
                 dispatch('allColls')
             }
