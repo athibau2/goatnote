@@ -336,9 +336,51 @@ export const actions = {
     },
 
     async userData({ commit, state }) {
-        const response = await axios.get(API_URL + '/see_personal_data?email=eq.' + state.user.email)
-        if (response.status === 200) {
-            commit('setUserData', response.data[0])
+        try {
+            const response = await axios.get(API_URL + '/see_personal_data?email=eq.' + state.user.email)
+            if (response.status === 200) {
+                commit('setUserData', response.data[0])
+            }
+        } catch(err) {
+            if (err.response.status === 404 || err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try again.')
+            }
+        }
+    },
+
+    async basicOnboardingComplete({ dispatch, state }) {
+        try {
+            const res = await axios.patch(API_URL + `/user?userid=eq.${state.user.user_id}`, {
+                onboarded: true
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                await dispatch('userData')
+            } 
+        } catch(err) {
+            if (err.response.status === 404 || err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try agian.')
+            }
+        }
+    },
+
+    async noteOnboardingComplete({ dispatch, state }) {
+        try {
+            const res = await axios.patch(API_URL + `/user?userid=eq.${state.user.user_id}`, {
+                noteonboarded: true
+            },
+            {
+                headers: authHeader()
+            })
+            if (res.status === 204) {
+                await dispatch('userData')
+            }
+        } catch(err) {
+            if (err.response.status === 404 || err.response.status === 400) {
+                alert('Something went wrong, please refresh the page and try agian.')
+            }
         }
     },
 

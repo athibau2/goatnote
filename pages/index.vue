@@ -7,288 +7,285 @@
       <!-- </head>
     </html> -->
     
-    <v-container>
-
-      <!-- Creating a new org -->
-      <v-col v-if="makingNewOrg">
-        <v-row justify="center" align="center">
-          <v-card color="#faf9e2" elevation="5" width="400">
-            <v-card-title class="headline" style="word-break: break-word;">
-                Create a New Organization {{windowWidth}}
-            </v-card-title>
-            <v-card-text>
-                <v-text-field
-                  class="selector"
-                  dense
-                  solo
-                  rounded
-                  background-color="light blue lighten-4"
-                  v-model="newOrgName" 
-                  placeholder="New Organization Name"
-                >
-                </v-text-field>
-            </v-card-text>
-            <v-card-actions>
-                <label id="checkbox-label" for="private">Make Private</label>
-                <input id="checkbox" type="checkbox" name="private" v-model="isPrivate" />
-                <v-spacer />
-                <v-btn color="light red lighten-2" nuxt @click="newOrg()">
-                    Cancel
-                </v-btn>
-                <v-btn color="primary" nuxt @click="createOrg()">
-                    Submit
-                </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-row>
-      </v-col>
-
-      <!-- Creating a new collection -->
-      <v-col v-if="makingNewCollection">
-        <v-row justify="center" align="center">
-          <v-card color="#faf9e2" elevation="5" width="400">
-            <v-card-title class="headline" style="word-break: break-word;">
-                Create a New Collection
-            </v-card-title>
-            <v-card-text>
-                <v-text-field
-                  class="selector"
-                  dense
-                  solo
-                  rounded
-                  background-color="light green lighten-3"
-                  v-model="newCollName" 
-                  placeholder="New Collection Name"
-                >
-                </v-text-field>
-                <v-menu
-                  bottom
-                  :close-on-content-click="true"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
-                      class="selector"
-                      dense
-                      solo
-                      rounded
-                      readonly
-                      background-color="light blue lighten-4"
-                      append-icon="mdi-chevron-down"
-                      v-bind="attrs" 
-                      v-on="on" 
-                      v-model="orgToAddTo" 
-                      placeholder="Add to Organization"
-                    >
-                    </v-text-field>
-                  </template>
-                  <v-list>
-                    <v-list-item v-for="(org, i) in orgs" :key="i">
-                      <v-btn color="light blue lighten-4" @click="setOrgToAddTo(org)">
-                        {{org.orgname}}
-                      </v-btn>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-            </v-card-text>
-            <v-card-actions>
-                <v-spacer />
-                <v-btn color="light red lighten-2" nuxt @click="newCollection()">
-                    Cancel
-                </v-btn>
-                <v-btn color="primary" @click="createCollection()">
-                    Add
-                </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-row>
-      </v-col>
-
-      <!-- Creating a new note -->
-      <v-col v-if="makingNewNote">
-        <v-row justify="center" align="center">
-          <v-card color="#faf9e2" elevation="5" width="400" style="word-break: break-word;">
-            <v-card-title class="headline">
-                Create a New Note
-            </v-card-title>
-            <v-card-text>
-                <v-text-field
-                  class="selector"
-                  dense
-                  solo
-                  rounded
-                  background-color="light purple lighten-3"
-                  v-model="newNoteName" 
-                  placeholder="New Note Name"
-                >
-                </v-text-field>
-                <v-menu
-                  bottom
-                  :close-on-content-click="true"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
-                      class="selector"
-                      dense
-                      solo
-                      rounded
-                      readonly
-                      background-color="light green lighten-3"
-                      append-icon="mdi-chevron-down"
-                      v-bind="attrs" 
-                      v-on="on" 
-                      v-model="collToAddTo" 
-                      placeholder="Add to Collection"
-                    >
-                    </v-text-field>
-                  </template>
-                  <v-list>
-                    <v-list-item v-for="(coll, i) in allColls" :key="i">
-                      <v-btn color="light green lighten-3" @click="setCollToAddTo(coll)">
-                        {{coll.collectionname}}
-                      </v-btn>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-            </v-card-text>
-            <v-card-actions>
-                <v-spacer />
-                <v-btn color="light red lighten-2" nuxt @click="newNote()">
-                    Cancel
-                </v-btn>
-                <v-btn color="primary" @click="createNote()">
-                    Add
-                </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-row>
-      </v-col>
-
-      <br>
-
-      <h2 v-if="orgs === null || orgs === undefined || orgs.length === 0" class="notice text-center">
-        You are currently not part of any organizations and have no collections or notes. Create one above!
-      </h2>
-
-      <!-- List of orgs -->
-      <v-col>
-        <v-row>
-          <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
-            <v-card-title class="headline" style="word-break: break-word;">
-                {{org.orgname}}
-                <v-spacer />
-                <v-menu
-                  offset-y
-                  top
-                  left
-                  :close-on-content-click="false"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn icon
-                      v-bind="attrs" 
-                      v-on="on"
-                    >
-                      <v-icon>mdi-dots-vertical</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list class="joincode-popup">
-                    <span class="joincode-1">Join code:</span>
-                    <span class="joincode-2"> {{org.joincode}}</span>
-                  </v-list>
-                </v-menu>
-            </v-card-title>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn>
-              <v-btn color="primary" @click="loadCollections(org.orgid)">Go</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-row>
-      </v-col>
-
-      <br>
-
-      <!-- List of collections -->
-      <v-col>
-        <v-row>
-          <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
-            <v-card-title 
-              v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)"
-              style="word-break: break-word;"
-            >
-                {{coll.collectionname}}
-                <v-spacer />
-                <v-btn 
-                  :disabled="(editingColl && coll.collectionid !== collBeingEdited) ? true : false" 
-                  icon @click="setEditColl(coll)"
-                >
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
-            </v-card-title>
-            <v-card-title v-else>
+    <!-- Creating a new org -->
+    <v-col v-if="makingNewOrg">
+      <v-row justify="center" align="center">
+        <v-card color="#faf9e2" elevation="5" width="400">
+          <v-card-title class="headline" style="word-break: break-word;">
+              Create a New Organization {{windowWidth}}
+          </v-card-title>
+          <v-card-text>
               <v-text-field
-                :value="coll.collectionname"
-                append-icon="mdi-pencil"
-                @click:append="editingColl = !editingColl"
-                @input="textChanged($event)"
-                @keyup.enter="updateColl(coll)"
+                class="selector"
+                dense
+                solo
+                rounded
+                background-color="light blue lighten-4"
+                v-model="newOrgName" 
+                placeholder="New Organization Name"
               >
               </v-text-field>
-            </v-card-title>
-            <v-card-actions>
+          </v-card-text>
+          <v-card-actions>
+              <label id="checkbox-label" for="private">Make Private</label>
+              <input id="checkbox" type="checkbox" name="private" v-model="isPrivate" />
               <v-spacer />
-              <v-tooltip top>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      color="#cccccc"
-                      v-bind="attrs"
-                      v-on="on"
-                      @click="getSharedCollList(coll)"
-                    >
-                      <v-icon>mdi-share-variant</v-icon>
+              <v-btn color="light red lighten-2" nuxt @click="newOrg()">
+                  Cancel
+              </v-btn>
+              <v-btn color="primary" nuxt @click="createOrg()">
+                  Submit
+              </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-row>
+    </v-col>
+
+    <!-- Creating a new collection -->
+    <v-col v-if="makingNewCollection">
+      <v-row justify="center" align="center">
+        <v-card color="#faf9e2" elevation="5" width="400">
+          <v-card-title class="headline" style="word-break: break-word;">
+              Create a New Collection
+          </v-card-title>
+          <v-card-text>
+              <v-text-field
+                class="selector"
+                dense
+                solo
+                rounded
+                background-color="light green lighten-3"
+                v-model="newCollName" 
+                placeholder="New Collection Name"
+              >
+              </v-text-field>
+              <v-menu
+                bottom
+                :close-on-content-click="true"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    class="selector"
+                    dense
+                    solo
+                    rounded
+                    readonly
+                    background-color="light blue lighten-4"
+                    append-icon="mdi-chevron-down"
+                    v-bind="attrs" 
+                    v-on="on" 
+                    v-model="orgToAddTo" 
+                    placeholder="Add to Organization"
+                  >
+                  </v-text-field>
+                </template>
+                <v-list>
+                  <v-list-item v-for="(org, i) in orgs" :key="i">
+                    <v-btn color="light blue lighten-4" @click="setOrgToAddTo(org)">
+                      {{org.orgname}}
                     </v-btn>
-                  </template>
-                  <span>Share</span>
-                </v-tooltip>
-              <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
-              <v-btn color="primary" @click="loadNotes(coll.collectionid)">Go</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-row>
-      </v-col>
-
-      <br>
-
-      <!-- List of notes -->
-      <v-col>
-        <v-row>
-          <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
-            <v-card-title style="word-break: break-word;">
-                {{note.notename}}
-            </v-card-title>
-            <v-card-actions>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+          </v-card-text>
+          <v-card-actions>
               <v-spacer />
-              <v-tooltip top>
+              <v-btn color="light red lighten-2" nuxt @click="newCollection()">
+                  Cancel
+              </v-btn>
+              <v-btn color="primary" @click="createCollection()">
+                  Add
+              </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-row>
+    </v-col>
+
+    <!-- Creating a new note -->
+    <v-col v-if="makingNewNote">
+      <v-row justify="center" align="center">
+        <v-card color="#faf9e2" elevation="5" width="400" style="word-break: break-word;">
+          <v-card-title class="headline">
+              Create a New Note
+          </v-card-title>
+          <v-card-text>
+              <v-text-field
+                class="selector"
+                dense
+                solo
+                rounded
+                background-color="light purple lighten-3"
+                v-model="newNoteName" 
+                placeholder="New Note Name"
+              >
+              </v-text-field>
+              <v-menu
+                bottom
+                :close-on-content-click="true"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    class="selector"
+                    dense
+                    solo
+                    rounded
+                    readonly
+                    background-color="light green lighten-3"
+                    append-icon="mdi-chevron-down"
+                    v-bind="attrs" 
+                    v-on="on" 
+                    v-model="collToAddTo" 
+                    placeholder="Add to Collection"
+                  >
+                  </v-text-field>
+                </template>
+                <v-list>
+                  <v-list-item v-for="(coll, i) in allColls" :key="i">
+                    <v-btn color="light green lighten-3" @click="setCollToAddTo(coll)">
+                      {{coll.collectionname}}
+                    </v-btn>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+          </v-card-text>
+          <v-card-actions>
+              <v-spacer />
+              <v-btn color="light red lighten-2" nuxt @click="newNote()">
+                  Cancel
+              </v-btn>
+              <v-btn color="primary" @click="createNote()">
+                  Add
+              </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-row>
+    </v-col>
+
+    <br>
+
+    <h2 v-if="orgs === null || orgs === undefined || orgs.length === 0" class="notice text-center">
+      You are currently not part of any organizations and have no collections or notes. Create one above!
+    </h2>
+
+    <!-- List of orgs -->
+    <v-col>
+      <v-row>
+        <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
+          <v-card-title class="headline" style="word-break: break-word;">
+              {{org.orgname}}
+              <v-spacer />
+              <v-menu
+                offset-y
+                top
+                left
+                :close-on-content-click="false"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn icon
+                    v-bind="attrs" 
+                    v-on="on"
+                  >
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
+                <v-list class="joincode-popup">
+                  <span class="joincode-1">Join code:</span>
+                  <span class="joincode-2"> {{org.joincode}}</span>
+                </v-list>
+              </v-menu>
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn>
+            <v-btn color="primary" @click="loadCollections(org.orgid)">Go</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-row>
+    </v-col>
+
+    <br>
+
+    <!-- List of collections -->
+    <v-col>
+      <v-row>
+        <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
+          <v-card-title 
+            v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)"
+            style="word-break: break-word;"
+          >
+              {{coll.collectionname}}
+              <v-spacer />
+              <v-btn 
+                :disabled="(editingColl && coll.collectionid !== collBeingEdited) ? true : false" 
+                icon @click="setEditColl(coll)"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+          </v-card-title>
+          <v-card-title v-else>
+            <v-text-field
+              :value="coll.collectionname"
+              append-icon="mdi-pencil"
+              @click:append="editingColl = !editingColl"
+              @input="textChanged($event)"
+              @keyup.enter="updateColl(coll)"
+            >
+            </v-text-field>
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer />
+            <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
                     color="#cccccc"
                     v-bind="attrs"
                     v-on="on"
-                    @click="getSharedNoteList(note)"
+                    @click="getSharedCollList(coll)"
                   >
                     <v-icon>mdi-share-variant</v-icon>
                   </v-btn>
                 </template>
                 <span>Share</span>
               </v-tooltip>
-              <v-btn color="light red lighten-2" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
-              <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-row>
-      </v-col>
-      <ShareColl v-show="showShareColl" @close-modal="showShareColl = false" />
-      <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
-    </v-container>
+            <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
+            <v-btn color="primary" @click="loadNotes(coll.collectionid)">Go</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-row>
+    </v-col>
+
+    <br>
+
+    <!-- List of notes -->
+    <v-col>
+      <v-row>
+        <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
+          <v-card-title style="word-break: break-word;">
+              {{note.notename}}
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer />
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="#cccccc"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="getSharedNoteList(note)"
+                >
+                  <v-icon>mdi-share-variant</v-icon>
+                </v-btn>
+              </template>
+              <span>Share</span>
+            </v-tooltip>
+            <v-btn color="light red lighten-2" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
+            <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-row>
+    </v-col>
+    <ShareColl v-show="showShareColl" @close-modal="showShareColl = false" />
+    <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
   </v-app>
 </template>
 
@@ -309,7 +306,7 @@ export default {
 
   components: {
     ShareColl,
-    ShareNote
+    ShareNote,
   },
 
   data () {
@@ -328,7 +325,7 @@ export default {
       showShareColl: false,
       showShareNote: false,
       isPrivate: false,
-      windowWidth: window.innerWidth
+      windowWidth: window.innerWidth,
     }
   },
 
@@ -483,6 +480,10 @@ export default {
   computed: {
     user () {
       return this.$store.state.users.user
+    },
+
+    userData () {
+      return this.$store.state.users.userData
     },
 
     orgs () {

@@ -7,6 +7,8 @@ CREATE TABLE "user"
   password text NOT NULL,
   isadmin BOOLEAN DEFAULT false,
   loggedin BOOLEAN,
+  onboarded BOOLEAN DEFAULT false,
+  noteonboarded BOOLEAN DEFAULT false,
   PRIMARY KEY (userid),
   UNIQUE (email)
 );
@@ -177,7 +179,7 @@ create or replace view see_all_plans as
 	order by n.notename asc, s.studydate asc, s.time asc;
 	--this will be filtered later
 
-create view see_personal_data as
+create or replace view see_personal_data as
   select * from "user";
   --this will be filtered later
   
