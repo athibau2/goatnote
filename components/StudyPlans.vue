@@ -1,6 +1,6 @@
 <template>
     <div class="modal-overlay" @click="close()">
-        <div class="modal" @click.stop>
+        <div v-if="!showAddPlan" :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
             <h6>Study Plans</h6>
             <v-divider />
             <div v-if="studyPlans.length !== 0">
@@ -44,12 +44,19 @@
                 <v-btn color="light red lighten-2" @click="$emit('close-modal')">
                     Exit
                 </v-btn>
-                <v-btn color="primary" @click="showAddPlan = true">Add Plan</v-btn>
+                <v-btn color="primary" 
+                    @click="windowWidth < '850' ? switchModals() : showAddPlan = true"
+                >
+                    Add Plan
+                </v-btn>
             </div>
         </div>
 
         <!-- Add Plan Modal -->
-        <div class="modal" style="margin-left: 3px;" v-if="showAddPlan" @click.stop>
+        <div :class="windowWidth < '850' ? 'modal-sm' : 'modal'" 
+            style="margin-left: 3px;" 
+            v-if="showAddPlan" @click.stop
+        >
             <h6>Add Plan</h6>
             <v-divider />
             <div class="eachRow">
@@ -90,7 +97,9 @@
                 <input class="text-center" type="number" max="5" min="1" v-model="priority">
             </div>
             <div style="margin-top: 70px">
-                <v-btn color="light red lighten-2" @click="showAddPlan = false">
+                <v-btn color="light red lighten-2" 
+                    @click="windowWidth < '850' ? switchModals() : showAddPlan = false"
+                >
                     Exit
                 </v-btn>
                 <v-btn color="primary" @click="addPlan()">Save</v-btn>
@@ -102,6 +111,11 @@
 <script>
   export default {
       name: "StudyPlansComponent",
+
+      created () {
+        window.addEventListener('resize', this.resizeHandler)
+        this.showPlans = true
+      },
 
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
@@ -118,12 +132,24 @@
             showDate: false,
             showTime: false,
             showAddPlan: false,
+            showPlans: false,
+            windowWidth: window.innerWidth,
         }
       },
 
       methods: {
+            resizeHandler() {
+                this.windowWidth = window.innerWidth
+            },
+
+            switchModals() {
+                this.showPlans = !this.showPlans
+                this.showAddPlan = !this.showAddPlan
+            },
+
             close () {
                 this.showAddPlan = false
+                this.showPlans = false
                 this.date = ""
                 this.time = ""
                 this.timeAmount = 5
@@ -205,6 +231,16 @@
 
 <style scoped>
 @import '~/assets/styles.css';
+
+.modal-sm {
+  text-align: center;
+  background-color: white;
+  height: 475px;
+  width: 400px;
+  margin-top: 15%;
+  padding: 0px 0;
+  border-radius: 20px;
+}
 
 h6 {
   font-weight: 500;

@@ -1,6 +1,6 @@
 <template>
     <div class="modal-overlay" @click="$emit('close-modal')">
-        <div v-if="!studyMode" class="modal" @click.stop>
+        <div v-if="!studyMode" :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
             <h6>Questions</h6>
             <v-divider />
             <div v-if="questions.length !== 0">
@@ -44,14 +44,15 @@
             </div>
             <div class="modal-bottom-content-2">
               <v-row>
-                <v-text-field 
+                <v-text-field :class="windowWidth < '850' ? 'modal-bottom-sm' : null"
                   v-model="newQuestion"
                   counter
                   maxlength="350"
                   placeholder="Enter New Question"
                 >
                 </v-text-field>
-                <v-text-field
+                &nbsp;&nbsp;
+                <v-text-field :class="windowWidth < '850' ? 'modal-bottom-sm' : null"
                   v-model="newAnswer"
                   counter
                   maxlength="350"
@@ -119,6 +120,10 @@
   export default {
       name: "QuestionsComponent",
 
+      created () {
+        window.addEventListener('resize', this.resizeHandler)
+      },
+
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
         this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
@@ -135,10 +140,15 @@
           questionBeingEdited: null,
           editQuestion: "",
           editAnswer: "",
+          windowWidth: window.innerWidth,
         }
       },
 
       methods: {
+        resizeHandler() {
+          this.windowWidth = window.innerWidth
+        },
+
         questionChanged (event) {
           this.editQuestion = event
         },
@@ -213,6 +223,16 @@
 
 <style scoped>
 @import '~/assets/styles.css';
+
+.modal-sm {
+  text-align: center;
+  background-color: white;
+  height: 475px;
+  width: 400px;
+  margin-top: 15%;
+  padding: 0px 0;
+  border-radius: 20px;
+}
 
 h6 {
   font-weight: 500;

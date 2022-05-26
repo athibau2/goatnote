@@ -82,6 +82,10 @@
     padding-top: 15px;
 }
 
+.modal-bottom-sm {
+    width: 48%;
+}
+
 table {
     font-family: Georgia;
     border-collapse: collapse;

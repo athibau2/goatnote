@@ -1,6 +1,6 @@
 <template>
     <div class="modal-overlay" @click="$emit('close-modal')">
-        <div v-if="!studyMode" class="modal" @click.stop>
+        <div v-if="!studyMode" :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
             <h6>Links</h6>
             <v-divider />
             <div v-if="links.length !== 0">
@@ -72,6 +72,10 @@
   export default {
       name: "LinksComponent",
 
+      created () {
+        window.addEventListener('resize', this.resizeHandler)
+      },
+
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
         this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
@@ -83,11 +87,16 @@
           newLink: "",
           editingLink: false,
           linkBeingEdited: null,
-          editLink: ""
+          editLink: "",
+          windowWidth: window.innerWidth,
         }
       },
 
       methods: {
+        resizeHandler() {
+          this.windowWidth = window.innerWidth
+        },
+
         linkChanged (event) {
           this.editLink = event
         },
@@ -148,6 +157,16 @@
 
 <style scoped>
 @import '~/assets/styles.css';
+
+.modal-sm {
+  text-align: center;
+  background-color: white;
+  height: 475px;
+  width: 400px;
+  margin-top: 15%;
+  padding: 0px 0;
+  border-radius: 20px;
+}
 
 h6 {
   font-weight: 500;

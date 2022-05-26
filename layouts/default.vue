@@ -5,6 +5,7 @@
 
 
     <v-navigation-drawer
+      id="menu-step-6"
       :mini-variant="windowWidth < 1161 ? true : miniVariant"
       :clipped="true"
       fixed
@@ -279,6 +280,21 @@ export default {
           text: 'If you are promoted to be a site admin, this is where you will go to see all the users and the data of GOAT Notes.',
           attachTo: {
             element: '#menu-step-5',
+            on: 'right'
+          },
+          buttons: [
+            {
+              text: 'Next',
+              action: this.tour.next
+            }
+          ]
+        },
+        {
+          id: 'menu-step-6',
+          title: 'Hello there!',
+          text: 'Using touch screen, you can swipe this menu back and forth to completely hide it or show it again.',
+          attachTo: {
+            element: '#menu-step-6',
             on: 'right'
           },
           buttons: [

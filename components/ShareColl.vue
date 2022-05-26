@@ -1,6 +1,6 @@
 <template>
     <div class="modal-overlay" @click="close()">
-        <div class="modal" @click.stop>
+        <div :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
             <h3>Share Collection</h3>
             <h6>You can share this collection with anyone in the same organization</h6>
             <v-divider />
@@ -54,6 +54,10 @@
 export default {
   name: 'ShareColl',
 
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
   mounted () {
     this.$store.commit('users/results', [])
   },
@@ -62,10 +66,15 @@ export default {
     return {
         searchText: "",
         newShareList: [],
+        windowWidth: window.innerWidth,
     }
   },
 
   methods: {
+    resizeHandler() {
+      this.windowWidth = window.innerWidth
+    },
+
     async search () {
       await this.$store.dispatch('users/search', {
           searchText: this.searchText,
@@ -161,6 +170,16 @@ export default {
   height: 475px;
   width: 500px;
   margin-top: 6%;
+  padding: 0px 0;
+  border-radius: 20px;
+}
+
+.modal-sm {
+  text-align: center;
+  background-color: white;
+  height: 475px;
+  width: 400px;
+  margin-top: 15%;
   padding: 0px 0;
   border-radius: 20px;
 }

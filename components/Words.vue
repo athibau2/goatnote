@@ -1,6 +1,6 @@
 <template>
     <div class="modal-overlay" @click="$emit('close-modal')">
-        <div v-if="!studyMode" class="modal" @click.stop>
+        <div v-if="!studyMode" :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
             <h6>Words</h6>
             <v-divider />
             <div v-if="words.length !== 0">
@@ -44,14 +44,15 @@
             </div>
             <div class="modal-bottom-content-2">
               <v-row>
-                <v-text-field 
+                <v-text-field :class="windowWidth < '850' ? 'modal-bottom-sm' : null"
                   v-model="newWord"
                   counter
                   maxlength="50"
                   placeholder="Enter New Word"
                 >
                 </v-text-field>
-                <v-text-field 
+                &nbsp;&nbsp;
+                <v-text-field :class="windowWidth < '850' ? 'modal-bottom-sm' : null"
                   v-model="newDef"
                   counter
                   maxlength="200"
@@ -71,7 +72,6 @@
         <div v-else class="modal" @click.stop>
             <h6>Words</h6>
             <v-divider />
-
             <v-col>
               <v-row justify="center" align="center">
                 <div v-if="words !== null && words !== undefined && words.length !== 0">
@@ -114,6 +114,10 @@
   export default {
       name: "WordsComponent",
 
+      created () {
+        window.addEventListener('resize', this.resizeHandler)
+      },
+
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
         this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
@@ -130,10 +134,15 @@
           wordBeingEdited: null,
           editWord: "",
           editDef: "",
+          windowWidth: window.innerWidth,
         }
       },
 
       methods: {
+        resizeHandler() {
+          this.windowWidth = window.innerWidth
+        },
+
         wordChanged (event) {
           this.editWord = event
         },
@@ -208,6 +217,16 @@
 
 <style scoped>
 @import '~/assets/styles.css';
+
+.modal-sm {
+  text-align: center;
+  background-color: white;
+  height: 475px;
+  width: 400px;
+  margin-top: 15%;
+  padding: 0px 0;
+  border-radius: 20px;
+}
 
 h6 {
   font-weight: 500;
