@@ -46,7 +46,8 @@
                   append-icon="mdi-chevron-down"
                   append-outer-icon="mdi-pencil"
                   @click:append-outer="editNote = !editNote"
-                  v-model="newNoteName"
+                  :value="currentNote.notename"
+                  @input="nameChanged($event)"
                   @keyup.enter="updateNoteName()"
                 >
                 </v-text-field>
@@ -437,6 +438,10 @@ export default {
 
       resizeHandler() {
         this.windowWidth = window.innerWidth
+      },
+
+      nameChanged (event) {
+        this.newNoteName = event
       },
 
       getSharedNoteList (note) {

@@ -741,9 +741,12 @@ export const actions = {
         {
             headers: { ...authHeader(), Prefer: "return=representation" }
         })
-        if (res.status === 204) {
-            let temp = { ...res.data[0], "collectionname": state.currentNote.collectionname }
-            commit('currentNote', temp)
+        if (res.status === 204 || res.status === 200) {
+            let temp = { ...res.data[0], 
+                "collectionname": state.currentNote.collectionname,
+                "orgid": state.currentNote.orgid,
+                "userid": state.user.user_id }
+            await commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
         }
     },
