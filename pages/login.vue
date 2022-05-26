@@ -1,10 +1,16 @@
 <template>
     <v-app>
       <v-row>
-        <v-col class="intro-page" cols="8">
+        <v-col class="intro-page" :cols="windowWidth < '850' ? null : '8'">
           <div class="full-intro">
-            <h3 class="text-center" v-if="windowWidth >= 1264">GOAT Notes is your one stop for academic success!</h3>
-            <h4 class="text-center" style="font-size: 20px" v-else-if="windowWidth < 1264">GOAT Notes is your one stop for academic success!</h4>
+            <h3 class="text-center" v-if="windowWidth >= 1264"
+            >
+              GOAT Notes is your one stop for academic success!
+            </h3>
+            <h4 class="text-center" style="font-size: 20px" v-else-if="windowWidth < 1264"
+            >
+              GOAT Notes is your one stop for academic success!
+            </h4>
             <div class="intro text-center">
               No more wasted time 
                 <div class="slidingVertical">
@@ -208,9 +214,12 @@
         </v-col>
 
         <!-- Sign in Form -->
-        <v-col cols="4">
+        <v-col :cols="windowWidth < '850' ? null : '4'">
             <v-row justify="center" align="center">
-              <v-card class="card" elevation="5" :width="windowWidth < 1060 ? 300 : 350">
+              <v-card :class="windowWidth < '850' ? 'card-small' : 'card'" 
+                elevation="5" 
+                :width="windowWidth < 1060 ? 300 : 350"
+              >
                 <v-card-title class="headline" style="color: #575757">
                     <em>Sign In Here</em>
                 </v-card-title>
@@ -251,6 +260,7 @@
                 </v-card-actions>
               </v-card>
             </v-row>
+            <br v-if="windowWidth < '850'">
         </v-col>
       </v-row>
     </v-app>
@@ -275,7 +285,7 @@ export default {
         "studying."
       ],
       introIndex: 0,
-      windowWidth: window.innerWidth
+      windowWidth: window.innerWidth,
     }
   },
 
@@ -372,13 +382,24 @@ export default {
   animation-delay: 1s;
 }
 
+.card-small {
+  background-color: #faf9e2;
+  position: relative;
+  top: 15%;
+  animation: fadeInAnimation ease 2s;
+  opacity: 0;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-delay: 1s;
+}
+
 .full-intro {
   background-color: #faf9e2;
   border-radius: 20px;
   box-shadow: 0px 0px 6px #575757;
 }
 
-h3 {
+h3, h4 {
   font-size: 22px;
   color: #575757;
   font-family: Georgia, 'Times New Roman', Times, serif;
