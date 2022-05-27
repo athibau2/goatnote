@@ -30,7 +30,7 @@
 
             <!-- List of notes in collection -->
             <v-row>
-              <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in collNotes" :key="i">
+              <v-card class="list-card" color="purple lighten-3" elevation="5" width="300" v-for="(note, i) in collNotes" :key="i">
                 <v-card-title>
                     {{note.notename}}
                 </v-card-title>
@@ -48,7 +48,7 @@
           <!-- List of notes -->
           <v-col v-else-if="tab === 1">
             <v-row>
-              <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in notesSharedWithMe" :key="i">
+              <v-card class="list-card" color="purple lighten-3" elevation="5" width="300" v-for="(note, i) in notesSharedWithMe" :key="i">
                 <v-card-title>
                     {{note.notename}}
                 </v-card-title>

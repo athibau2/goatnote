@@ -50,7 +50,9 @@
         </template>
         <span>{{miniVariant ? 'Expand' : 'Collapse'}}</span>
       </v-tooltip>
-      <v-toolbar-title class="font-weight-bold" v-text="title" />
+      <button class="logo-btn" @click="toHome()">
+        <img class="logo" src="~/assets/logos/GN.png" height="45px">
+      </button>
       <v-spacer/>
       <div class="topButton" id="step-2">
         <v-btn color="light blue lighten-4" @click="newOrg()" to="/">Add Organization </v-btn>
@@ -59,7 +61,7 @@
         <v-btn color="light green lighten-3" @click="newCollection()" to="/">Add Collection </v-btn>
       </div>
       <div class="topButton" id="step-4">
-        <v-btn color="light purple lighten-3" @click="newNote()" to="/">Add Note </v-btn>
+        <v-btn color="purple lighten-3" @click="newNote()" to="/">Add Note </v-btn>
       </div>
       <v-toolbar-title class="name-display" v-if="user !== null && user !== undefined">
         &nbsp;{{userData.firstname}} {{userData.lastname}}
@@ -327,6 +329,10 @@ export default {
       this.windowWidth = window.innerWidth
     },
 
+    toHome() {
+      this.$router.push('/')
+    },
+
     logout() {
       this.$store.dispatch('users/logout')
     },
@@ -408,6 +414,19 @@ export default {
 
 .app-bar {
   overflow-y: scroll;
+}
+
+.logo-btn {
+  transition: transform 0.5s;
+}
+
+.logo-btn:hover {
+    transform: scale(1.05);
+}
+
+.logo {
+  margin: 2px 6px 2px 6px;
+  vertical-align: middle;
 }
 
 </style>

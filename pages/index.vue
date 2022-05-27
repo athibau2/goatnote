@@ -114,7 +114,7 @@
                 dense
                 solo
                 rounded
-                background-color="light purple lighten-3"
+                background-color="purple lighten-3"
                 v-model="newNoteName" 
                 placeholder="New Note Name"
               >
@@ -259,7 +259,7 @@
     <!-- List of notes -->
     <v-col>
       <v-row>
-        <v-card class="list-card" color="light purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
+        <v-card class="list-card" color="purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
           <v-card-title style="word-break: break-word;">
               {{note.notename}}
           </v-card-title>

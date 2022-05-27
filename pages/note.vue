@@ -42,7 +42,7 @@
                   dense
                   solo
                   rounded
-                  background-color="light purple lighten-3"
+                  background-color="purple lighten-3"
                   append-icon="mdi-chevron-down"
                   append-outer-icon="mdi-pencil"
                   @click:append-outer="editNote = !editNote"
@@ -65,7 +65,7 @@
                       solo
                       rounded
                       readonly
-                      background-color="light purple lighten-3"
+                      background-color="purple lighten-3"
                       append-icon="mdi-chevron-down"
                       append-outer-icon="mdi-pencil"
                       @click:append-outer="editNote = !editNote"
@@ -94,7 +94,7 @@
                 solo
                 rounded
                 readonly
-                background-color="light purple lighten-3"
+                background-color="purple lighten-3"
                 v-bind="attrs"
                 v-on="on"
                 :placeholder="currentNote.notename"
@@ -535,7 +535,7 @@ export default {
 
 <style scoped>
 .editor {
-  background-color: lightyellow;
+  background-color: #FFFFE0;
   margin-top: 5px;
 }
 

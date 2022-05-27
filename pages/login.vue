@@ -373,7 +373,7 @@ export default {
 .card {
   background-color: #faf9e2;
   position: fixed;
-  top: 15%;
+  top: 16%;
   right: 30px;
   animation: fadeInAnimation ease 2s;
   opacity: 0;
