@@ -1,5 +1,7 @@
 <template>
     <v-app>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4644384223616162" crossorigin="anonymous"></script>
+      
         <v-col v-if="(userData !== null && userData !== undefined)">
           <v-row justify="center" align="center">
             <v-card class="account-card" elevation="5" width="400">
