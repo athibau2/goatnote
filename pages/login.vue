@@ -1,4 +1,5 @@
 <template>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4644384223616162"crossorigin="anonymous"></script>
     <v-app>
       <v-row>
         <v-col class="intro-page" :cols="windowWidth < '850' ? null : '8'">

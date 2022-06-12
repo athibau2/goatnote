@@ -1,4 +1,5 @@
 <template>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4644384223616162"crossorigin="anonymous"></script>
     <v-app>
       <span>
         <v-tabs background-color="transparent" left v-model="tab">
