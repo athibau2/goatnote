@@ -145,7 +145,7 @@ export default {
 @import '~/assets/styles.css';
 
 .shared-list {
-  background-color: #DAECDA;
+  background-color: #F4F4F4;
   padding-bottom: 10px;
 }
 

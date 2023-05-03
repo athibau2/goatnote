@@ -115,7 +115,7 @@
 
         <!-- Notes area fullscreen -->
         <v-row v-if="windowWidth >= 1271">
-          <v-col cols="10">
+          <v-col cols="8">
             <vue-editor class="editor" id="note-step-1"
               :disabled="(user.user_id == currentNote.userid) ? false : true"
               @text-change="saveNotes()"
@@ -124,6 +124,24 @@
             </vue-editor>
           </v-col>
           <v-col class="text-center">
+            <div>
+              <v-btn width="100%" color="light grey lighten-1" 
+                @click="generateVocab()"
+                :disabled="user.user_id == currentNote.userid ? false : true"
+              >
+                Generate Vocab
+              </v-btn>
+            </div>
+            <br>
+            <div>
+              <v-btn width="100%" color="light grey lighten-1" 
+                @click="generateQuestions()"
+                :disabled="user.user_id == currentNote.userid ? false : true"
+              >
+                Generate Questions
+              </v-btn>
+            </div>
+            <br>
             <div id="note-step-2">
               <v-btn width="100%" color="light grey lighten-1" 
                 @click="getSharedNoteList(currentNote)"
@@ -226,6 +244,7 @@ import StudyPlans from '~/components/StudyPlans.vue'
 import ShareNote from '~/components/ShareNote.vue'
 import { VueEditor } from "vue2-editor"
 import Shepherd from 'shepherd.js'
+import { openaiGenerateQuestions, openaiGenerateVocab } from '~/store/openai'
 
 export default {
   name: 'NotePage',
@@ -284,6 +303,38 @@ export default {
   },
 
   methods: {
+      async generateVocab() {
+        console.log('Generateing vocab...')
+        const vocab = await openaiGenerateVocab({
+          input: this.noteText,
+          noteid: this.currentNote.noteid
+        })
+        for (let i = 0; i < vocab.length; ++i) {
+          await this.$store.dispatch('users/addWord', {
+            newWord: vocab[i].word,
+            newDef: vocab[i].definition,
+            noteid: this.currentNote.noteid
+          })
+        }
+        alert('Your vocab words have been successfully generated. You can review them by clicking the \"Words\" button.')
+      },
+      
+      async generateQuestions() {
+        console.log('Generateing questions...')
+        const questions = await openaiGenerateQuestions({
+          input: this.noteText,
+          noteid: this.currentNote.noteid
+        })
+        for (let i = 0; i < questions.length; ++i) {
+          await this.$store.dispatch('users/addQuestion', {
+            newQuestion: questions[i].question,
+            newAnswer: questions[i].answer,
+            noteid: this.currentNote.noteid
+          })
+        }
+        alert('Your study questions have been successfully generated. You can review them by clicking the \"Questions\" button.')
+      },
+      
       addSteps() {
         this.noteTour.addSteps([
           {

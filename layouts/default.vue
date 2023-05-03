@@ -5,13 +5,13 @@
 
 
     <v-navigation-drawer
+      class="main"
       id="menu-step-6"
       :mini-variant="windowWidth < 1161 ? true : miniVariant"
       :clipped="true"
       fixed
       app
       permanent
-      color="light grey lighten-4"
     >
       <v-list>
         <v-list-item
@@ -33,6 +33,7 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
+
     <v-app-bar
       class="app-bar"
       :clipped-left="true"
@@ -54,31 +55,27 @@
         <img class="logo" src="~/assets/logos/GN.png" height="45px">
       </button>
       <v-spacer/>
-      <div class="topButton" id="step-2">
+      <!-- <div class="topButton" id="step-2">
         <v-btn color="light blue lighten-4" @click="newOrg()" to="/">Add Organization </v-btn>
       </div>
       <div class="topButton" id="step-3">
         <v-btn color="light green lighten-3" @click="newCollection()" to="/">Add Collection </v-btn>
-      </div>
-      <div class="topButton" id="step-4">
+      </div> -->
+      <!-- <div class="topButton" id="step-4">
         <v-btn color="purple lighten-3" @click="newNote()" to="/">Add Note </v-btn>
-      </div>
+      </div> -->
       <v-toolbar-title class="name-display" v-if="user !== null && user !== undefined">
-        &nbsp;{{userData.firstname}} {{userData.lastname}}
+        {{userData.firstname}} {{userData.lastname}}
       </v-toolbar-title>
+      <v-btn to="/account" icon><v-icon size="30">mdi-account</v-icon></v-btn>
     </v-app-bar>
+
     <v-main class="main">
       <v-container class="main">
         <Nuxt class="main" />
       </v-container>
     </v-main>
-    <v-navigation-drawer
-      v-model="rightDrawer"
-      :right="right"
-      temporary
-      fixed
-    >
-    </v-navigation-drawer>
+
   </v-app>
 </template>
 
@@ -186,51 +183,51 @@ export default {
             }
           ]
         },
-        {
-          id: 'step-2',
-          title: 'Hello there!',
-          text: 'Create a new organization here, such as a school or business.',
-          attachTo: {
-            element: '#step-2',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: this.tour.next
-            }
-          ]
-        },
-        {
-          id: 'step-3',
-          title: 'Hello there!',
-          text: 'Create collections inside your organizations. This could be a school course, or a specific work project!',
-          attachTo: {
-            element: '#step-3',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: this.tour.next
-            }
-          ]
-        },
-        {
-          id: 'step-4',
-          title: 'Hello there!',
-          text: 'Now create individual notes inside your collections. This could be specific lectures or meetings.',
-          attachTo: {
-            element: '#step-4',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: this.tour.next
-            }
-          ]
-        },
+        // {
+        //   id: 'step-2',
+        //   title: 'Hello there!',
+        //   text: 'Create a new organization here, such as a school or business.',
+        //   attachTo: {
+        //     element: '#step-2',
+        //     on: 'bottom'
+        //   },
+        //   buttons: [
+        //     {
+        //       text: 'Next',
+        //       action: this.tour.next
+        //     }
+        //   ]
+        // },
+        // {
+        //   id: 'step-3',
+        //   title: 'Hello there!',
+        //   text: 'Create collections inside your organizations. This could be a school course, or a specific work project!',
+        //   attachTo: {
+        //     element: '#step-3',
+        //     on: 'bottom'
+        //   },
+        //   buttons: [
+        //     {
+        //       text: 'Next',
+        //       action: this.tour.next
+        //     }
+        //   ]
+        // },
+        // {
+        //   id: 'step-4',
+        //   title: 'Hello there!',
+        //   text: 'Now create individual notes inside your collections. This could be specific lectures or meetings.',
+        //   attachTo: {
+        //     element: '#step-4',
+        //     on: 'bottom'
+        //   },
+        //   buttons: [
+        //     {
+        //       text: 'Next',
+        //       action: this.tour.next
+        //     }
+        //   ]
+        // },
         {
           id: 'menu-step-1',
           title: 'Hello there!',
@@ -344,39 +341,6 @@ export default {
     loadOrgs () {
         this.$store.dispatch('users/orgs')
     },
-
-    loadCollections () {
-      this.$store.dispatch('users/collections')
-    },
-
-    newOrg () {
-      this.$store.commit('users/newCollection', false)
-      this.$store.commit('users/newNote', false)
-      this.$store.commit('users/newOrg', true)
-    },
-
-    newCollection () {
-      if (this.orgs.length === 0) {
-        alert('You must first create an organization before you can create a collection.')
-      }
-      else {
-        this.$store.commit('users/newNote', false)
-        this.$store.commit('users/newOrg', false)
-        this.$store.commit('users/newCollection', true)
-      }
-    },
-
-    newNote() {
-      if (this.allColls.length === 0) {
-        alert('You must first create a collection before you can create a note.')
-      }
-      else {
-        this.$store.commit('users/newOrg', false)
-        this.$store.commit('users/newCollection', false)
-        this.$store.commit('users/newNote', true)
-        this.$store.dispatch('users/allColls')
-      }
-    }
   },
 
   computed: {
@@ -400,12 +364,9 @@ export default {
 </script>
 
 <style scoped>
+@import '~/assets/styles.css';
 .topButton {
   margin-right : 3px;
-}
-
-.main{
-  background-color: #DAECDA;
 }
 
 .name-display {
@@ -413,7 +374,7 @@ export default {
 }
 
 .app-bar {
-  overflow-y: scroll;
+  background-image: linear-gradient(to top right, #f4f4f4, #B3E5FC);
 }
 
 .logo-btn {

@@ -7,13 +7,48 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
       <!-- </head>
     </html> -->
+
+    <span>
+      <span class="basic-header">
+        {{level == 1 ? 'Your Organizations' : level == 2 ? `${selectedOrg.orgname} Collections` : `${selectedColl.collectionname} Notes`}}
+      </span>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn class="add-btn" 
+            @click="level == 1 ? newOrg() : level == 2 ? newCollection() : newNote()"
+            icon
+            v-on="on"
+            v-bind="attrs"
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </template>
+        <span>Create New</span>
+      </v-tooltip>
+
+      <v-tooltip bottom v-if="level != 1">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn class="add-btn"
+            @click="level--"
+            icon
+            v-on="on"
+            v-bind="attrs"
+            :disabled="creating"
+          >
+            <v-icon>mdi-chevron-up</v-icon>
+          </v-btn>
+        </template>
+        <span>Collapse</span>
+      </v-tooltip>
+    </span>
+    <hr>
     
     <!-- Creating a new org -->
-    <v-col v-if="makingNewOrg">
+    <v-col v-if="makingNewOrg" style="margin-top: 10px;">
       <v-row justify="center" align="center">
-        <v-card color="#faf9e2" elevation="5" width="400">
-          <v-card-title class="headline" style="word-break: break-word;">
-              Create a New Organization {{windowWidth}}
+        <v-card class="card" elevation="5" width="400">
+          <v-card-title class="basic-header" style="word-break: break-word;">
+              New Organization
           </v-card-title>
           <v-card-text>
               <v-text-field
@@ -21,7 +56,7 @@
                 dense
                 solo
                 rounded
-                background-color="light blue lighten-4"
+                background-color="#f4f4f4"
                 v-model="newOrgName" 
                 placeholder="New Organization Name"
               >
@@ -31,10 +66,10 @@
               <label id="checkbox-label" for="private">Make Private</label>
               <input id="checkbox" type="checkbox" name="private" v-model="isPrivate" />
               <v-spacer />
-              <v-btn color="light red lighten-2" nuxt @click="newOrg()">
+              <v-btn text nuxt @click="cancelNewOrg()">
                   Cancel
               </v-btn>
-              <v-btn color="primary" nuxt @click="createOrg()">
+              <v-btn class="submit-btn" nuxt @click="createOrg()">
                   Submit
               </v-btn>
           </v-card-actions>
@@ -45,56 +80,31 @@
     <!-- Creating a new collection -->
     <v-col v-if="makingNewCollection">
       <v-row justify="center" align="center">
-        <v-card color="#faf9e2" elevation="5" width="400">
-          <v-card-title class="headline" style="word-break: break-word;">
-              Create a New Collection
+        <v-card class="card" elevation="5" width="400">
+          <v-card-title class="basic-header" style="word-break: break-word;">
+              New Collection
           </v-card-title>
+          <v-card-subtitle>
+            {{ selectedOrg.orgname }}
+          </v-card-subtitle>
           <v-card-text>
               <v-text-field
                 class="selector"
                 dense
                 solo
                 rounded
-                background-color="light green lighten-3"
+                background-color="#f4f4f4"
                 v-model="newCollName" 
                 placeholder="New Collection Name"
               >
               </v-text-field>
-              <v-menu
-                bottom
-                :close-on-content-click="true"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    class="selector"
-                    dense
-                    solo
-                    rounded
-                    readonly
-                    background-color="light blue lighten-4"
-                    append-icon="mdi-chevron-down"
-                    v-bind="attrs" 
-                    v-on="on" 
-                    v-model="orgToAddTo" 
-                    placeholder="Add to Organization"
-                  >
-                  </v-text-field>
-                </template>
-                <v-list>
-                  <v-list-item v-for="(org, i) in orgs" :key="i">
-                    <v-btn color="light blue lighten-4" @click="setOrgToAddTo(org)">
-                      {{org.orgname}}
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
           </v-card-text>
           <v-card-actions>
               <v-spacer />
-              <v-btn color="light red lighten-2" nuxt @click="newCollection()">
+              <v-btn text nuxt @click="cancelNewCollection()">
                   Cancel
               </v-btn>
-              <v-btn color="primary" @click="createCollection()">
+              <v-btn color="#85c59d" @click="createCollection()">
                   Add
               </v-btn>
           </v-card-actions>
@@ -105,56 +115,31 @@
     <!-- Creating a new note -->
     <v-col v-if="makingNewNote">
       <v-row justify="center" align="center">
-        <v-card color="#faf9e2" elevation="5" width="400" style="word-break: break-word;">
-          <v-card-title class="headline">
-              Create a New Note
+        <v-card class="card" elevation="5" width="400" style="word-break: break-word;">
+          <v-card-title class="basic-header">
+              New Note
           </v-card-title>
+          <v-card-subtitle>
+            {{ selectedColl.collectionname }}
+          </v-card-subtitle>
           <v-card-text>
               <v-text-field
                 class="selector"
                 dense
                 solo
                 rounded
-                background-color="purple lighten-3"
-                v-model="newNoteName" 
+                background-color="#f4f4f4"
+                v-model="newNoteName"
                 placeholder="New Note Name"
               >
               </v-text-field>
-              <v-menu
-                bottom
-                :close-on-content-click="true"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    class="selector"
-                    dense
-                    solo
-                    rounded
-                    readonly
-                    background-color="light green lighten-3"
-                    append-icon="mdi-chevron-down"
-                    v-bind="attrs" 
-                    v-on="on" 
-                    v-model="collToAddTo" 
-                    placeholder="Add to Collection"
-                  >
-                  </v-text-field>
-                </template>
-                <v-list>
-                  <v-list-item v-for="(coll, i) in allColls" :key="i">
-                    <v-btn color="light green lighten-3" @click="setCollToAddTo(coll)">
-                      {{coll.collectionname}}
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
           </v-card-text>
           <v-card-actions>
               <v-spacer />
-              <v-btn color="light red lighten-2" nuxt @click="newNote()">
+              <v-btn text nuxt @click="cancelNewNote()">
                   Cancel
               </v-btn>
-              <v-btn color="primary" @click="createNote()">
+              <v-btn color="#85c59d" @click="createNote()">
                   Add
               </v-btn>
           </v-card-actions>
@@ -169,9 +154,9 @@
     </h2>
 
     <!-- List of orgs -->
-    <v-col>
+    <v-col v-if="level == 1">
       <v-row>
-        <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
+        <v-card class="card" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
           <v-card-title class="headline" style="word-break: break-word;">
               {{org.orgname}}
               <v-spacer />
@@ -197,19 +182,17 @@
           </v-card-title>
           <v-card-actions>
             <v-spacer />
-            <v-btn color="light red lighten-2" @click="leaveOrg(org.orgid)">Leave</v-btn>
-            <v-btn color="primary" @click="loadCollections(org.orgid)">Go</v-btn>
+            <v-btn text @click="leaveOrg(org.orgid)">Leave</v-btn>
+            <v-btn color="#85c59d" @click="loadCollections(org)">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
     </v-col>
 
-    <br>
-
     <!-- List of collections -->
-    <v-col>
+    <v-col v-if="level == 2">
       <v-row>
-        <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
+        <v-card class="card" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
           <v-card-title 
             v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)"
             style="word-break: break-word;"
@@ -237,8 +220,7 @@
             <v-spacer />
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    color="#cccccc"
+                  <v-btn icon
                     v-bind="attrs"
                     v-on="on"
                     @click="getSharedCollList(coll)"
@@ -248,19 +230,17 @@
                 </template>
                 <span>Share</span>
               </v-tooltip>
-            <v-btn color="light red lighten-2" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
-            <v-btn color="primary" @click="loadNotes(coll.collectionid)">Go</v-btn>
+            <v-btn text @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
+            <v-btn color="#85c59d" @click="loadNotes(coll)">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
     </v-col>
 
-    <br>
-
     <!-- List of notes -->
-    <v-col>
+    <v-col v-if="level == 3">
       <v-row>
-        <v-card class="list-card" color="purple lighten-3" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
+        <v-card class="card" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
           <v-card-title style="word-break: break-word;">
               {{note.notename}}
           </v-card-title>
@@ -268,8 +248,7 @@
             <v-spacer />
             <v-tooltip top>
               <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  color="#cccccc"
+                <v-btn icon
                   v-bind="attrs"
                   v-on="on"
                   @click="getSharedNoteList(note)"
@@ -279,8 +258,8 @@
               </template>
               <span>Share</span>
             </v-tooltip>
-            <v-btn color="light red lighten-2" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
-            <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
+            <v-btn text @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
+            <v-btn color="#85c59d" @click="openNote(note.noteid)">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
@@ -315,22 +294,53 @@ export default {
       newOrgName: "",
       newCollName: "",
       newNoteName: "",
-      orgToAddTo: "",
-      orgIdToAddTo: null,
-      collToAddTo: "",
-      collIdToAddTo: null,
-      orgOfCollBeingAddedTo: null,
       collBeingEdited: null,
       editingColl: false,
       newName: "",
       showShareColl: false,
       showShareNote: false,
       isPrivate: false,
+      selectedOrg: null,
+      selectedColl: null,
+      level: 1,
+      creating: false,
       windowWidth: window.innerWidth,
     }
   },
 
   methods: {
+    newOrg () {
+      this.creating = true
+      this.$store.commit('users/newCollection', false)
+      this.$store.commit('users/newNote', false)
+      this.$store.commit('users/newOrg', true)
+    },
+
+    newCollection () {
+      this.creating = true
+      if (this.orgs.length === 0) {
+        alert('You must first create an organization before you can create a collection.')
+      }
+      else {
+        this.$store.commit('users/newNote', false)
+        this.$store.commit('users/newOrg', false)
+        this.$store.commit('users/newCollection', true)
+      }
+    },
+
+    newNote() {
+      this.creating = true
+      if (this.allColls.length === 0) {
+        alert('You must first create a collection before you can create a note.')
+      }
+      else {
+        this.$store.commit('users/newOrg', false)
+        this.$store.commit('users/newCollection', false)
+        this.$store.commit('users/newNote', true)
+        this.$store.dispatch('users/allColls')
+      }
+    },
+
     getSharedCollList (coll) {
       this.showShareColl = true
       this.$store.dispatch('users/getSharedCollList', {
@@ -364,33 +374,26 @@ export default {
       this.setEditColl()
     },
 
-    loadCollections (orgid) {
+    loadCollections (org) {
+      this.level++
+      this.selectedOrg = org
       this.$store.dispatch('users/collections', {
-        orgid
+        orgid: org.orgid
       })
     },
 
-    loadNotes (collectionid) {
+    loadNotes (collection) {
+      this.level++
+      this.selectedColl = collection
       this.$store.dispatch('users/notes', {
-        collectionid
+        collectionid: collection.collectionid
       })
     },
 
     openNote (noteid) {
       this.$store.dispatch('users/openNote', {
-        noteid
+        noteid: noteid
       })
-    },
-
-    setOrgToAddTo (org) {
-      this.orgToAddTo = org.orgname
-      this.orgIdToAddTo = org.orgid
-    },
-
-    setCollToAddTo (coll) {
-      this.orgOfCollBeingAddedTo = coll.orgid
-      this.collToAddTo = coll.collectionname
-      this.collIdToAddTo = coll.collectionid
     },
 
     createOrg () {
@@ -400,20 +403,18 @@ export default {
           orgname: this.newOrgName,
           isPrivate: this.isPrivate
         })
-        this.newOrgName = ""
-        this.newOrg()
+        this.cancelNewOrg()
       }
     },
 
-    createCollection () {
+    async createCollection () {
       if (this.newCollName === "") alert('No field may be left empty')
       else {
-        this.$store.dispatch('users/createCollection', {
+        await this.$store.dispatch('users/createCollection', {
           collectionname: this.newCollName,
-          orgid: this.orgIdToAddTo
+          orgid: this.selectedOrg.orgid
         })
-        this.newCollName = ""
-        this.newCollection()
+        this.cancelNewCollection()
       }
     },
 
@@ -422,12 +423,18 @@ export default {
       else {
         this.$store.dispatch('users/createNote', {
           notename: this.newNoteName,
-          collectionid: this.collIdToAddTo,
-          orgid: this.orgOfCollBeingAddedTo
+          collectionid: this.selectedColl.collectionid,
+          orgid: this.selectedOrg.orgid
         })
-        this.newNoteName = ""
-        this.newNote()
+        this.cancelNewNote()
       }
+    },
+
+    cancelNewOrg() {
+      this.$store.commit('users/newOrg', false)
+      this.newOrgName = ""
+      this.isPrivate = false
+      this.creating = false
     },
 
     leaveOrg(orgid) {
@@ -456,25 +463,16 @@ export default {
       }
     },
 
-    newOrg () {
-      this.$store.commit('users/newOrg', false)
-      this.newOrgName = ""
-      this.isPrivate = false
-    },
-
-    newCollection () {
+    cancelNewCollection () {
       this.$store.commit('users/newCollection', false)
-      this.orgToAddTo = ""
-      this.orgIdToAddTo = null
       this.newCollName = ""
+      this.creating = false
     },
 
-    newNote () {
+    cancelNewNote() {
       this.$store.commit('users/newNote', false)
-      this.collToAddTo = ""
-      this.collIdToAddTo = null
       this.newNoteName = ""
-      this.orgOfCollBeingAddedTo = null
+      this.creating = false
     },
   },
 
@@ -521,9 +519,8 @@ export default {
 <style scoped>
 @import '~/assets/styles.css';
 
-.list-card{
-  margin-right: 10px;
-  margin-bottom: 10px;
+.add-btn {
+  vertical-align: baseline;
 }
 
 #checkbox-label {
