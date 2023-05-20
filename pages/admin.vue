@@ -32,7 +32,7 @@
                   <td>{{u.email}}</td>
                   <td>
                     <v-btn
-                      :color="u.isadmin ? 'light red lighten-2' : 'primary'"
+                      :class="u.isadmin ? 'bad-btn' : 'good-btn'"
                       @click="changeStatus(u)"
                     >
                       {{u.isadmin ? 'Demote' : 'Promote'}}
@@ -40,7 +40,7 @@
                   </td>
                   <td>
                     <v-btn
-                      :color="'grey'"
+                      text
                       @click="deleteUser(u)"
                     >
                       Delete
@@ -72,7 +72,7 @@
                     </v-btn>
                   </td>
                   <td>
-                    <v-btn color="light red lighten-2"
+                    <v-btn class="bad-btn"
                       @click="$route.query.userid === undefined ? deleteOrg(o) : removeUserFromOrg($route.params.user, o)"
                     >
                       {{$route.query.userid === undefined ? 'Delete' : 'Remove'}}
@@ -102,7 +102,7 @@
                     </nuxt-link>
                   </td>
                   <td>
-                    <v-btn color="light red lighten-2" @click="deleteColl(c)">
+                    <v-btn class="bad-btn" @click="deleteColl(c)">
                       Delete
                     </v-btn>
                   </td>
@@ -127,7 +127,7 @@
                     </nuxt-link>
                   </td>
                   <td>
-                    <v-btn color="light red lighten-2" @click="deleteNote(n)">
+                    <v-btn class="bad-btn" @click="deleteNote(n)">
                       Delete
                     </v-btn>
                   </td>
@@ -156,7 +156,7 @@
                     </td>
                     <td>{{m.email}}</td>
                     <td>
-                      <v-btn color="light red lighten-2" @click="removeUserFromOrg(m, $route.params.org)">
+                      <v-btn class="bad-btn" @click="removeUserFromOrg(m, $route.params.org)">
                         Remove
                       </v-btn>
                     </td>
@@ -164,7 +164,7 @@
               </table>
             </div>
             <div class="modal-bottom-content">
-                <v-btn color="light red lighten-2" @click="showOrgUsers = false">
+                <v-btn text @click="showOrgUsers = false">
                     Exit
                 </v-btn>
             </div>
@@ -187,7 +187,7 @@
                     <td>{{n.notename}}</td>
                     <td>{{parseDate(n.notedate)}}</td>
                     <td>
-                      <v-btn color="light red lighten-2" @click="deleteNote(n)">
+                      <v-btn class="bad-btn" @click="deleteNote(n)">
                         Delete
                       </v-btn>
                     </td>
@@ -195,7 +195,7 @@
               </table>
             </div>
             <div class="modal-bottom-content">
-                <v-btn color="light red lighten-2" @click="showCollNotes = false">
+                <v-btn text @click="showCollNotes = false">
                     Exit
                 </v-btn>
             </div>

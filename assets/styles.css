@@ -4,6 +4,7 @@
     green: #85c59d
     blue: #B3E5FC
     black: #2F2B28
+    red/white gradient: to top right, #f4f4f4, #E57373
     yellow/white gradient: to top right, #ffffec, #F4F4F4
     blue/white gradient: to top right, #f4f4f4, #B3E5FC
     green/white gradient: to top right, #f4f4f4, #85c59d
@@ -21,6 +22,10 @@
 
 .good-btn {
     background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
+}
+
+.bad-btn {
+    background-image: linear-gradient(to top right, #f4f4f4, #E57373);
 }
 
 .basic-header {

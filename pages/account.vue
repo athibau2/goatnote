@@ -4,14 +4,14 @@
       
         <v-col v-if="(userData !== null && userData !== undefined)">
           <v-row justify="center" align="center">
-            <v-card class="account-card" elevation="5" width="400">
-            <v-card-title class="name">
-                {{userData.firstname}} {{userData.lastname}}
-            </v-card-title>
-            <v-card-subtitle>
-                {{userData.email}}
-            </v-card-subtitle>
-            <v-card-text>
+            <v-card class="account-card" elevation="1" outlined width="500">
+              <v-card-title class="name">
+                  {{userData.firstname}} {{userData.lastname}}
+              </v-card-title>
+              <v-card-subtitle>
+                  {{userData.email}}
+              </v-card-subtitle>
+              <v-card-text>
                 <v-text-field
                   class="selector"
                   dense
@@ -38,12 +38,12 @@
                   placeholder="New Password"
                 >
                 </v-text-field>
-            </v-card-text>
-            <v-card-actions>
+              </v-card-text>
+              <v-card-actions>
                 <v-spacer />
-                <v-btn color="light red lighten-2" @click="deleteAccount()">Delete Account</v-btn>
-                <v-btn color="primary" @click="updatePass()">Update Password</v-btn>
-            </v-card-actions>
+                <v-btn text @click="deleteAccount()">Delete Account</v-btn>
+                <v-btn class="good-btn" @click="updatePass()">Update Password</v-btn>
+              </v-card-actions>
             </v-card>
           </v-row>
         </v-col>
@@ -108,7 +108,13 @@ export default {
 @import '~/assets/styles.css';
 
 .account-card {
-  background-color: #faf9e2;
+  background-color: transparent;
+  margin-top: 20px;
+}
+
+.selector {
+  width: 70%;
+  margin: auto;
 }
 
 .name {
