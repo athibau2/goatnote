@@ -55,15 +55,7 @@
         <img class="logo" src="~/assets/logos/GN.png" height="45px">
       </button>
       <v-spacer/>
-      <!-- <div class="topButton" id="step-2">
-        <v-btn color="light blue lighten-4" @click="newOrg()" to="/">Add Organization </v-btn>
-      </div>
-      <div class="topButton" id="step-3">
-        <v-btn color="light green lighten-3" @click="newCollection()" to="/">Add Collection </v-btn>
-      </div> -->
-      <!-- <div class="topButton" id="step-4">
-        <v-btn color="purple lighten-3" @click="newNote()" to="/">Add Note </v-btn>
-      </div> -->
+
       <v-toolbar-title class="name-display" v-if="user !== null && user !== undefined">
         {{userData.firstname}} {{userData.lastname}}
       </v-toolbar-title>
@@ -183,51 +175,6 @@ export default {
             }
           ]
         },
-        // {
-        //   id: 'step-2',
-        //   title: 'Hello there!',
-        //   text: 'Create a new organization here, such as a school or business.',
-        //   attachTo: {
-        //     element: '#step-2',
-        //     on: 'bottom'
-        //   },
-        //   buttons: [
-        //     {
-        //       text: 'Next',
-        //       action: this.tour.next
-        //     }
-        //   ]
-        // },
-        // {
-        //   id: 'step-3',
-        //   title: 'Hello there!',
-        //   text: 'Create collections inside your organizations. This could be a school course, or a specific work project!',
-        //   attachTo: {
-        //     element: '#step-3',
-        //     on: 'bottom'
-        //   },
-        //   buttons: [
-        //     {
-        //       text: 'Next',
-        //       action: this.tour.next
-        //     }
-        //   ]
-        // },
-        // {
-        //   id: 'step-4',
-        //   title: 'Hello there!',
-        //   text: 'Now create individual notes inside your collections. This could be specific lectures or meetings.',
-        //   attachTo: {
-        //     element: '#step-4',
-        //     on: 'bottom'
-        //   },
-        //   buttons: [
-        //     {
-        //       text: 'Next',
-        //       action: this.tour.next
-        //     }
-        //   ]
-        // },
         {
           id: 'menu-step-1',
           title: 'Hello there!',
@@ -365,16 +312,13 @@ export default {
 
 <style scoped>
 @import '~/assets/styles.css';
+
 .topButton {
   margin-right : 3px;
 }
 
 .name-display {
   font-family: Georgia, 'Times New Roman', Times, serif;
-}
-
-.app-bar {
-  background-image: linear-gradient(to top right, #f4f4f4, #B3E5FC);
 }
 
 .logo-btn {

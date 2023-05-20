@@ -222,7 +222,7 @@
                 elevation="5" 
                 :width="windowWidth < 1060 ? 300 : 350"
               >
-                <v-card-title class="headline" style="color: #575757">
+                <v-card-title class="headline" style="color: #2F2B28">
                     <em>Sign In Here</em>
                 </v-card-title>
                 <v-card-text>
@@ -256,7 +256,7 @@
                     <v-spacer />
                     <nuxt-link to="/signup">Join Here</nuxt-link>
                     <span>&nbsp;</span>
-                    <v-btn color="#abddd0" nuxt @click="login()">
+                    <v-btn class="good-btn" nuxt @click="login()">
                         Sign In
                     </v-btn>
                 </v-card-actions>
@@ -396,20 +396,20 @@ export default {
 }
 
 .full-intro {
-  background-color: #faf9e2;
+  background-color: transparent;
   border-radius: 20px;
-  box-shadow: 0px 0px 6px #575757;
+  box-shadow: 0px 0px 4px #2F2B28;
 }
 
 h3, h4 {
   font-size: 22px;
-  color: #575757;
+  color: #2F2B28;
   font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 .intro {
   font-size: 20px;
-  color: #575757;
+  color: #2F2B28;
   font-family: Cochin;
 }
 
@@ -423,7 +423,7 @@ h3, h4 {
 
 .intro-img {
   border-radius: 10px;
-  box-shadow: 0px 0px 4px #575757;
+  box-shadow: 0px 0px 4px #2F2B28;
 }
 
 </style>
