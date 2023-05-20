@@ -147,17 +147,16 @@
       </v-row>
     </v-col>
 
-    <br>
-
-    <h2 v-if="orgs === null || orgs === undefined || orgs.length === 0" class="notice text-center">
-      You are currently not part of any organizations and have no collections or notes. Create one above!
-    </h2>
+    <span v-if="orgs === null || orgs === undefined || orgs.length === 0" class="notice text-center">
+      You are currently not part of any organizations. Create one above or 
+      <nuxt-link to="/joinOrg">join one</nuxt-link>!
+    </span>
 
     <!-- List of orgs -->
     <v-col v-if="level == 1">
       <v-row>
         <v-card class="card" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
-          <v-card-title class="headline" style="word-break: break-word;">
+          <v-card-title style="word-break: break-word;">
               {{org.orgname}}
               <v-spacer />
               <v-menu

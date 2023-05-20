@@ -4,7 +4,9 @@
     green: #85c59d
     blue: #B3E5FC
     black: #2F2B28
+    yellow/white gradient: to top right, #ffffec, #F4F4F4
     blue/white gradient: to top right, #f4f4f4, #B3E5FC
+    green/white gradient: to top right, #f4f4f4, #85c59d
 */
 
 .main {
@@ -13,7 +15,8 @@
 
 .card {
     background-image: linear-gradient(to top right, #f4f4f4, #B3E5FC) !important;
-    margin: 5px;
+    margin: 10px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .basic-header {
@@ -27,11 +30,12 @@
 }
 
 .notice{
-    font-family: Cochon;
-    border: solid grey 1.5px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 18px;
+    border: solid grey 1.2px;
     border-radius: 8px;
-    padding: 8px;
-    background-color: #faf9e2;
+    padding: 10px;
+    background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
 }
 
 .modal, .modal-overlay {

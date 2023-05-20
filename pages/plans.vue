@@ -62,7 +62,7 @@
                           <v-icon>mdi-chevron-right-circle</v-icon>
                         </v-btn>
                       </template>
-                      <span>Go Study</span>
+                      <span>Study</span>
                     </v-tooltip>
                 </v-card-actions>
             </v-card>

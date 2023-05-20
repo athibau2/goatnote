@@ -5,44 +5,59 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4644384223616162" crossorigin="anonymous"></script>
 
     <v-container>
-        <v-row class="text-center">
+        <v-row>
             <v-col>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      v-bind="attrs"
-                      v-on="on"
-                      color="light red lighten-2" 
-                      to="/"
-                    >
-                      <v-icon>mdi-arrow-left</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Back</span>
-                </v-tooltip>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn id="note-step-7"
-                      color="primary"
-                      dark
-                      v-bind="attrs"
-                      v-on="on"
-                      @click="toggleStudy()"
-                    >
-                      Study!
-                    </v-btn>
-                  </template>
-                  <span v-if="studyMode">Turn off study mode</span>
-                  <span v-else>Begin study</span>
-                </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="back()"
+                    icon
+                  >
+                    <v-icon size="30">mdi-arrow-left</v-icon>
+                  </v-btn>
+                </template>
+                <span>Back</span>
+              </v-tooltip>
+
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn id="note-step-7"
+                    style="margin: 0 10px"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="toggleStudy()"
+                    icon
+                  >
+                    <v-icon size="32">mdi-head-question</v-icon>
+                  </v-btn>
+                </template>
+                <span>{{studyMode ? 'Turn off study mode' : 'Begin Study'}}</span>
+              </v-tooltip>
+
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="newNote()"
+                    icon
+                  >
+                    <v-icon size="28">mdi-note-plus</v-icon>
+                  </v-btn>
+                </template>
+                <span>New Note</span>
+              </v-tooltip>
             </v-col>
+
             <v-col cols="7" v-if="user.user_id == currentNote.userid">
                 <v-text-field v-if="editNote"
                   class="noteselector"
                   dense
                   solo
                   rounded
-                  background-color="purple lighten-3"
+                  color="#F4F4F4"
                   append-icon="mdi-chevron-down"
                   append-outer-icon="mdi-pencil"
                   @click:append-outer="editNote = !editNote"
@@ -56,7 +71,7 @@
                   bottom
                   transition="slide-y-transition"
                   :offset-y="true"
-                  :close-on-content-click="true"
+                  close-on-content-click
                 >
                   <template v-slot:activator="{ on, attrs }">
                     <v-text-field id="note-step-8"
@@ -65,7 +80,7 @@
                       solo
                       rounded
                       readonly
-                      background-color="purple lighten-3"
+                      color="#F4F4F4"
                       append-icon="mdi-chevron-down"
                       append-outer-icon="mdi-pencil"
                       @click:append-outer="editNote = !editNote"
@@ -94,7 +109,7 @@
                 solo
                 rounded
                 readonly
-                background-color="purple lighten-3"
+                color="#F4F4F4"
                 v-bind="attrs"
                 v-on="on"
                 :placeholder="currentNote.notename"
@@ -106,7 +121,7 @@
                 >
                   {{this.currentNote.collectionname}}
                 </span>
-                <h5>{{prettyDate}} &nbsp;--&nbsp; {{this.saving}}</h5>
+                <h5>{{prettyDate}} &ndash; {{this.saving}}</h5>
             </v-col>
         </v-row>
 
@@ -115,56 +130,53 @@
 
         <!-- Notes area fullscreen -->
         <v-row v-if="windowWidth >= 1271">
-          <v-col cols="8">
-            <vue-editor class="editor" id="note-step-1"
-              :disabled="(user.user_id == currentNote.userid) ? false : true"
-              @text-change="saveNotes()"
-              v-model="noteText"
-            >
-            </vue-editor>
+          <v-col cols="9">
+            <div class="editor-wrapper">
+              <vue-editor class="editor" id="note-step-1"
+                :disabled="(user.user_id == currentNote.userid) ? false : true"
+                @text-change="saveNotes()"
+                v-model="noteText"
+              >
+              </vue-editor>
+            </div>
           </v-col>
-          <v-col class="text-center">
+
+          <v-col class="text-center" cols="3">
             <div>
-              <v-btn width="100%" color="light grey lighten-1" 
+              <v-btn class="tool-btn"
                 @click="generateVocab()"
                 :disabled="user.user_id == currentNote.userid ? false : true"
               >
                 Generate Vocab
               </v-btn>
             </div>
-            <br>
             <div>
-              <v-btn width="100%" color="light grey lighten-1" 
+              <v-btn class="tool-btn"
                 @click="generateQuestions()"
                 :disabled="user.user_id == currentNote.userid ? false : true"
               >
                 Generate Questions
               </v-btn>
             </div>
-            <br>
             <div id="note-step-2">
-              <v-btn width="100%" color="light grey lighten-1" 
+              <v-btn class="tool-btn"
                 @click="getSharedNoteList(currentNote)"
                 :disabled="user.user_id == currentNote.userid ? false : true"
               >
                 Share Note
               </v-btn>
             </div>
-            <br>
             <div id="note-step-3">
-              <v-btn width="100%" color="light grey lighten-1" @click="showWords = true">Words</v-btn>
+              <v-btn class="tool-btn" @click="showWords = true">Words</v-btn>
             </div>
-            <br>
             <div id="note-step-4">
-              <v-btn width="100%" color="light grey lighten-1" @click="showQuestions = true">Questions</v-btn>
+              <v-btn class="tool-btn" @click="showQuestions = true">Questions</v-btn>
             </div>
-            <br>
             <div id="note-step-5">
-              <v-btn width="100%" color="light grey lighten-1" @click="showLinks = true">Links</v-btn>
+              <v-btn class="tool-btn" @click="showLinks = true">Links</v-btn>
             </div>
-            <br>
             <div id="note-step-6">
-              <v-btn width="100%" color="light grey lighten-1" 
+              <v-btn class="tool-btn"
                 @click="openPlans()"
                 :disabled="user.user_id == currentNote.userid ? false : true"
               >
@@ -176,54 +188,67 @@
 
         <!-- Notes area small screen -->
         <v-col cols="12" v-else-if="windowWidth < 1271">
-          <v-btn id="note-step-2"
-            :style="windowWidth < 936 ? 'font-size: 10px' : null"
-            :width="windowWidth < 936 ? '15%' : '20%'" 
-            color="light grey lighten-1" 
+          <v-btn class="tool-btn"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto" 
+            @click="generateVocab()"
+            :disabled="user.user_id == currentNote.userid ? false : true"
+          >
+            Generate Vocab
+          </v-btn>
+          <v-btn class="tool-btn"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
+            @click="generateQuestions()"
+            :disabled="user.user_id == currentNote.userid ? false : true"
+          >
+            Generate Questions
+          </v-btn>
+          <v-btn  class="tool-btn" id="note-step-2"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
             @click="getSharedNoteList(currentNote)"
             :disabled="user.user_id == currentNote.userid ? false : true"
           >
             Share Note
           </v-btn>
-          <v-btn id="note-step-3"
-            :style="windowWidth < 936 ? 'font-size: 10px' : null"
-            :width="windowWidth < 936 ? '15%' : '20%'" 
-            color="light grey lighten-1" 
+          <v-btn class="tool-btn" id="note-step-3"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
             @click="showWords = true"
           >
             Words
           </v-btn>
-          <v-btn id="note-step-4"
-            :style="windowWidth < 936 ? 'font-size: 10px' : null"
-            :width="windowWidth < 936 ? '15%' : '20%'" 
-            color="light grey lighten-1" 
+          <v-btn class="tool-btn" id="note-step-4"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
             @click="showQuestions = true"
           >
             Questions
           </v-btn>
-          <v-btn id="note-step-5"
-            :style="windowWidth < 936 ? 'font-size: 10px' : null"
-            :width="windowWidth < 936 ? '15%' : '19%'" 
-            color="light grey lighten-1" 
+          <v-btn class="tool-btn" id="note-step-5"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
             @click="showLinks = true"
           >
             Links
           </v-btn>
-          <v-btn id="note-step-6"
-            :style="windowWidth < 936 ? 'font-size: 10px' : null"
-            :width="windowWidth < 936 ? '15%' : '19%'" 
-            color="light grey lighten-1" 
+          <v-btn class="tool-btn" id="note-step-6"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
             @click="openPlans()"
             :disabled="user.user_id == currentNote.userid ? false : true"
           >
             Study Plans
           </v-btn>
-          <vue-editor class="editor" id="note-step-1"
-            :disabled="(user.user_id == currentNote.userid) ? false : true"
-            @text-change="saveNotes()"
-            v-model="noteText"
-          >
-          </vue-editor>
+          <div class="editor-wrapper">
+            <vue-editor class="editor" id="note-step-1"
+              :disabled="(user.user_id == currentNote.userid) ? false : true"
+              @text-change="saveNotes()"
+              v-model="noteText"
+            >
+            </vue-editor>
+          </div>
         </v-col>
 
         <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
@@ -303,6 +328,19 @@ export default {
   },
 
   methods: {
+      back() {
+        this.$router.go(-1)
+      },
+
+      async newNote() {
+        await this.$store.dispatch('users/createNote', {
+          notename: 'Untitled Note',
+          collectionid: this.currentNote.collectionid,
+          orgid: this.currentNote.orgid
+        })
+        this.noteText = this.currentNote.typednotes
+      },
+
       async generateVocab() {
         console.log('Generateing vocab...')
         const vocab = await openaiGenerateVocab({
@@ -585,13 +623,32 @@ export default {
 </script>
 
 <style scoped>
+@import '~/assets/styles.css';
+
+.study-btn {
+  color: #2F2B28;
+  background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
+}
+
+.editor-wrapper {
+  /* background-color: #ffffec; */
+  background-image: linear-gradient(to top right, #ffffec, #F4F4F4);
+  height: 500px;
+  overflow: scroll;
+}
+
 .editor {
-  background-color: #FFFFE0;
   margin-top: 5px;
 }
 
+.tool-btn {
+  width: 100%;
+  color: #2F2B28;
+  margin: 4px 2px;
+  background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
+}
+
 .noteselector {
-  text-align: center;
   font-size: 20px;
   font-weight: 500;
 }

@@ -14,8 +14,8 @@
         <v-tab-item class="shared-list" v-for="item in items" :key="item.tab">
           <!-- List of shared collections -->
           <v-col v-if="tab === 0">
-            <v-row>
-              <v-card class="list-card" color="light green lighten-3" elevation="5" width="250" v-for="(coll, i) in collsSharedWithMe" :key="i">
+            <v-row v-if="selectedColl == null">
+              <v-card class="card" elevation="5" width="250" v-for="(coll, i) in collsSharedWithMe" :key="i">
                 <v-card-title>
                   {{coll.collectionname}}
                 </v-card-title>
@@ -24,15 +24,38 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="light red lighten-2" @click="removeColl(coll)">Remove</v-btn>
-                  <v-btn color="primary" @click="loadNotes(coll.collectionid)">Go</v-btn>
+                  <v-btn text @click="removeColl(coll)">Remove</v-btn>
+                  <v-btn color="#85c59d"
+                    @click="loadNotes(coll)"
+                  >
+                    Open
+                  </v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
 
+            <!-- header for notes in shared collection -->
+            <span style="margin: 20px;" v-if="selectedColl != null">
+              <span class="basic-header">Notes in {{ selectedColl.collectionname }}</span>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn class="add-btn"
+                    @click="selectedColl = null"
+                    icon
+                    v-on="on"
+                    v-bind="attrs"
+                  >
+                    <v-icon>mdi-chevron-up</v-icon>
+                  </v-btn>
+                </template>
+                <span>Collapse</span>
+              </v-tooltip>
+              <hr>
+            </span>
+
             <!-- List of notes in collection -->
-            <v-row>
-              <v-card class="list-card" color="purple lighten-3" elevation="5" width="300" v-for="(note, i) in collNotes" :key="i">
+            <v-row v-if="selectedColl != null">
+              <v-card class="card" elevation="5" width="300" v-for="(note, i) in collNotes" :key="i">
                 <v-card-title>
                     {{note.notename}}
                 </v-card-title>
@@ -41,7 +64,7 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
+                  <v-btn color="#85c59d" @click="openNote(note.noteid)">Open</v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
@@ -50,7 +73,7 @@
           <!-- List of notes -->
           <v-col v-else-if="tab === 1">
             <v-row>
-              <v-card class="list-card" color="purple lighten-3" elevation="5" width="300" v-for="(note, i) in notesSharedWithMe" :key="i">
+              <v-card class="card" elevation="5" width="300" v-for="(note, i) in notesSharedWithMe" :key="i">
                 <v-card-title>
                     {{note.notename}}
                 </v-card-title>
@@ -59,8 +82,8 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="light red lighten-2" @click="removeNote(note)">Remove</v-btn>
-                  <v-btn color="primary" @click="openNote(note.noteid)">Go</v-btn>
+                  <v-btn text @click="removeNote(note)">Remove</v-btn>
+                  <v-btn color="#85c59d" @click="openNote(note.noteid)">Go</v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
@@ -88,6 +111,7 @@ export default {
         { tab: 'collections' },
         { tab: 'notes' },
       ],
+      selectedColl: null,
     }
   },
 
@@ -98,6 +122,7 @@ export default {
         userid: this.user.user_id,
         type: "receiver"
       })
+      this.selectedColl = null
     },
 
     async removeNote (note) {
@@ -108,9 +133,10 @@ export default {
       })
     },
 
-    loadNotes (collectionid) {
+    loadNotes (collection) {
+      this.selectedColl = collection
       this.$store.dispatch('users/notes', {
-        collectionid
+        collectionid: collection.collectionid
       })
     },
 
@@ -147,11 +173,6 @@ export default {
 .shared-list {
   background-color: #F4F4F4;
   padding-bottom: 10px;
-}
-
-.list-card {
-  margin-right: 10px;
-  margin-top: 10px;
 }
 
 </style>

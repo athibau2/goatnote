@@ -14,7 +14,7 @@
               dense
               solo
               rounded
-              background-color="light blue lighten-4"
+              background-color="#f4f4f4"
               v-model="searchText"
               placeholder="Find by join code"
               append-icon="mdi-magnify"
@@ -28,7 +28,7 @@
           <!-- List of public orgs -->
           <v-col v-if="tab === 0">
             <v-row>
-              <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250" v-for="(org, i) in publicOrgs" :key="i">
+              <v-card class="card" elevation="5" width="250" v-for="(org, i) in publicOrgs" :key="i">
                 <v-card-title>
                   {{org.orgname}}
                 </v-card-title>
@@ -37,7 +37,7 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="light green lighten-3" @click="joinOrg(org)">Join</v-btn>
+                  <v-btn color="#85c59d" @click="joinOrg(org)">Join</v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
@@ -46,7 +46,7 @@
           <!-- Search for private org -->
           <v-col v-else-if="tab === 1">
             <v-row v-if="foundOrg !== null">
-              <v-card class="list-card" color="light blue lighten-4" elevation="5" width="250">
+              <v-card class="card" elevation="5" width="250">
                 <v-card-title>
                   {{foundOrg.orgname}}
                 </v-card-title>
@@ -121,11 +121,6 @@ export default {
 .public-list {
   background-color: #F4F4F4;
   padding-bottom: 10px;
-}
-
-.list-card {
-  margin-right: 10px;
-  margin-top: 10px;
 }
 
 .search-bar {
