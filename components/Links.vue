@@ -39,10 +39,10 @@
                 </v-text-field>
               </v-row>
               <div class="modal-bottom-content-3">
-                <v-btn color="light red lighten-2" @click="$emit('close-modal')">
+                <v-btn text @click="$emit('close-modal')">
                     Exit
                 </v-btn>
-                <v-btn color="primary" @click="addLink()">Add</v-btn>
+                <v-btn class="good-btn" @click="addLink()">Add</v-btn>
               </div>
             </div>
         </div>
@@ -61,7 +61,7 @@
               </v-list>
             </div>
             <br>
-            <v-btn color="light red lighten-2" @click="$emit('close-modal')">
+            <v-btn text @click="$emit('close-modal')">
                 Exit
             </v-btn>
         </div>

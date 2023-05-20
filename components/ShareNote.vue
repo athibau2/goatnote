@@ -43,8 +43,8 @@
             </span>
             </div>
             <div class="bottom-buttons">
-              <v-btn color="#cccccc" @click="close()">Exit</v-btn>
-              <v-btn color="#abddd0" @click="shareNote()">Share</v-btn>
+              <v-btn text @click="close()">Exit</v-btn>
+              <v-btn class="good-btn" @click="shareNote()">Share</v-btn>
             </div>
         </div>
     </div>

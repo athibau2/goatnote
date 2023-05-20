@@ -41,10 +41,10 @@
               </v-list>
             </div>
             <div class="modal-bottom-content">
-                <v-btn color="light red lighten-2" @click="$emit('close-modal')">
+                <v-btn text @click="$emit('close-modal')">
                     Exit
                 </v-btn>
-                <v-btn color="primary" 
+                <v-btn class="good-btn"
                     @click="windowWidth < '850' ? switchModals() : showAddPlan = true"
                 >
                     Add Plan
@@ -75,13 +75,13 @@
                     elevation="6"
                     :landscape="$vuetify.breakpoint.smAndUp"                    
                 >
-                <v-btn
-                    text
-                    color="primary"
-                    @click="prettyTime()"
-                >
-                    OK
-                </v-btn>
+                    <v-btn
+                        text
+                        color="primary"
+                        @click="prettyTime()"
+                    >
+                        OK
+                    </v-btn>
                 </v-time-picker>
             </div>
             <div class="eachRow">
@@ -97,12 +97,12 @@
                 <input class="text-center" type="number" max="5" min="1" v-model="priority">
             </div>
             <div style="margin-top: 70px">
-                <v-btn color="light red lighten-2" 
+                <v-btn text
                     @click="windowWidth < '850' ? switchModals() : showAddPlan = false"
                 >
                     Exit
                 </v-btn>
-                <v-btn color="primary" @click="addPlan()">Save</v-btn>
+                <v-btn class="good-btn" @click="addPlan()">Save</v-btn>
             </div>
         </div>
     </div>
