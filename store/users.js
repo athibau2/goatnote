@@ -43,6 +43,7 @@ export const state = () => ({
     notesSharedWithMe: [],
     publicOrgs: [],
     foundOrg: null,
+    showLoginDialog: false,
   })
   
 // mutations should update state
@@ -188,6 +189,10 @@ export const mutations = {
 
     foundOrg(state, data) {
         state.foundOrg = data
+    },
+
+    toggleLoginDialog(state, data) {
+        state.showLoginDialog = data
     },
 }
 
@@ -1057,6 +1062,10 @@ export const actions = {
         }
     },
 
+    async toggleLoginDialog({ commit, state }) {
+        await commit('toggleLoginDialog', !state.showLoginDialog)
+    },
+
     async login ({ dispatch, commit }, { email, password }) {
         try {
             email = email.toLowerCase()
@@ -1077,6 +1086,7 @@ export const actions = {
                             await commit('setUser', getUserIdFromToken(getJwtToken()))
                             dispatch('userData')
                             dispatch('orgs')
+                            commit('toggleLoginDialog', false)
                             this.$router.push('/')
                         }
                     } catch(error) {

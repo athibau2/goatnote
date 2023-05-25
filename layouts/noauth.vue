@@ -10,6 +10,7 @@
       <!-- <v-toolbar-title class="font-weight-bold" v-text="title" /> -->
       <img class="logo" src="~/assets/logos/GOAT.png" height="60px">
       <v-spacer />
+      <v-btn v-if="windowWidth < 850" height="50px" @click="toggleLoginDialog()" text>Login</v-btn>
     </v-app-bar>
 
     <v-main class="main">
@@ -23,13 +24,29 @@
 <script>
 export default {
   name: 'NoauthLayout',
+
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
   data () {
     return {
       clipped: false,
       fixed: false,
       title: 'GOAT Notes',
+      windowWidth: window.innerWidth,
     }
   },
+
+  methods: {
+    toggleLoginDialog() {
+      this.$store.dispatch('users/toggleLoginDialog')
+    },
+
+    resizeHandler() {
+      this.windowWidth = window.innerWidth
+    }
+  }
 }
 </script>
 
