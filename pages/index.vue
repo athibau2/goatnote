@@ -147,9 +147,23 @@
       </v-row>
     </v-col>
 
-    <span v-if="orgs === null || orgs === undefined || orgs.length === 0" class="notice text-center">
+    <span class="notice text-center"
+      v-if="(orgs === null || orgs === undefined || orgs.length === 0) && level == 1"
+    >
       You are currently not part of any organizations. Create one above or 
       <nuxt-link to="/joinOrg">join one</nuxt-link>!
+    </span>
+
+    <span class="notice text-center"
+      v-if="(collections === null || collections === undefined || collections.length === 0) && level == 2" 
+    >
+      You currently have no collections in this organization. Create one above!
+    </span>
+
+    <span class="notice text-center"
+      v-if="(notes === null || notes === undefined || notes.length === 0) && level == 3"
+    >
+      You currently have no notes in this collection. Create one above!
     </span>
 
     <!-- List of orgs -->

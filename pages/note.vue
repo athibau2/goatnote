@@ -145,7 +145,7 @@
             <div>
               <v-btn class="tool-btn"
                 @click="generateVocab()"
-                :disabled="user.user_id == currentNote.userid ? false : true"
+                :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
               >
                 Generate Vocab
               </v-btn>
@@ -153,7 +153,7 @@
             <div>
               <v-btn class="tool-btn"
                 @click="generateQuestions()"
-                :disabled="user.user_id == currentNote.userid ? false : true"
+                :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
               >
                 Generate Questions
               </v-btn>
@@ -192,7 +192,7 @@
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto" 
             @click="generateVocab()"
-            :disabled="user.user_id == currentNote.userid ? false : true"
+            :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
           >
             Generate Vocab
           </v-btn>
@@ -200,7 +200,7 @@
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto"
             @click="generateQuestions()"
-            :disabled="user.user_id == currentNote.userid ? false : true"
+            :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
           >
             Generate Questions
           </v-btn>
@@ -270,6 +270,7 @@ import ShareNote from '~/components/ShareNote.vue'
 import { VueEditor } from "vue2-editor"
 import Shepherd from 'shepherd.js'
 import { openaiGenerateQuestions, openaiGenerateVocab } from '~/store/openai'
+import { debounce } from 'lodash'
 
 export default {
   name: 'NotePage',
@@ -312,6 +313,7 @@ export default {
         showLinks: false,
         showWords: false,
         showStudyPlans: false,
+        generating: false,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
         editNote: false,
@@ -342,35 +344,41 @@ export default {
       },
 
       async generateVocab() {
-        console.log('Generateing vocab...')
-        const vocab = await openaiGenerateVocab({
-          input: this.noteText,
-          noteid: this.currentNote.noteid
-        })
-        for (let i = 0; i < vocab.length; ++i) {
-          await this.$store.dispatch('users/addWord', {
-            newWord: vocab[i].word,
-            newDef: vocab[i].definition,
-            noteid: this.currentNote.noteid
+        if (confirm('Are you ready to generate vocab? This may take a minute to complete. Please do not refresh your page.')) {
+          console.log('Generating vocab...')
+          this.generating = true
+          const vocab = await openaiGenerateVocab({
+            input: this.noteText
           })
+          for (let i = 0; i < vocab.length; ++i) {
+            await this.$store.dispatch('users/addWord', {
+              newWord: vocab[i].word,
+              newDef: vocab[i].definition,
+              noteid: this.currentNote.noteid
+            })
+          }
+          this.generating = false
+          alert('Your vocab words have been successfully generated. You can review them by clicking the \"Words\" button.')
         }
-        alert('Your vocab words have been successfully generated. You can review them by clicking the \"Words\" button.')
       },
       
       async generateQuestions() {
-        console.log('Generateing questions...')
-        const questions = await openaiGenerateQuestions({
-          input: this.noteText,
-          noteid: this.currentNote.noteid
-        })
-        for (let i = 0; i < questions.length; ++i) {
-          await this.$store.dispatch('users/addQuestion', {
-            newQuestion: questions[i].question,
-            newAnswer: questions[i].answer,
-            noteid: this.currentNote.noteid
+        if (confirm('Are you ready to generate questions? This may take a minute to complete. Please do not refresh your page.')) {
+          console.log('Generating questions...')
+          this.generating = true
+          const questions = await openaiGenerateQuestions({
+            input: this.noteText
           })
+          for (let i = 0; i < questions.length; ++i) {
+            await this.$store.dispatch('users/addQuestion', {
+              newQuestion: questions[i].question,
+              newAnswer: questions[i].answer,
+              noteid: this.currentNote.noteid
+            })
+          }
+          this.generating = false
+          alert('Your study questions have been successfully generated. You can review them by clicking the \"Questions\" button.')
         }
-        alert('Your study questions have been successfully generated. You can review them by clicking the \"Questions\" button.')
       },
       
       addSteps() {
@@ -555,14 +563,14 @@ export default {
         this.editNote = !this.editNote
       },
 
-      async saveNotes () {
+      saveNotes: debounce(async function () {
         this.$store.commit('users/saving', "Saving...")
         await this.$store.dispatch('users/saveNotes', {
           noteText: this.noteText,
           noteid: this.currentNote.noteid
         })
         this.$store.commit('users/saving', 'Saved')
-      },
+      }, 2000),
 
       async toggleStudy () {
         await this.$store.commit('users/study', !this.studyMode)

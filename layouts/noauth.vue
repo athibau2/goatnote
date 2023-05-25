@@ -6,9 +6,8 @@
       fixed
       app
     >
-      <v-spacer />
-      <!-- <v-toolbar-title class="font-weight-bold" v-text="title" /> -->
-      <img class="logo" src="~/assets/logos/GOAT.png" height="60px">
+      <v-spacer v-if="windowWidth >= 850" />
+      <img class="logo" src="~/assets/logos/GOAT.png" :height="windowWidth < 850 ? '30px' : windowWidth < 1000 ? '45px' : '60px'">
       <v-spacer />
       <v-btn v-if="windowWidth < 850" height="50px" @click="toggleLoginDialog()" text>Login</v-btn>
     </v-app-bar>

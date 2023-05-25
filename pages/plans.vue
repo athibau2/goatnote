@@ -2,13 +2,12 @@
     <v-app>
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4644384223616162" crossorigin="anonymous"></script>
       
-      <v-container>
-        <h2 v-if="allPlans.length === 0" class="notice text-center">
+        <span v-if="allPlans.length === 0" class="notice text-center">
           You currently do not have any study plans set up for any of your notes.
-        </h2>
+        </span>
         <div v-else-if="allPlans.length > 0">
           <v-row justify="center" align="center">
-            <h2 class="notice text-center">Uncompleted Study Plans</h2>
+            <span class="notice text-center">Uncompleted Study Plans</span>
           </v-row>
           <v-row justify="center" align="center" style="margin-top: 20px;">
             <v-card class="modal-list-item" :style="windowWidth < 850 ? 'width: 200px' : null" 
@@ -68,7 +67,6 @@
             </v-card>
           </v-row>
         </div>
-      </v-container>
     </v-app>
 </template>
 

@@ -885,6 +885,7 @@ export const actions = {
     },
 
     async addWord({ dispatch }, { newWord, newDef, noteid }) {
+        console.log(newWord, newDef)
         const response = await axios.post(API_URL + '/words', {
             vocabword: newWord,
             definition: newDef,
