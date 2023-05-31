@@ -286,6 +286,7 @@
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import ShareColl from "~/components/ShareColl.vue"
 import ShareNote from "~/components/ShareNote.vue"
+import Loading from '~/components/Loading.vue'
 
 export default {
   name: 'IndexPage',
@@ -300,6 +301,7 @@ export default {
   components: {
     ShareColl,
     ShareNote,
+    Loading
   },
 
   data () {

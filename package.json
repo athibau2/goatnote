@@ -23,6 +23,7 @@
     "openai": "^3.2.1",
     "shepherd.js": "^9.1.0",
     "short-uuid": "^4.2.0",
+    "spinkit": "^2.0.1",
     "v-click-outside": "^3.2.0",
     "vue": "^2.6.14",
     "vue-clickaway": "^2.2.2",

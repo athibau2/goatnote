@@ -147,7 +147,7 @@
                 @click="generateVocab()"
                 :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
               >
-                Generate Vocab
+                <Loading v-if="isLoadingVocab" /> {{ !isLoadingVocab ? 'Generate Vocab' : null }}
               </v-btn>
             </div>
             <div>
@@ -155,7 +155,7 @@
                 @click="generateQuestions()"
                 :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
               >
-                Generate Questions
+                <Loading v-if="isLoadingQuestions" /> {{ !isLoadingQuestions ? 'Generate Questions' : null }}
               </v-btn>
             </div>
             <div id="note-step-2">
@@ -194,7 +194,7 @@
             @click="generateVocab()"
             :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
           >
-            Generate Vocab
+            <Loading v-if="isLoadingVocab" /> {{ !isLoadingVocab ? 'Generate Vocab' : null }}
           </v-btn>
           <v-btn class="tool-btn"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
@@ -202,7 +202,7 @@
             @click="generateQuestions()"
             :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
           >
-            Generate Questions
+            <Loading v-if="isLoadingQuestions" /> {{ !isLoadingQuestions ? 'Generate Questions' : null }}
           </v-btn>
           <v-btn  class="tool-btn" id="note-step-2"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
@@ -271,6 +271,7 @@ import { VueEditor } from "vue2-editor"
 import Shepherd from 'shepherd.js'
 import { openaiGenerateQuestions, openaiGenerateVocab } from '~/store/openai'
 import { debounce } from 'lodash'
+import Loading from '~/components/Loading.vue'
 
 export default {
   name: 'NotePage',
@@ -282,7 +283,8 @@ export default {
       Links,
       StudyPlans,
       ShareNote,
-      VueEditor
+      VueEditor,
+      Loading
   },
 
   async mounted() {
@@ -309,6 +311,8 @@ export default {
 
   data () {
     return {
+        isLoadingVocab: false,
+        isLoadingQuestions: false,
         showQuestions: false,
         showLinks: false,
         showWords: false,
@@ -346,9 +350,12 @@ export default {
       async generateVocab() {
         if (confirm('Are you ready to generate vocab? This may take a minute to complete. Please do not refresh your page.')) {
           console.log('Generating vocab...')
+          const wordsArr = await this.extractVocabWords()
+          this.isLoadingVocab = true
           this.generating = true
           const vocab = await openaiGenerateVocab({
-            input: this.noteText
+            input: this.noteText,
+            ignore: wordsArr
           })
           for (let i = 0; i < vocab.length; ++i) {
             await this.$store.dispatch('users/addWord', {
@@ -358,6 +365,7 @@ export default {
             })
           }
           this.generating = false
+          this.isLoadingVocab = false
           alert('Your vocab words have been successfully generated. You can review them by clicking the \"Words\" button.')
         }
       },
@@ -365,9 +373,12 @@ export default {
       async generateQuestions() {
         if (confirm('Are you ready to generate questions? This may take a minute to complete. Please do not refresh your page.')) {
           console.log('Generating questions...')
+          const questionsArr = await this.extractQuestionText()
+          this.isLoadingQuestions = true
           this.generating = true
           const questions = await openaiGenerateQuestions({
-            input: this.noteText
+            input: this.noteText,
+            ignore: questionsArr
           })
           for (let i = 0; i < questions.length; ++i) {
             await this.$store.dispatch('users/addQuestion', {
@@ -377,8 +388,25 @@ export default {
             })
           }
           this.generating = false
+          this.isLoadingQuestions = false
           alert('Your study questions have been successfully generated. You can review them by clicking the \"Questions\" button.')
         }
+      },
+
+      async extractVocabWords() {
+        let wordsArr = []
+        this.words.forEach(element => {
+          wordsArr.push(element.vocabword)
+        });
+        return wordsArr
+      },
+
+      async extractQuestionText() {
+        let questionsArr = []
+        this.questions.forEach(element => {
+          questionsArr.push(element.questiontext)
+        });
+        return questionsArr
       },
       
       addSteps() {

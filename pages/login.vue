@@ -7,7 +7,7 @@
         <div class="full-intro">
           <h3 class="text-center" v-if="windowWidth >= 1000"
           >
-            GOAT Notes is your one stop for academic success!
+            Your one stop for academic success!
           </h3>
           <h4 class="text-center" style="font-size: 20px" v-else-if="windowWidth < 1000"
           >
@@ -23,196 +23,42 @@
         </div>
         <v-divider class="intro-divider" />
 
-        <!-- Row 1 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="4">
-            <span class="intro">
-              Join or create organizations to connect and share notes with friends and peers!
-            </span>
-          </v-col>
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/home.png" width="100%">
-          </v-col>
-        </v-row>
+        <!-- Large Screen repeating card -->
+        <div v-if="windowWidth >= 1000">
+          <div v-for="(card, i) in introCards" :key="i">
+            <v-row class="intro-rows" align="center">
+              <v-col v-if="i == 0 || i % 2 == 0" cols="4">
+                <span class="intro" :style="windowWidth > 1300 ? {'font-size': '24px'} : null">
+                  {{ card.description }}
+                </span>
+              </v-col>
+              <v-col cols="8">
+                <img class="intro-img" :src="require(`~/assets/images/${card.img}`)" width="100%">
+              </v-col>
+              <v-col v-if="i != 0 && i % 2 != 0" cols="4">
+                <span class="intro" :style="windowWidth > 1300 ? {'font-size': '24px'} : null">
+                  {{ card.description }}
+                </span>
+              </v-col>
+            </v-row>
+            <v-divider class="intro-divider" />
+          </div>
+        </div>
 
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              Join or create organizations to connect and share notes with friends and peers!
-            </p>
-            <img class="intro-img" src="~/assets/home.png" width="100%">
-          </v-col>
-        </v-row>
-
-        <v-divider class="intro-divider" />
-
-        <!-- Row 2 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/note.png" width="100%">
-          </v-col>
-          <v-col cols="4">
-            <span class="intro">
-              Create collections to organize your notes. In your notes, you have a dedicated space for vocab words, study questions, helpful links, and study plans!
-            </span>
-          </v-col>
-        </v-row>
-
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              Create collections to organize your notes. In your notes, you have a dedicated space for vocab words, study questions, helpful links, and study plans! 
-            </p>
-            <img class="intro-img" src="~/assets/note.png" width="100%">
-          </v-col>
-        </v-row>
-
-        <v-divider class="intro-divider" />
-
-        <!-- Row 3 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="4">
-            <span class="intro">
-              AI is your study buddy. You can utilize AI to generate vocab words and study questions based off your notes!
-            </span>
-          </v-col>
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/goatnotes-ai.gif" width="100%">
-          </v-col>
-        </v-row>
-
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              AI is your study buddy. You can utilize AI to generate vocab words and study questions based off your notes!
-            </p>
-            <img class="intro-img" src="~/assets/goatnotes-ai.gif" width="100%">
-          </v-col>
-        </v-row>
-
-        <v-divider class="intro-divider" />
-        
-        <!-- Row 4 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/goatnotes-study.gif" width="100%">
-          </v-col>
-          <v-col cols="4">
-            <span class="intro">
-              When it's time to study, the study mode button changes the layout of your notes page and lets you review your vocab words and study questions as flashcards!
-            </span>
-          </v-col>
-        </v-row>
-
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              When it's time to study, the study mode button changes the layout of your notes page and lets you review your vocab words and study questions as flashcards!
-            </p>
-            <img class="intro-img" src="~/assets/goatnotes-study.gif" width="100%">
-          </v-col>
-        </v-row>
-
-        <v-divider class="intro-divider" />
-
-        <!-- Row 5 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="4">
-            <span class="intro">
-              On the Join Organization page, you can scroll through all the public organizations to find the right one to join to connect with your peers!
-            </span>
-          </v-col>
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/join-org.png" width="100%">
-          </v-col>
-        </v-row>
-
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              On the Join Organization page, you can scroll through all the public organizations to find the right one to join to connect with your peers!
-            </p>
-            <img class="intro-img" src="~/assets/join-org.png" width="100%">
-          </v-col>
-        </v-row>
-
-        <v-divider class="intro-divider" />
-
-        <!-- Row 6 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/join-org-private.png" width="100%">
-          </v-col>
-          <v-col cols="4">
-            <span class="intro">
-              Privacy is important, so organizations can be made private. Use a join code to find and become part of the organizations you need.
-            </span>
-          </v-col>
-        </v-row>
-
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              Privacy is important, so organizations can be made private. Use a join code to find and become part of the organizations you need.
-            </p>
-            <img class="intro-img" src="~/assets/join-org-private.png" width="100%">
-          </v-col>
-        </v-row>
-
-        <v-divider class="intro-divider" />
-
-        <!-- Row 7 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="4">
-            <span class="intro">
-              Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add study resources!
-            </span>
-          </v-col>
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/share.png" width="100%">
-          </v-col>
-        </v-row>
-
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add study resources!
-            </p>
-            <img class="intro-img" src="~/assets/share.png" width="100%">
-          </v-col>
-        </v-row>
-
-        <v-divider class="intro-divider" />
-
-        <!-- Row 8 -->
-        <v-row class="intro-rows" align="center" v-if="windowWidth >= 1000">
-          <v-col cols="8">
-            <img class="intro-img" src="~/assets/shared-with-me.png" width="100%">
-          </v-col>
-          <v-col cols="4">
-            <span class="intro">
-              The Shared With Me page shows all of the collections and notes you have access to. You can't change the typed notes, but you can add to and study the vocab words and study questions!
-            </span>
-          </v-col>
-        </v-row>
-
-        <!-- small window -->
-        <v-row class="intro-rows" align="center" justify="center" v-else-if="windowWidth < 1000">
-          <v-col>
-            <p class="intro text-center">
-              The Shared With Me page shows all of the collections and notes you have access to. You can't change the typed notes, but you can add to and study the vocab words and study questions!
-            </p>
-            <img class="intro-img" src="~/assets/shared-with-me.png" width="100%">
-          </v-col>
-        </v-row>
-
+        <!-- Small screen repeating card -->
+        <div v-else-if="windowWidth < 1000">
+          <div v-for="(card, i) in introCards" :key="i">
+            <v-row class="intro-rows" align="center" justify="center" >
+              <v-col>
+                <p class="intro text-center" :style="windowWidth > 1300 ? {'font-size': '24px'} : null">
+                  {{ card.description }}
+                </p>
+                <img class="intro-img" :src="require(`~/assets/images/${card.img}`)" width="100%">
+              </v-col>
+            </v-row>
+            <v-divider class="intro-divider" />
+          </div>
+        </div>
       </v-col>
 
       <!-- Sign in Form -->
@@ -383,11 +229,33 @@ export default {
       password: "",
       show: false,
       isSignup: false,
+      introIndex: 0,
       introPhrases: [
         "note-taking.",
         "studying."
       ],
-      introIndex: 0,
+      introCards: [
+        {
+          img: 'note.png',
+          description: 'Create collections to organize your notes. In your notes, you have a dedicated space for vocab words, study questions, helpful links, and study plans!',
+        },
+        {
+          img: 'goatnotes-ai.gif',
+          description: 'AI is your study buddy. You can utilize AI to generate vocab words and study questions based off your notes!',
+        },
+        {
+          img: 'goatnotes-study.gif',
+          description: 'When it\'s time to study, the study mode button changes the layout of your notes page and lets you review your vocab words and study questions as flashcards!',
+        },
+        {
+          img: 'share.png',
+          description: 'Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add study resources!',
+        },
+        {
+          img: 'shared-with-me.png',
+          description: 'The Shared With Me page shows all of the collections and notes you have access to. You can\'t change the typed notes, but you can add to and study the vocab words and study questions!',
+        },
+      ],
       windowWidth: window.innerWidth,
     }
   },
@@ -543,7 +411,7 @@ h3, h4 {
 }
 
 .intro-divider {
-  margin-top: 20px;
+  margin: 50px;
 }
 
 .intro-img {

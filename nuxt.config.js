@@ -4,8 +4,8 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
 
   server: {
-	host: '0.0.0.0'
-},
+    host: '0.0.0.0'
+  },
   middleware: ["auth", "admin"],
   ssr: false,
   
@@ -22,7 +22,7 @@ export default {
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
-      { rel: 'icon', type: 'image/png', href: '/favicon.png' }
+      { rel: 'icon', type: 'image/png', href: '/favicon.png' },
     ]
   },
 
