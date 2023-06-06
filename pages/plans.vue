@@ -1,6 +1,5 @@
 <template>
     <v-app>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4644384223616162" crossorigin="anonymous"></script>
       
         <span v-if="allPlans.length === 0" class="notice text-center">
           You currently do not have any study plans set up for any of your notes.
