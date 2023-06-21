@@ -18,7 +18,7 @@
     "core-js": "^3.19.3",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
-    "nuxt": "^2.15.8",
+    "nuxt": "^3.4.3",
     "openai": "^3.2.1",
     "shepherd.js": "^9.1.0",
     "short-uuid": "^4.2.0",
