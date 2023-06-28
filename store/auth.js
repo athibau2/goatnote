@@ -1,8 +1,8 @@
 import jwt_decode from "jwt-decode";
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_KEY
+const supabaseUrl = NUXT_ENV_SUPABASE_URL
+const supabaseKey = NUXT_ENV_SUPABASE_KEY
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
 export function getJwtToken() {
