@@ -12,7 +12,7 @@
 /* @import './spinkit.css'; */
 
 .main {
-    background-color: #f4f4f4;
+    background-color: #f4f4f4 !important;
 }
 
 .app-bar {

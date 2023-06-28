@@ -21,7 +21,7 @@
                 <th>Remove User</th>
               </tr>
               <tr v-for="(u, i) in $route.query.userid === undefined ? adminUsers : adminUserData" :key="i">
-                  <td v-if="$route.query.userid === undefined" @click="loadAdminUserData(u)">
+                  <td v-if="$route.query.userid === undefined" @click="adminLoadOneUser(u)">
                     <nuxt-link :to="{ name: 'admin', query: { userid: u.userid }, params: { user: u }}">
                       {{u.firstname}} {{u.lastname}}
                     </nuxt-link>
@@ -96,7 +96,7 @@
                     </v-btn>
                   </td>
                   <td>{{c.orgname}}</td>
-                  <td v-if="$route.query.userid === undefined" @click="loadAdminUserData(c)">
+                  <td v-if="$route.query.userid === undefined" @click="adminLoadOneUser(c)">
                     <nuxt-link :to="{ name: 'admin', query: { userid: c.userid }, params: { user: c }}">
                       {{c.firstname}} {{c.lastname}}
                     </nuxt-link>
@@ -121,7 +121,7 @@
                   <td>{{n.notename}}</td>
                   <td>{{parseDate(n.notedate)}}</td>
                   <td>{{n.collectionname}}</td>
-                  <td v-if="$route.query.userid === undefined" @click="loadAdminUserData(n)">
+                  <td v-if="$route.query.userid === undefined" @click="adminLoadOneUser(n)">
                     <nuxt-link :to="{ name: 'admin', query: { userid: n.userid }, params: { user: n }}">
                       {{n.firstname}} {{n.lastname}}
                     </nuxt-link>
@@ -149,7 +149,7 @@
                   <th>Remove</th>
                 </tr>
                 <tr v-for="(m, i) in orgUsers" :key="i">
-                    <td @click="loadAdminUserData(m)">
+                    <td @click="adminLoadOneUser(m)">
                       <nuxt-link :to="{ name: 'admin', query: { userid: m.userid }, params: { user: m }}">
                         {{m.firstname}} {{m.lastname}}
                       </nuxt-link>
@@ -211,12 +211,12 @@ export default {
   middleware: ["auth", "admin"],
 
   async updated () {
-    await this.$store.dispatch('users/loadAdminUserData', { userid: this.$route.query.userid })
+    await this.$store.dispatch('users/adminLoadOneUser', { userid: this.$route.query.userid })
   },
 
   async mounted () {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
-    await this.$store.dispatch('users/loadAdminData')
+    await this.$store.dispatch('users/adminLoadUsers')
   },
 
   data () {
@@ -242,9 +242,9 @@ export default {
       })
     },
 
-    loadAdminUserData (u) {
+    adminLoadOneUser (u) {
       this.showOrgUsers = false
-      this.$store.dispatch('users/loadAdminUserData', {
+      this.$store.dispatch('users/adminLoadOneUser', {
         userid: u.userid
       })
     },

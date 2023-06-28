@@ -1,10 +1,6 @@
-import axios from "axios";
-import { authHeader, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
+import { supabase, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
-
-
-const API_URL = "http://ec2-3-88-53-104.compute-1.amazonaws.com:8000";
 
 export const state = () => ({
     user: getJwtToken(),
@@ -199,867 +195,958 @@ export const mutations = {
 // actions should call mutations
 export const actions = {
     async toggleAdmin({ dispatch }, { userid, isadmin }) {
-        try {
-            const res = await axios.patch(API_URL + `/user?userid=eq.${userid}`, {
+        const { data, error, status } = await supabase.from('user')
+            .update({
                 isadmin: isadmin
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                dispatch('loadAdminData')
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                alert('User is not found')
-            } else if (err.response.status === 400) {
-                alert('Something went wront, please try again')
+            .eq('userid', userid)
+        if (!error) {
+            dispatch('adminLoadUsers')
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
+                alert('User is not found.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
-    async loadAdminData({ commit }) {
-        try {
-            const res = await axios.get(API_URL + '/admin_see_all_users')
-            if (res.status === 200) await commit('adminUsers', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminUsers', []) }
+    async adminLoadUsers({ commit }) {
+        getUsers()
+        getOrgs()
+        getColls()
+        getNotes()
 
-        try {
-            const res = await axios.get(API_URL + '/admin_see_all_orgs')
-            if (res.status === 200) await commit('adminOrgs', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminOrgs', []) }
+        async function getUsers() {
+            const { data, error, status } = await supabase.from('admin_see_all_users')
+                .select()
+            if (!error) {
+                await commit('adminUsers', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminUsers', [])
+            }
+        }
+        
+        async function getOrgs() {
+            const { data, error, status } = await supabase.from('admin_see_all_orgs')
+                .select()
+            if (!error) {
+                await commit('adminOrgs', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminOrgs', [])
+            }
+        }
 
-        try {
-            const res = await axios.get(API_URL + '/admin_see_all_colls')
-            if (res.status === 200) await commit('adminColls', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminColls', []) }
+        async function getColls() {
+            const { data, error, status } = await supabase.from('admin_see_all_colls')
+                .select()
+            if (!error) {
+                await commit('adminColls', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminColls', [])
+            }
+        }
 
-        try {
-            const res = await axios.get(API_URL + '/admin_see_all_notes')
-            if (res.status === 200) await commit('adminNotes', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminNotes', []) }
+        async function getNotes() {
+            const { data, error, status } = await supabase.from('admin_see_all_notes')
+                .select()
+            if (!error) {
+                await commit('adminNotes', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminNotes', [])
+            }
+        }
     },
 
-    async loadAdminUserData({ commit }, { userid }) {
-        try {
-            const res = await axios.get(API_URL + `/see_personal_data?userid=eq.${userid}`)
-            if (res.status === 200) await commit('adminUserData', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminUserData', []) }
+    async adminLoadOneUser({ commit }, { userid }) {
+        getOneUser()
+        getOneUserOrgs()
+        getOneUserColls()
+        getOneUserNotes()
 
-        try {
-            const res = await axios.get(API_URL + `/admin_see_user_orgs?userid=eq.${userid}`)
-            if (res.status === 200) await commit('adminUserOrgs', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminUserOrgs', []) }
+        async function getOneUser() {
+            const { data, error, status } = await supabase.from('see_personal_data')
+                .select()
+                .eq('userid', userid)
+            if (!error) {
+                await commit('adminUserData', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminUserData', [])
+            }
+        }
 
-        try {
-            const res = await axios.get(API_URL + `/admin_see_user_colls?userid=eq.${userid}`)
-            if (res.status === 200) await commit('adminUserColls', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminUserColls', []) }
+        async function getOneUserOrgs() {
+            const { data, error, status } = await supabase.from('admin_see_user_orgs')
+                .select()
+                .eq('userid', userid)
+            if (!error) {
+                await commit('adminUserOrgs', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminUserOrgs', [])
+            }
+        }
 
-        try {
-            const res = await axios.get(API_URL + `/admin_see_user_notes?userid=eq.${userid}`)
-            if (res.status === 200) await commit('adminUserNotes', res.data)
-        } catch (err) { if (err.response.status === 404) commit('adminUserNotes', []) }
+        async function getOneUserColls() {
+            const { data, error, status } = await supabase.from('admin_see_user_colls')
+                .select()
+                .eq('userid', userid)
+            if (!error) {
+                await commit('adminUserColls', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminUserColls', [])
+            }
+        }
+
+        async function getOneUserNotes() {
+            const { data, error, status } = await supabase.from('admin_see_user_notes')
+                .select()
+                .eq('userid', userid)
+            if (!error) {
+                await commit('adminUserNotes', data)
+            } else if (error) {
+                console.log(error)
+                await commit('adminUserNotes', [])
+            }
+        }
     },
 
     async deleteUser({ dispatch }, { userid }) {
-        try {
-            const res = await axios.delete(API_URL + `/user?userid=eq.${userid}`, {
-                headers: authHeader()
-            })
-            if (res.status === 204 || res.status === 404) {
-                await dispatch('loadAdminData')
-                this.$router.push('/admin')
-            }
-        } catch (err) {
-            if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+        const { data, error, status } = await supabase.from('user')
+            .delete()
+            .eq('userid', userid)
+        if (!error) {
+            await dispatch('adminLoadUsers')
+            this.$router.push('/admin')
+        } else if (error) {
+            console.log(error)
+            if (status === 400) {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async deleteOrg({ dispatch }, { orgid }) {
-        try {
-            const res = await axios.delete(API_URL + `/organization?orgid=eq.${orgid}`, {
-                headers: authHeader()
-            })
-            if (res.status === 204 || res.status === 404) {
-                await dispatch('loadAdminData')
-                this.$router.push('/admin')
-            }
-        } catch (err) {
-            if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+        const { data, error, status } = await supabase.from('organization')
+            .delete()
+            .eq('orgid', orgid)
+        if (!error) {
+            await dispatch('adminLoadUsers')
+            this.$router.push('/admin')
+        } else if (error) {
+            console.log(error)
+            if (status === 400) {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async removeFromOrg({ dispatch }, { userid, orgid }) {
-        try {
-            const res = await axios.delete(API_URL + `/part_of?userid=eq.${userid}&orgid=eq.${orgid}`, {
-                headers: authHeader()
-            })
-            if (res.status === 204 || res.status === 404) {
-                await dispatch('loadOrgUsers', { orgid })
-                await dispatch('loadAdminUserData', { userid })
-            }
-        } catch (err) {
-            if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
-            }
+        const { data, error, status } = await supabase.from('part_of')
+            .delete()
+            .eq('userid', userid)
+            .eq('orgid', orgid)
+        if (!error) {
+            await dispatch('loadOrgUsers', { orgid })
+            await dispatch('adminLoadOneUser', { userid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async loadOrgUsers({ commit }, { orgid }) {
-        try {
-            const res = await axios.get(API_URL + `/admin_see_org_users?orgid=eq.${orgid}`)
-            if (res.status === 200) {
-                await commit('orgUsers', res.data)
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
+        const { data, error, status } = await supabase.from('admin_see_org_users')
+            .select()
+            .eq('orgid', orgid)
+        if (!error) {
+            await commit('orgUsers', data)
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
                 await commit('orgUsers', [])
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async loadCollNotes({ commit }, { collectionid }) {
-        try {
-            const res = await axios.get(API_URL +  `/admin_see_coll_notes?collectionid=eq.${collectionid}`)
-            if (res.status == 200) {
-                await commit('collNotes', res.data)
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
+        const { data, error, status } = await supabase.from('admin_see_coll_notes')
+            .select()
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await commit('collNotes', data)
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
                 await commit('collNotes', [])
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async userData({ commit, state }) {
-        try {
-            const response = await axios.get(API_URL + '/see_personal_data?email=eq.' + state.user.email)
-            if (response.status === 200) {
-                commit('setUserData', response.data[0])
-            }
-        } catch(err) {
-            if (err.response.status === 404 || err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
-            }
+        const { data, error, status } = await supabase.from('see_personal_data')
+            .select()
+            .eq('email', state.user.email)
+        if (!error) {
+            await commit('setUserData', data[0])
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async basicOnboardingComplete({ dispatch, state }) {
-        try {
-            const res = await axios.patch(API_URL + `/user?userid=eq.${state.user.user_id}`, {
+        const { data, error, status } = await supabase.from('user')
+            .update({
                 onboarded: true
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                await dispatch('userData')
-            } 
-        } catch(err) {
-            if (err.response.status === 404 || err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try agian.')
+            .eq('userid', state.user.user_id)
+        if (!error) {
+            await dispatch('userData')
+        } else if (error) {
+            console.log(error)
+            if (status === 404 || status === 400) {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async noteOnboardingComplete({ dispatch, state }) {
-        try {
-            const res = await axios.patch(API_URL + `/user?userid=eq.${state.user.user_id}`, {
+        const { data, error, status } = await supabase.from('user')
+            .update({
                 noteonboarded: true
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                await dispatch('userData')
-            }
-        } catch(err) {
-            if (err.response.status === 404 || err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try agian.')
+            .eq('userid', state.user.user_id)
+        if (!error) {
+            await dispatch('userData')
+        } else if (error) {
+            console.log(error)
+            if (status === 404 || status === 400) {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async loadPublicOrgs({ commit }) {
         await commit('foundOrg', null)
-        try {
-            const res = await axios.get(API_URL + `/see_public_orgs`)
-            if (res.status === 200) {
-                await commit('publicOrgs', res.data)
-            }
-        } catch(err) {
-            if (err.response.status === 404 || err.response.status === 400) {
-                await commit('publicOrgs', [])
-            }
+        const { data, error, status } = await supabase.from('see_public_orgs')
+            .select()
+        if (!error) {
+            await commit('publicOrgs', data)
+        } else if (error) {
+            console.log(error)
+            await commit('publicOrgs', [])
         }
     },
 
     async searchOrg({ commit }, { searchText }) {
-        try {
-            const res = await axios.get(API_URL + `/search_org_by_code?joincode=eq.${searchText}`)
-            if (res.status === 200) {
-                if (res.data.length === 0) await commit('foundOrg', null)
-                else await commit('foundOrg', res.data[0])
-            }
-        } catch(err) {
-            if (err.response.status === 404) {
-                await commit('foundOrg', null)
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
-            }
+        const { data, error, status } = await supabase.from('search_org_by_code')
+            .select()
+            .eq('joincode', searchText)
+        if (!error) {
+            if (data.length == 0) await commit('foundOrg', null)
+            else await commit('foundOrg', data[0])
+        } else if (error) {
+            console.log(error)
+            await commit('foundOrg', null)
         }
     },
 
     async joinOrg({ dispatch, state }, { orgid }) {
-        try {
-            const res = await axios.post(API_URL + `/part_of`, {
+        const { data, error, status } = await supabase.from('part_of')
+            .insert({
                 userid: state.user.user_id,
                 orgid: orgid
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 201) {
-                dispatch('orgs')
-                alert('You have been successfully added to the organization.')
-            }
-        } catch(err) {
-            if (err.response.status === 409) {
-                alert('You are already a member of this organization or this organization already exists.')
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+        if (!error) {
+            await dispatch('orgs')
+            alert('You have been successfully added to the organization.')
+        } else if (error) {
+            console.log(error)
+            if (status === 409) {
+                alert('You are already a member of this organization.')
+            } else if (status === 400) {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async toggleOrg({ dispatch }, { orgid, isPrivate }) {
-        try {
-            const res = await axios.patch(API_URL + `/organization?orgid=eq.${orgid}`, {
+        const { data, error, status } = await supabase.from('organization')
+            .update({
                 isprivate: isPrivate
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                dispatch('loadAdminData')
-            }
-        } catch(err) {
-            if (err.response.status === 404) {
+            .eq('orgid', orgid)
+        if (!error) {
+            await dispatch('adminLoadUsers')
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
                 alert('Organization not found.')
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+            } else if (status === 400) {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async createOrg({ dispatch }, { orgname, isPrivate }) {
-        try {
-            const response = await axios.post(API_URL + '/organization', {
+        const { data, error, status } = await supabase.from('organization')
+            .insert({
                 orgname: orgname,
                 isprivate: isPrivate,
                 joincode: short.generate()
-            },
-            {
-                headers: { ...authHeader(), Prefer: "return=representation" }
             })
-            if (response.status === 201) {
-                dispatch('joinOrg', { orgid: response.data[0].orgid })
-            }
-        } catch(error) {
-            if (error.response.status === 409) alert('An organization with that name already exists')
-            else alert('Something went wrong')
+            .select()
+        if (!error) {
+            await dispatch('joinOrg', { orgid: data[0].orgid })
+        } else if (error) {
+            console.log(error)
+            if (status === 409) {
+                alert('An organization with this name already exists.')
+            } else alert('Something went wrong, please try again.')
         }
     },
 
     async updateCollName({ dispatch }, { collectionid, newName, orgid }) {
-        try {
-            const res = await axios.patch(API_URL + `/collection?collectionid=eq.${collectionid}`, {
+        const { data, error, status } = await supabase.from('collection')
+            .update({
                 collectionname: newName
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                dispatch('collections', { orgid })
-            }
-        } catch (err) {
-            if (err.response.status === 404) alert('Collection not found')
-            else if (err.response.status === 400) alert('Something went wrong, please refresh the page and try again.')
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await dispatch('collections', { orgid })
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
+                alert('Collection not found.')
+            } else alert('Something went wrong, please try again.')
         }
     },
 
-    async loadSharedWithMe({ commit, state }) {
-        try {
-            const res = await axios.get(API_URL + `/see_colls_shared_with_me?userid=eq.${state.user.user_id}`)
-            if (res.status === 200) {
-                await commit('collsSharedWithMe', res.data)
-            }
-        } catch(err) {
-            if (err.response.status === 404 || err.response.status === 400) {
-                await commit('collsSharedWithMe', [])
-            }
+    async loadSharedColls({ commit, state }) {
+        const { data, error, status } = await supabase.from('see_colls_shared_with_me')
+            .select()
+            .eq('userid', state.user.user_id)
+        if (!error) {
+            await commit('collsSharedWithMe', data)
+        } else if (error) {
+            console.log(error)
+            await commit('collsSharedWithMe', [])
         }
+    },
 
-        try {
-            const res = await axios.get(API_URL + `/see_notes_shared_with_me?userid=eq.${state.user.user_id}`)
-            if (res.status === 200) {
-                await commit('notesSharedWithMe', res.data)
-            }
-        } catch(err) {
-            if (err.response.status === 404 || err.response.status === 400) {
-                await commit('notesSharedWithMe', [])
-            }
+    async loadSharedNotes({ commit, state }) {
+        const { data, error, status } = await supabase.from('see_notes_shared_with_me')
+            .select()
+            .eq('userid', state.user.user_id)
+        if (!error) {
+            await commit('notesSharedWithMe', data)
+        } else if (error) {
+            console.log(error)
+            await commit('notesSharedWithMe', [])
         }
+    },
+
+    async loadSharedWithMe({ dispatch }) {
+        await dispatch('loadSharedColls')
+        await dispatch('loadSharedNotes')
     },
 
     async search({ commit }, { searchText, orgid }) {
-        try {
-            searchText = searchText.toLowerCase()
-            const res = await axios.get(API_URL + `/search_users?orgid=eq.${orgid}&email=like.${searchText}%`)
-            if (res.status === 200) {
-                await commit('results', res.data)
-            }
-        } catch(err) {
-            if (err.response.status === 404 || err.response.status === 400) {
-                await commit('results', [])
-            }
+        searchText = searchText.toLowerCase()
+        const { data, error, status } = await supabase.from('search_users')
+            .select()
+            .eq('orgid', orgid)
+            .like('email', searchText)
+        if (!error) {
+            await commit('results', data)
+        } else if (error) {
+            console.log(error)
+            await commit('results', [])
         }
     },
 
     async getSharedCollList({ commit }, { collection }) {
         await commit('collBeingShared', collection)
-        try {
-            const res = await axios.get(API_URL + `/see_shared_colls?collectionid=eq.${collection.collectionid}`)
-            if (res.status === 200) {
-                await commit('sharedCollList', res.data)
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                await commit('sharedCollList', [])
-            }
+        const { data, error, status } = await supabase.from('see_shared_colls')
+            .select()
+            .eq('collectionid', collection.collectionid)
+        if (!error) {
+            await commit('sharedCollList', data)
+        } else if (error) {
+            console.log(error)
+            await commit('sharedCollList', [])
         }
     },
 
     async getSharedNoteList({ commit }, { note }) {
         await commit('noteBeingShared', note)
-        try {
-            const res = await axios.get(API_URL + `/see_shared_notes?noteid=eq.${note.noteid}`)
-            if (res.status === 200) {
-                await commit('sharedNoteList', res.data)
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                await commit('sharedNoteList', [])
-            }
+        const { data, error, status } = await supabase.from('see_shared_notes')
+            .select()
+            .eq('noteid', note.noteid)
+        if (!error) {
+            await commit('sharedNoteList', data)
+        } else if (error) {
+            console.log(error)
+            await commit('sharedNoteList', [])
         }
     },
 
     async shareColl({ dispatch, state }, { collection, users }) {
-        try {
-            for (let i = 0; i < users.length; ++i) {
-                const res = await axios.post(API_URL + '/shared_collection', {
+        let success = true
+        for (let i = 0; i < users.length; ++i) {
+            const { data, error, status } = await supabase.from('shared_collection')
+                .insert({
                     collectionid: collection.collectionid,
                     ownerid: state.user.user_id,
                     userid: users[i]
                 })
-                if (res.status === 201) continue
+            if (!error) continue
+            else if (error) {
+                console.log(error)
+                success = false
             }
-            await dispatch('getSharedCollList', { collection })
+        }
+        await dispatch('getSharedCollList', { collection })
+        if (success) {
             alert('Your collection has successfully been shared')
-        } catch (err) {
-            if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again')
-            }
+        } else if (!success) {
+            alert('Sharing has completed, but an error has occurred.')
         }
     },
 
     async shareNote({ dispatch, state }, { note, users }) {
-        try {
-            for (let i = 0; i < users.length; ++i) {
-                const res = await axios.post(API_URL + '/shared_note', {
+        let success = true
+        for (let i = 0; i < users.length; ++i) {
+            const { data, error, status } = await supabase.from('shared_note')
+                .insert({
                     noteid: note.noteid,
                     ownerid: state.user.user_id,
                     userid: users[i]
                 })
-                if (res.status === 201) continue
+            if (!error) continue
+            else if (error) {
+                console.log(error)
+                success = false
             }
-            await dispatch('getSharedNoteList', { note })
+        }
+        await dispatch('getSharedNoteList', { note })
+        if (success) {
             alert('Your note has successfully been shared')
-        } catch (err) {
-            if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again')
-            }
+        } else if (!success) {
+            alert('Sharing has completed, but an error has occurred.')
         }
     },
 
     async unshareColl({ dispatch }, { collection, userid, type }) {
-        try {
-            const res = await axios.delete(API_URL + `/shared_collection?collectionid=eq.${collection.collectionid}&userid=eq.${userid}`, {
-                headers: authHeader()
-            })
-            if (res.status === 204) {
-                (type === "owner")
-                    ? await dispatch('getSharedCollList', { collection })
-                    : await dispatch('loadSharedWithMe')
-            }
-        } catch (err) {
-            if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again')
-            }
+        const { data, error, status } = await supabase.from('shared_collection')
+            .delete()
+            .eq('collectionid', collection.collectionid)
+            .eq('userid', userid)
+        if (!error) {
+            (type === "owner")
+                ? await dispatch('getSharedCollList', { collection })
+                : await dispatch('loadSharedWithMe')
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async unshareNote({ dispatch }, { note, userid, type }) {
-        try {
-            const res = await axios.delete(API_URL + `/shared_note?noteid=eq.${note.noteid}&userid=eq.${userid}`, {
-                headers: authHeader()
-            })
-            if (res.status === 204) {
-                (type === "owner")
-                    ? await dispatch('getSharedNoteList', { note })
-                    : await dispatch('loadSharedWithMe')
-            }
-        } catch (err) {
-            if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again')
-            }
+        const { data, error, status } = await supabase.from('shared_note')
+            .delete()
+            .eq('noteid', note.noteid)
+            .eq('userid', userid)
+        if (!error) {
+            (type === "owner")
+                ? await dispatch('getSharedNoteList', { note })
+                : await dispatch('loadSharedWithMe')
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again')
         }
     },
 
     async createCollection({ dispatch, state }, { collectionname, orgid }) {
-        try {
-            const response = await axios.post(API_URL + '/collection', {
+        const { data, error, status } = await supabase.from('collection')
+            .insert({
                 collectionname: collectionname,
                 orgid: orgid,
                 userid: state.user.user_id
-            },
-            {
-                headers: authHeader()
             })
-            if (response.status === 200 || response.status === 201) {
-                dispatch('collections', { orgid })
-                dispatch('allColls')
-            }
-        } catch(err) {
-            if (err.response.status === 404) {
+        if (!error) {
+            await dispatch('collections', { orgid })
+            await dispatch('allColls')
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
                 alert('Organization or user not found, unable to create collection.')
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async createNote({ dispatch }, { notename, collectionid, orgid }) {
-        const response = await axios.post(API_URL + '/note', {
-            notename: notename,
-            collectionid: collectionid,
-        },
-        {
-            headers: { ...authHeader(), Prefer: "return=representation" }
-        })
-        if (response.status === 201) {
-            dispatch('openNote', { noteid: response.data[0].noteid })
-            dispatch('collections', { orgid })
-            dispatch('notes', { collectionid })
+        const { data, error, status } = await supabase.from('note')
+            .insert({
+                notename: notename,
+                collectionid: collectionid,
+            }).select()
+        if (!error) {
+            await dispatch('openNote', { noteid: data[0].noteid })
+            await dispatch('collections', { orgid })
+            await dispatch('notes', { collectionid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async orgs({ commit, state }) {
-        commit('setCollections', [])
-        commit('setNotes', [])
-        const response = await axios.get(API_URL + '/see_orgs?email=eq.' + state.user.email)
-        if (response.status === 200) {
-            commit('setOrgs', response.data)
+        await commit('setCollections', [])
+        await commit('setNotes', [])
+        const { data, error, status } = await supabase.from('see_orgs')
+            .select()
+            .eq('email', state.user.email)
+        if (!error) {
+            await commit('setOrgs', data)
+        } else if (error) {
+            console.log(error)
+            await commit('setOrgs', [])
         }
     },
 
     async allColls({ commit, state }) {
-        const response = await axios.get(API_URL + '/see_collections?email=eq.' + state.user.email)
-        if (response.status === 200) {
-            commit('allColls', response.data)
+        const { data, error, status } = await supabase.from('see_collections')
+            .select()
+            .eq('email', state.user.email)
+        if (!error) {
+            await commit('allColls', data)
+        } else if (error) {
+            console.log(error)
+            await commit('allColls', [])
         }
     },
 
     async collections ({ commit, state }, { orgid }) {
-        commit('setCollections', [])
-        commit('setNotes', [])
-        const response = await axios.get(API_URL + '/see_collections?email=eq.' + state.user.email + '&orgid=eq.' + orgid)
-        if (response.status === 200) {
-            commit('setCollections', response.data)
+        await commit('setCollections', [])
+        await commit('setNotes', [])
+        const { data, error, status } = await supabase.from('see_collections')
+            .select()
+            .eq('email', state.user.email)
+            .eq('orgid', orgid)
+        if (!error) {
+            await commit('setCollections', data)
+        } else if (error) {
+            console.log(error)
+            await commit('setCollections', [])
         }
     },
 
     async notes({ commit }, { collectionid }) {
-        commit('setNotes', [])
-        const response = await axios.get(API_URL + '/see_notes?&collectionid=eq.' + collectionid)
-        if (response.status === 200) {
-            await commit('setNotes', response.data)
+        await commit('setNotes', [])
+        const { data, error, status } = await supabase.from('see_notes')
+            .select()
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await commit('setNotes', data)
             localStorage.setItem('collNotes', JSON.stringify(response.data))
+        } else if (error) {
+            console.log(error)
+            await commit('setNotes', [])
         }
     },
 
     async openNote({ dispatch, commit, state }, { noteid }) {
         localStorage.removeItem('prettyDate')
         await commit('currentNote', {})
-        const response = await axios.get(API_URL + '/see_note_with_data?noteid=eq.' + noteid)
-        if (response.status === 200) {
-            let prettyDate = await parseDate(response.data[0].notedate)
+        const { data, error, status } = await supabase.from('see_note_with_data')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            let prettyDate = await parseDate(data[0].notedate)
             localStorage.setItem('prettyDate', prettyDate)
-            await commit('currentNote', response.data[0])
+            await commit('currentNote', data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
-            await dispatch('getWords', { noteid })
-            await dispatch('getQuestions', { noteid })
-            await dispatch('getLinks', { noteid })
-            await dispatch('getStudyPlans', { noteid })
+            await dispatch('getWords', { noteid: noteid })
+            await dispatch('getQuestions', { noteid: noteid })
+            await dispatch('getLinks', { noteid: noteid })
+            await dispatch('getStudyPlans', { noteid: noteid })
             this.$router.push('/note')
+        } else if (error) {
+            console.log(error)
+            alert('An error occurred opening the note, please try again.')
         }
     },
 
     async saveNotes({ commit }, { noteText, noteid }) {
-        const response = await axios.patch(API_URL + '/note?noteid=eq.' + noteid, {
-            typednotes: noteText
-        },
-        {
-            headers: authHeader()
-        })
-        if (response.status === 204) {
+        const { data, error, status } = await supabase.from('note')
+            .update({
+                typednotes: noteText
+            })
+            .eq('noteid', noteid)
+        if (!error) {
             let temp = JSON.parse(localStorage.getItem('note'))
             temp.typednotes = noteText
-            commit('currentNote', temp)
+            await commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
+        } else if (error) {
+            console.log(error)
         }
     },
 
     async updateNoteName({ commit, state }, { newNoteName, noteid }) {
-        const res = await axios.patch(API_URL + '/note?noteid=eq.' + noteid, {
-            notename: newNoteName
-        },
-        {
-            headers: { ...authHeader(), Prefer: "return=representation" }
-        })
-        if (res.status === 204 || res.status === 200) {
-            let temp = { ...res.data[0], 
+        const { data, error, status } = await supabase.from('note')
+            .update({
+                notename: newNoteName
+            }).select()
+            .eq('noteid', noteid)
+        if (!error) {
+            let temp = { ...data[0], 
                 "collectionname": state.currentNote.collectionname,
                 "orgid": state.currentNote.orgid,
                 "userid": state.user.user_id }
             await commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
+        } else if (error) {
+            console.log(error)
+            alert('An error occurred updating the note name, please try again.')
         }
     },
 
     async getLinks({ commit, state }, { noteid }) {
-        try {
-            const links = await axios.get(API_URL + '/see_links?noteid=eq.' + noteid)
-            if (links.status === 200) {
-                await commit('links', links.data)
-                localStorage.setItem('links', JSON.stringify(state.links))
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                await commit('links', [])
-            }
+        const { data, error, status } = await supabase.from('see_links')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            await commit('links', data)
+            localStorage.setItem('links', JSON.stringify(state.links))
+        } else if (error) {
+            console.log(error)
+            await commit('links', [])
         }
     },
 
     async addLink({ dispatch }, { url, noteid }) {
-        const response = await axios.post(API_URL + '/links', {
-            url: url,
-            noteid: noteid
-        },
-        {
-            headers: authHeader()
-        })
-        if (response.status === 201) {
-            dispatch('getLinks', { noteid: noteid })
+        const { data, error, status } = await supabase.from('links')
+            .insert({
+                url: url,
+                noteid: noteid
+            })
+        if (!error) {
+            await dispatch('getLinks', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async updateLink({ dispatch }, { linkid, editLink, noteid }) {
-        try {
-            const res = await axios.patch(API_URL + `/links?linkid=eq.${linkid}`, {
+        const { data, error, status } = await supabase.from('links')
+            .update({
                 url: editLink
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                dispatch('getLinks', { noteid: noteid })
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                alert('Link not found')
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+            .eq('linkid', linkid)
+        if (!error) {
+            await dispatch('getLinks', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
+                alert('Link not found.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async deleteLink({ dispatch }, { linkid, noteid }) {
-        const res = await axios.delete(API_URL + '/links?linkid=eq.' + linkid, {
-            headers: authHeader()
-        })
-        if (res.status === 204) {
-            dispatch('getLinks', { noteid: noteid})
+        const { data, error, status } = await supabase.from('links')
+            .delete()
+            .eq('linkid', linkid)
+        if (!error) {
+            await dispatch('getLinks', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async getQuestions({ commit, state }, { noteid }) {
-        try {
-            const questions = await axios.get(API_URL + '/see_questions?noteid=eq.' + noteid)
-            if (questions.status === 200) {
-                await commit('questions', questions.data)
-                localStorage.setItem('questions', JSON.stringify(state.questions))
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                await commit('questions', [])
-            }
+        const { data, error, status } = await supabase.from('see_questions')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            await commit('questions', data)
+            localStorage.setItem('questions', JSON.stringify(state.questions))
+        } else if (error) {
+            console.log(error)
+            await commit('questions', [])
         }
     },
 
     async addQuestion({ dispatch }, { newQuestion, newAnswer, noteid }) {
-        const response = await axios.post(API_URL + '/questions', {
-            questiontext: newQuestion,
-            answer: newAnswer,
-            noteid: noteid
-        },
-        {
-            headers: authHeader()
-        })
-        if (response.status === 201) {
-            dispatch('getQuestions', { noteid: noteid })
+        const { data, error, status } = await supabase.from('questions')
+            .insert({
+                questiontext: newQuestion,
+                answer: newAnswer,
+                noteid: noteid
+            })
+        if (!error) {
+            await dispatch('getQuestions', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try agian.')
         }
     },
 
     async updateQuestion({ dispatch }, { questionid, editQuestion, editAnswer, noteid }) {
-        try {
-            const res = await axios.patch(API_URL + `/questions?questionid=eq.${questionid}`, {
+        const { data, error, status } = await supabase.from('questions')
+            .update({
                 questiontext: editQuestion,
                 answer: editAnswer
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                dispatch('getQuestions', { noteid: noteid })
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                alert('Question not found')
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+            .eq('questionid', questionid)
+        if (!error) {
+            await dispatch('getQuestions', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
+                alert('Question not found.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async deleteQuestion({ dispatch }, { questionid, noteid }) {
-        const res = await axios.delete(API_URL + '/questions?questionid=eq.' + questionid, {
-            headers: authHeader()
-        })
-        if (res.status === 204) {
-            dispatch('getQuestions', { noteid: noteid})
+        const { data, error, status } = await supabase.from('questions')
+            .delete()
+            .eq('questionid', questionid)
+        if (!error) {
+            await dispatch('getQuestions', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async getWords({ commit, state }, { noteid }) {
-        try {
-            const words = await axios.get(API_URL + '/see_words?noteid=eq.' + noteid)
-            if (words.status === 200) {
-                await commit('words', words.data)
-                localStorage.setItem('words', JSON.stringify(state.words))
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
-                await commit('words', [])
-            }
+        const { data, error, status } = await supabase.from('see_words')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            await commit('words', data)
+            localStorage.setItem('words', JSON.stringify(state.words))
+        } else if (error) {
+            console.log(error)
+            await commit('words', [])
         }
     },
 
     async addWord({ dispatch }, { newWord, newDef, noteid }) {
-        console.log(newWord, newDef)
-        const response = await axios.post(API_URL + '/words', {
-            vocabword: newWord,
-            definition: newDef,
-            noteid: noteid
-        },
-        {
-            headers: authHeader()
-        })
-        if (response.status === 201) {
-            dispatch('getWords', { noteid: noteid })
+        const { data, error, status } = await supabase.from('words')
+            .insert({
+                vocabword: newWord,
+                definition: newDef,
+                noteid: noteid
+            })
+        if (!error) {
+            await dispatch('getWords', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async updateWord({ dispatch }, { wordid, editWord, editDef, noteid }) {
-        try {
-            const res = await axios.patch(API_URL + `/words?wordid=eq.${wordid}`, {
+        const { data, error, status } = await supabase.from('words')
+            .update({
                 vocabword: editWord,
                 definition: editDef
-            },
-            {
-                headers: authHeader()
             })
-            if (res.status === 204) {
-                dispatch('getWords', { noteid: noteid })
-            }
-        } catch (err) {
-            if (err.response.status === 404) {
+            .eq('wordid', wordid)
+        if (!error) {
+            await dispatch('getWords', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
                 alert('Word not found')
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
         }
     },
 
     async deleteWord({ dispatch }, { wordid, noteid }) {
-        const res = await axios.delete(API_URL + '/words?wordid=eq.' + wordid, {
-            headers: authHeader()
-        })
-        if (res.status === 204) {
-            dispatch('getWords', { noteid: noteid })
+        const { data, error, status } = await supabase.from('words')
+            .delete()
+            .eq('wordid', wordid)
+        if (!error) {
+            await dispatch('getWords', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async addPlan({ dispatch }, { date, time, amount, priority, noteid}) {
-        const res = await axios.post(API_URL + '/study_plan', {
-            studydate: date + 'T00:00:00.000Z',
-            timeamount: amount,
-            prioritylevel: priority,
-            noteid: noteid,
-            time: time
-        },
-        {
-            headers: authHeader()
-        })
-        if (res.status === 201) {
-            dispatch('getStudyPlans', { noteid })
+        const { data, error, status } = await supabase.from('study_plan')
+            .insert({
+                studydate: date + 'T00:00:00.000Z',
+                timeamount: amount,
+                prioritylevel: priority,
+                noteid: noteid,
+                time: time
+            })
+        if (!error) {
+            await dispatch('getStudyPlans', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async updatePlan({ dispatch }, { planid, completed, noteid }) {
-        const res = await axios.patch(API_URL + '/study_plan?planid=eq.' + planid, {
-            studycompleted: completed
-        },
-        {
-            headers: authHeader()
-        })
-        if (res.status === 204) {
-            dispatch('getStudyPlans', { noteid })
+        const { data, error, status } = await supabase.from('study_plan')
+            .update({
+                studycompleted: completed
+            })
+            .eq('planid', planid)
+        if (!error) {
+            await dispatch('getStudyPlans', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
+                alert('Plan not found.')
+            } else {
+                alert('Something went wrong, please try again.')
+            }
         }
     },
 
     async getAllPlans({ commit, state }) {
-        try {
-            const res = await axios.get(API_URL + `/see_all_plans?userid=eq.${state.user.user_id}&studycompleted=eq.false`)
-            if (res.status === 200) {
-                for (let i = 0; i < res.data.length; ++i) {
-                    let timeOfDay = " AM"
-                    let time = res.data[i].time
-                    time = time.split(':')
-                    if (parseInt(time[0]) > 12) {
-                        time[0] = parseInt(time[0]) - 12
-                        timeOfDay = " PM"
-                    }
-                    if (timeOfDay === " AM" && parseInt(time[0]) < 10) time[0] = parseInt(time[0])
-                    res.data[i].time = time[0].toString() + ":" + time[1] + timeOfDay
-                    let date = res.data[i].studydate
-                    res.data[i].studydate = new Date(date).toDateString()
+        const { data, error, status } = await supabase.from('see_all_plans')
+            .select()
+            .eq('userid', state.user.user_id)
+            .eq('studycompleted', false)
+        if (!error) {
+            for (let i = 0; i < data.length; ++i) {
+                let timeOfDay = " AM"
+                let time = data[i].time
+                time = time.split(':')
+                if (parseInt(time[0]) > 12) {
+                    time[0] = parseInt(time[0]) - 12
+                    timeOfDay = " PM"
                 }
-                await commit('allPlans', res.data)
+                if (timeOfDay === " AM" && parseInt(time[0]) < 10) time[0] = parseInt(time[0])
+                data[i].time = time[0].toString() + ":" + time[1] + timeOfDay
+                let date = data[i].studydate
+                data[i].studydate = new Date(date).toDateString()
             }
-        } catch (err) {
-            if (err.response.status === 404) {
-                await commit('allPlans', [])
-            }
+            await commit('allPlans', data)
+        } else if (error) {
+            console.log(error)
+            await commit('allPlans', [])
         }
     },
 
     async getStudyPlans({ commit }, { noteid }) {
-        try {
-            const res = await axios.get(API_URL + '/see_study_plans?noteid=eq.' + noteid)
-            if (res.status === 200) {
-                for (let i = 0; i < res.data.length; ++i) {
-                    let timeOfDay = " AM"
-                    let time = res.data[i].time
-                    time = time.split(':')
-                    if (parseInt(time[0]) > 12) {
-                        time[0] = parseInt(time[0]) - 12
-                        timeOfDay = " PM"
-                    }
-                    if (timeOfDay === " AM" && parseInt(time[0]) < 10) time[0] = parseInt(time[0])
-                    res.data[i].time = time[0].toString() + ":" + time[1] + timeOfDay
-                    let date = res.data[i].studydate
-                    res.data[i].studydate = new Date(date).toDateString()
+        const { data, error, status } = await supabase.from('see_study_plans')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            for (let i = 0; i < data.length; ++i) {
+                let timeOfDay = " AM"
+                let time = data[i].time
+                time = time.split(':')
+                if (parseInt(time[0]) > 12) {
+                    time[0] = parseInt(time[0]) - 12
+                    timeOfDay = " PM"
                 }
-                await localStorage.setItem('studyPlans', JSON.stringify(res.data))
-                await commit('studyPlans', res.data)
+                if (timeOfDay === " AM" && parseInt(time[0]) < 10) time[0] = parseInt(time[0])
+                data[i].time = time[0].toString() + ":" + time[1] + timeOfDay
+                let date = data[i].studydate
+                data[i].studydate = new Date(date).toDateString()
             }
-        } catch (err) {
-            if (err.response.status === 404) {
-                await commit('studyPlans', [])
-                localStorage.setItem('studyPlans', JSON.stringify([]))
-            }
+            localStorage.setItem('studyPlans', JSON.stringify(data))
+            await commit('studyPlans', data)
+        } else if (error) {
+            console.log(error)
+            await commit('studyPlans', [])
+            localStorage.setItem('studyPlans', JSON.stringify([]))
         }
     },
 
     async deletePlan({ dispatch }, { planid, noteid }) {
-        const res = await axios.delete(API_URL + '/study_plan?planid=eq.' + planid, {
-            headers: authHeader()
-        })
-        if (res.status === 204) {
-            if (noteid === null) dispatch('getAllPlans')
-            else dispatch('getStudyPlans', { noteid: noteid })
+        const { data, error, status } = await supabase.from('study_plan')
+            .delete()
+            .eq('planid', planid)
+        if (!error) {
+            if (noteid === null) await dispatch('getAllPlans')
+            else await dispatch('getStudyPlans', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async updatePass({ dispatch, state }, { newPass, currentPass }) {
-        try {
-            const res = await axios.get(API_URL + '/user?userid=eq.' + state.user.user_id)
-            if (await matchPassword(currentPass, res.data[0].password)) {
-                const response = await axios.patch(API_URL + '/user?userid=eq.' + state.user.user_id, {
-                    password: await encryptPassword(newPass)
-                },
-                {
-                    headers: authHeader()
-                })
-                if (response.status === 204) {
-                    dispatch('userData')
+        const response = await dispatch('getUser', { email: state.user.email })
+        if (response != null) {
+            if (await matchPassword(currentPass, response[0].password)) {
+                const { data, error, status } = await supabase.from('user')
+                    .update({
+                        password: await encryptPassword(newPass)
+                    })
+                    .eq('userid', state.user.user_id)
+                if (!error) {
+                    await dispatch('userData')
                     alert("Your password has been updated")
+                } else if (error) {
+                    console.log(error)
+                    alert('Something went wrong, please try again.')
                 }
             }
-            else { alert("The current password you entered is incorrect") }
-        } catch(err) {
-            if (err.response.status === 400 || err.response.status === 404) {
-                alert('Something went wrong, please refresh the page and try again.')
+            else {
+                alert("The current password you entered is incorrect")
             }
+        } else {
+            alert('Something went wrong, please try again.')
         }
     },
 
     async signup({ dispatch }, { firstname, lastname, email, password }) {
-        try {
-            email = email.toLowerCase()
-            const response = await axios.post(API_URL + '/rpc/signup', {
-                firstname: firstname, lastname: lastname,
-                email: email, password: await encryptPassword(password)
+        email = email.toLowerCase()
+        const { data, error, status } = await supabase.rpc('signup', {
+            firstname: firstname,
+            lastname: lastname,
+            email: email,
+            password: await encryptPassword(password)
+        })
+        if (!error) {
+            await dispatch('login', {
+                email: email,
+                password: password
             })
-            if (response.status === 200) {
-                dispatch('login', {
-                    email: email,
-                    password: password
-                })
+        } else if (error) {
+            if (status === 409) {
+                alert('An account already exists with that email.')
+            } else {
+                alert('Something went wrong, please try again.')
             }
-        } catch(error) {
-            if (error.response.status === 409) alert('An account with that email already exists')
-            else alert('Something went wrong, please refresh the page and try again.')
         }
     },
 
@@ -1067,59 +1154,49 @@ export const actions = {
         await commit('toggleLoginDialog', !state.showLoginDialog)
     },
 
-    async login ({ dispatch, commit }, { email, password }) {
-        try {
-            email = email.toLowerCase()
-            const res = await axios.get(API_URL + `/user?email=eq.${email}`)
-            if (res.status === 200 && res.data.length > 0) {
-                if (await matchPassword(password, res.data[0].password)) {
-                    try {
-                        const response = await axios.post(API_URL + "/rpc/login", {
-                            email: email,
-                            password: res.data[0].password
-                        },
-                        {
-                            headers: authHeader()
-                        }
-                        );
-                        if (response.status === 200) {
-                            setJwtToken(response.data[0].token)
-                            await commit('setUser', getUserIdFromToken(getJwtToken()))
-                            dispatch('userData')
-                            dispatch('orgs')
-                            commit('toggleLoginDialog', false)
-                            this.$router.push('/')
-                        }
-                    } catch(error) {
-                        if (error) {
-                            if (error.response.status === 400) {
-                                alert('Something went wrong, please refresh the page and try again.')
-                            }
-                        }
-                    }
-                } else {
-                    alert('The password you entered was incorrect.')
+    async getUser({}, { email }) {
+        const { data, error, status } = await supabase.from('user')
+            .select()
+            .eq('email', email)
+        return error ? null : data
+    },
+
+    async login({ dispatch, commit }, { email, password }) {
+        email = email.toLowerCase()
+        const res = await dispatch('getUser', { email: email })
+        if (res != null) {
+            if (await matchPassword(password, res[0].password)) {
+                const { data, error, status } = await supabase.rpc('login', {
+                    email: email,
+                    password: res[0].password
+                })
+                if (!error && data.token != null) {
+                    setJwtToken(data.token)
+                    await commit('setUser', getUserIdFromToken(getJwtToken()))
+                    dispatch('userData')
+                    dispatch('orgs')
+                    commit('toggleLoginDialog', false)
+                    this.$router.push('/')
+                } else if (error) {
+                    console.log(error)
+                    alert('Something went wrong, please try again.')
                 }
-            } else if (res.data.length === 0) {
-                alert('No user found with that email.')
+            } else {
+                alert('The password you entered was incorrect.')
             }
-        } catch(err) {
-            if (err.response.status === 404) {
-                alert('No user found with that email.')
-            } else if (err.response.status === 400) {
-                alert('Something went wrong, please refresh the page and try again.')
-            }
+        } else {
+            alert('No user found with that email.')
         }
     },
 
     async logout({ commit }) {
-        commit('setCollections', [])
-        commit('setNotes', [])
-        commit('currentNote', {})
-        commit('studyPlans', [])
-        commit('newOrg', false)
-        commit('newCollection', false)
-        commit('newNote', false)
+        await commit('setCollections', [])
+        await commit('setNotes', [])
+        await commit('currentNote', {})
+        await commit('studyPlans', [])
+        await commit('newOrg', false)
+        await commit('newCollection', false)
+        await commit('newNote', false)
         localStorage.removeItem('note')
         localStorage.removeItem('collNotes')
         localStorage.removeItem('words')
@@ -1132,41 +1209,54 @@ export const actions = {
     },
 
     async leaveOrg({ dispatch, state }, { orgid }) {
-        const response = await axios.delete(API_URL + `/part_of?orgid=eq.${orgid}&userid=eq.${state.user.user_id}`, {
-            headers: authHeader()
-        })
-        if (response.status === 204) {
-            dispatch('orgs')
+        const { data, error, status } = await supabase.from('part_of')
+            .delete()
+            .eq('orgid', orgid)
+            .eq('userid', state.user.user_id)
+        if (!error) {
+            await dispatch('orgs')
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async deleteCollection({ dispatch }, { collectionid, orgid }) {
-        const response = await axios.delete(API_URL + `/collection?collectionid=eq.${collectionid}`, {
-            headers: authHeader()
-        })
-        if (response.status === 204) {
-            dispatch('collections', { orgid: orgid })
+        const { data, error, status } = await supabase.from('collection')
+            .delete()
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await dispatch('collections', { orgid: orgid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async deleteNote({ dispatch }, { noteid, collectionid }) {
-        const response = await axios.delete(API_URL + `/note?noteid=eq.${noteid}`, {
-            headers: authHeader()
-        })
-        if (response.status === 204) {
-            if (collectionid === undefined) await dispatch('loadAdminData')
+        const { data, error, status } = await supabase.from('note')
+            .delete()
+            .eq('noteid', noteid)
+        if (!error) {
+            if (collectionid === undefined) await dispatch('adminLoadUsers')
             else await dispatch('notes', { collectionid: collectionid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
     async deleteAccount({ state }) {
-        const res = await axios.delete(API_URL + '/user?userid=eq.' + state.user.user_id, {
-            headers: authHeader()
-        })
-        if (res.status === 204) {
+        const { data, error, status } = await supabase.from('user')
+            .delete()
+            .eq('userid', state.user.user_id)
+        if (!error) {
             deleteJwtToken()
             this.$router.push('/login')
             alert("Your account has been deleted")
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     }
 }

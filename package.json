@@ -11,6 +11,7 @@
   "dependencies": {
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/vuetify": "^1.12.3",
+    "@supabase/supabase-js": "^2.24.0",
     "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^4.6.0",

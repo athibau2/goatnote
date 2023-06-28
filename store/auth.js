@@ -1,4 +1,9 @@
 import jwt_decode from "jwt-decode";
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_KEY
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
 export function getJwtToken() {
     return localStorage.getItem("accessToken")
@@ -17,13 +22,13 @@ export function deleteJwtToken() {
     localStorage.removeItem("accessToken");
 }
 
-export function authHeader() {
-  let accessToken = getJwtToken();
+// export function authHeader() {
+//   let accessToken = getJwtToken();
 
-  if (accessToken) {
-    return { Authorization: "Bearer " + accessToken };
-  } else {
-    return {};
-  }
-}
+//   if (accessToken) {
+//     return { Authorization: "Bearer " + accessToken };
+//   } else {
+//     return {};
+//   }
+// }
 
