@@ -134,9 +134,9 @@
             <v-btn @click="isSignup = !isSignup" text>{{ isSignup ? 'Login' : 'Join' }} Here</v-btn>
             <span>&ensp;</span>
             <v-btn nuxt
-            class="good-btn"
-            :disabled="isSignup == 1 && (!consent || !verifyAge)"
-            @click="isSignup == 0 ? login() : signup()"
+              class="good-btn"
+              :disabled="isSignup == 1 && (!consent || !verifyAge)"
+              @click="isSignup == 0 ? login() : signup()"
             >
                 Sign {{ isSignup == 0 ? 'In' : 'Up' }}
             </v-btn>
@@ -213,10 +213,24 @@
             placeholder="Enter your password"
           >
           </v-text-field>
+          <input type="checkbox" v-model="consent" v-if="isSignup == 1" />
+          <span v-if="isSignup == 1">
+            I consent to the 
+            <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a>
+              and to the 
+            <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms.</a>
+          </span>
+          <br v-if="isSignup == 1">
+          <input type="checkbox" v-model="verifyAge" v-if="isSignup == 1" />
+          <span v-if="isSignup == 1">I certify that I am at least 13 years of age.</span>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn class="good-btn" nuxt @click="isSignup == 0 ? login() : signup()">
+          <v-btn nuxt
+            class="good-btn"
+            :disabled="isSignup == 1 && (!consent || !verifyAge)"
+            @click="isSignup == 0 ? login() : signup()"
+          >
             Sign {{ isSignup == 0 ? 'In' : 'Up' }}
           </v-btn>
         </v-card-actions>
