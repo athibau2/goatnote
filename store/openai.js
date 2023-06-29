@@ -22,6 +22,5 @@ export async function openaiGenerateQuestions({ input, ignore }) {
         model: "gpt-3.5-turbo",
         messages: [{role: "user", content: `In the following request, don\'t do anything similar to the following questions: ${ignore}. This is the request: find useful study questions and their answers from the following text and return them as a JSON array of objects with the key being \"question\" and the value being \"answer\": ${input}.`}],
     });
-    console.log(completion)
     return JSON.parse(completion.data.choices[0].message.content)
 }

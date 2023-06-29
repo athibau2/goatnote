@@ -568,7 +568,7 @@ export const actions = {
         const { data, error, status } = await supabase.from('search_users')
             .select()
             .eq('orgid', orgid)
-            .like('email', searchText)
+            .like('email', `${searchText}%`)
         if (!error) {
             await commit('results', data)
         } else if (error) {

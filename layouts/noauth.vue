@@ -17,15 +17,24 @@
         <Nuxt class="main" />
       </v-container>
     </v-main>
+
+    <Footer />
+    
   </v-app>
 </template>
 
 <script>
+import Footer from '~/components/Footer.vue'
+
 export default {
   name: 'NoauthLayout',
 
   created () {
     window.addEventListener('resize', this.resizeHandler)
+  },
+
+  components: {
+    Footer
   },
 
   data () {

@@ -62,73 +62,87 @@
 
       <!-- Sign in Form -->
       <v-col cols="4" v-if="windowWidth >= 850 && !showLoginDialog">
-        <v-row justify="center" align="center">
-          <v-card :class="windowWidth < '850' ? 'card-small' : 'card'" 
-            elevation="5"
-            :width="windowWidth < 1060 ? 300 : 350"
-          >
-            <v-card-title class="headline" style="color: #2F2B28">
-                <em>Sign In Here</em>
-            </v-card-title>
-            <v-card-text>
+        <div class="d-flex justify-center">
+        <v-card :class="windowWidth < '850' ? 'card-small' : 'card'" 
+          elevation="5"
+          :width="windowWidth < '1000' ? '300px' : '350px'"
+        >
+          <v-card-title class="headline" style="color: #2F2B28">
+              <em>Sign In Here</em>
+          </v-card-title>
+          <v-card-text>
+            <v-text-field
+                v-if="isSignup == 1"
+                class="selector"
+                background-color="#f0f0f0"
+                dense
+                solo
+                rounded
+                v-model="firstname"
+                placeholder="First name"
+            >
+            </v-text-field>
+            <v-text-field
+                v-if="isSignup == 1"
+                class="selector"
+                background-color="#f0f0f0"
+                dense
+                solo
+                rounded
+                v-model="lastname"
+                placeholder="Last name"
+            >
+            </v-text-field>
               <v-text-field
-                  v-if="isSignup == 1"
                   class="selector"
                   background-color="#f0f0f0"
                   dense
                   solo
                   rounded
-                  v-model="firstname"
-                  placeholder="First name"
+                  v-model="email"
+                  :append-icon="'mdi-email'"
+                  placeholder="Enter your email"
               >
               </v-text-field>
               <v-text-field
-                  v-if="isSignup == 1"
                   class="selector"
                   background-color="#f0f0f0"
                   dense
                   solo
                   rounded
-                  v-model="lastname"
-                  placeholder="Last name"
+                  :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="show ? 'text' : 'password'"
+                  @click:append="show = !show"
+                  v-model="password"
+                  @keyup.enter="isSignup == 0 ? login() : signup()"
+                  placeholder="Enter your password"
               >
               </v-text-field>
-                <v-text-field
-                    class="selector"
-                    background-color="#f0f0f0"
-                    dense
-                    solo
-                    rounded
-                    v-model="email"
-                    :append-icon="'mdi-email'"
-                    placeholder="Enter your email"
-                >
-                </v-text-field>
-                <v-text-field
-                    class="selector"
-                    background-color="#f0f0f0"
-                    dense
-                    solo
-                    rounded
-                    :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="show ? 'text' : 'password'"
-                    @click:append="show = !show"
-                    v-model="password"
-                    @keyup.enter="isSignup == 0 ? login() : signup()"
-                    placeholder="Enter your password"
-                >
-                </v-text-field>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn @click="isSignup = !isSignup" text>{{ isSignup ? 'Login' : 'Join' }} Here</v-btn>
-              <span>&ensp;</span>
-              <v-btn class="good-btn" nuxt @click="isSignup == 0 ? login() : signup()">
-                  Sign {{ isSignup == 0 ? 'In' : 'Up' }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-row>
+              <input type="checkbox" v-model="consent" v-if="isSignup == 1" />
+              <span v-if="isSignup == 1">
+                I consent to the 
+                <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a>
+                 and to the 
+                <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms.</a>
+              </span>
+              <br v-if="isSignup == 1">
+              <input type="checkbox" v-model="verifyAge" v-if="isSignup == 1" />
+              <span v-if="isSignup == 1">I certify that I am at least 13 years of age.</span>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn @click="isSignup = !isSignup" text>{{ isSignup ? 'Login' : 'Join' }} Here</v-btn>
+            <span>&ensp;</span>
+            <v-btn nuxt
+            class="good-btn"
+            :disabled="isSignup == 1 && (!consent || !verifyAge)"
+            @click="isSignup == 0 ? login() : signup()"
+            >
+                Sign {{ isSignup == 0 ? 'In' : 'Up' }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+        </div>
       </v-col>
     </v-row>
 
@@ -229,6 +243,8 @@ export default {
       show: false,
       isSignup: false,
       introIndex: 0,
+      consent: false,
+      verifyAge: false,
       introPhrases: [
         "note-taking.",
         "studying."
@@ -368,7 +384,7 @@ export default {
   background-color: #faf9e2;
   position: fixed;
   top: 16%;
-  right: 30px;
+  right: 2%;
   animation: fadeInAnimation ease 2s;
   opacity: 0;
   animation-iteration-count: 1;

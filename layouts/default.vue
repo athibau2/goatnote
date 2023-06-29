@@ -67,12 +67,15 @@
       </v-container>
     </v-main>
 
+    <Footer />
+
   </v-app>
 </template>
 
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Shepherd from 'shepherd.js'
+import Footer from '~/components/Footer.vue'
 
 export default {
   name: 'DefaultLayout',
@@ -90,6 +93,10 @@ export default {
 
   created () {
     window.addEventListener('resize', this.resizeHandler)
+  },
+
+  components: {
+    Footer,
   },
 
   data () {
