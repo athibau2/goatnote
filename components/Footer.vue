@@ -4,14 +4,38 @@
       app
       color="#eeeeee"
     >
-      <span>&copy; 2022 GOAT Notes</span>
-      <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a>
-      <v-divider vertical />
-      <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms and Conditions</a>
-      <v-spacer />
-      <a target="_blank" href="https://deltaapps.dev/contact">Contact Us</a>
+      <v-col cols="8">
+        <span>&copy; 2022 GOAT Notes</span><br>
+        <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a><br>
+        <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms and Conditions</a><br>
+      </v-col>
+      <v-col class="text-right" cols="4">
+        <a target="_blank" href="https://deltaapps.dev/contact">Contact Us</a>
+      </v-col>
     </v-footer>
 </template>
+
+<script>
+export default {
+  name: 'Footer',
+
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
+  date () {
+    return {
+      windowWidth: window.innerWidth
+    }
+  },
+
+  methods: {
+    resizeHandler() {
+      this.windowWidth = window.innerWidth
+    },
+  },
+}
+</script>
 
 <style scoped>
 

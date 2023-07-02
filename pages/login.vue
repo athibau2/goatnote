@@ -1,40 +1,71 @@
 <template>
   <v-app style="background-color: #f4f4f4;">
-    
-    <v-row>
-      <v-col class="intro-page" :cols="windowWidth < '850' ? null : '8'">
-        <div class="full-intro">
-          <h3 class="text-center" v-if="windowWidth >= 1000"
+    <v-row justify="center" align="center">
+      <v-col class="intro-page"
+        :cols="windowWidth > 800 ? '10' : null"
+      >
+        <div class="full-intro"
+          data-aos="zoom-in"
+          data-aos-duration="1000"
+        >
+          <h3 class="text-center" v-if="windowWidth >= 900"
           >
-            Your one stop for academic success!
+            Note-taking Done Right!
           </h3>
-          <h4 class="text-center" style="font-size: 20px" v-else-if="windowWidth < 1000"
+          <h4 class="text-center" style="font-size: 22px" v-else-if="windowWidth < 900"
           >
-            GOAT Notes is your one stop for academic success!
+            Note-taking Done Right!
           </h4>
-          <div class="intro text-center">
-            No more wasted time
-              <div class="slidingVertical">
-                <span><b> in note-taking.</b></span>
-                <span><b> in studying.</b></span>
-              </div>
-          </div>
+          <RotateText class="intro" />
         </div>
-        <v-divider class="intro-divider" />
+
+        <v-btn class="good-btn"
+          :style="windowWidth < 600 ? {
+            'width': '90%'
+          } : null"
+          @click="toggleSignupDialog()"
+          data-aos="zoom-in"
+          data-aos-duration="1500"
+        >
+          Get Started
+        </v-btn>
+
+        <h2 class="basic-header text-center"
+          v-if="windowWidth > 900"
+          data-aos="zoom-in"
+          data-aos-duration="2000"
+        >
+          See What We Do
+        </h2>
+        <h3 v-else>See What We Do</h3>
+        <v-divider />
 
         <!-- Large Screen repeating card -->
-        <div v-if="windowWidth >= 1000">
-          <div v-for="(card, i) in introCards" :key="i">
+        <div v-if="windowWidth >= 900">
+          <div v-for="(card, i) in introCards"
+            :key="i"
+          >
             <v-row class="intro-rows" align="center">
-              <v-col v-if="i == 0 || i % 2 == 0" cols="4">
+              <v-col v-if="i == 0 || i % 2 == 0"
+                cols="4"
+                data-aos="fade-right"
+                data-aos-duration="800"
+              >
                 <span class="intro" :style="windowWidth > 1300 ? {'font-size': '24px'} : null">
                   {{ card.description }}
                 </span>
               </v-col>
-              <v-col cols="8">
+              <v-col cols="8"
+                :data-aos="i == 0 || i % 2 == 0 ? 'fade-left' : 'fade-right'"
+                data-aos-duration="800"
+              >
                 <img class="intro-img" :src="require(`~/assets/images/${card.img}`)" width="100%">
               </v-col>
-              <v-col v-if="i != 0 && i % 2 != 0" cols="4">
+              <v-col v-if="i != 0 && i % 2 != 0"
+                cols="4"
+                data-aos="fade-left"
+                data-aos-duration="800"
+              >
                 <span class="intro" :style="windowWidth > 1300 ? {'font-size': '24px'} : null">
                   {{ card.description }}
                 </span>
@@ -45,7 +76,7 @@
         </div>
 
         <!-- Small screen repeating card -->
-        <div v-else-if="windowWidth < 1000">
+        <div v-else-if="windowWidth < 900">
           <div v-for="(card, i) in introCards" :key="i">
             <v-row class="intro-rows" align="center" justify="center" >
               <v-col>
@@ -58,207 +89,51 @@
             <v-divider class="intro-divider" />
           </div>
         </div>
-      </v-col>
-
-      <!-- Sign in Form -->
-      <v-col cols="4" v-if="windowWidth >= 850 && !showLoginDialog">
-        <div class="d-flex justify-center">
-        <v-card :class="windowWidth < '850' ? 'card-small' : 'card'" 
-          elevation="5"
-          :width="windowWidth < '1000' ? '300px' : '350px'"
+        <v-btn class="good-btn"
+          :style="windowWidth < 600 ? {
+            'width': '90%'
+          } : null"
+          @click="toggleSignupDialog()"
+          data-aos="zoom-in"
+          data-aos-duration="1500"
         >
-          <v-card-title class="headline" style="color: #2F2B28">
-              <em>Sign In Here</em>
-          </v-card-title>
-          <v-card-text>
-            <v-text-field
-                v-if="isSignup == 1"
-                class="selector"
-                background-color="#f0f0f0"
-                dense
-                solo
-                rounded
-                v-model="firstname"
-                placeholder="First name"
-            >
-            </v-text-field>
-            <v-text-field
-                v-if="isSignup == 1"
-                class="selector"
-                background-color="#f0f0f0"
-                dense
-                solo
-                rounded
-                v-model="lastname"
-                placeholder="Last name"
-            >
-            </v-text-field>
-              <v-text-field
-                  class="selector"
-                  background-color="#f0f0f0"
-                  dense
-                  solo
-                  rounded
-                  v-model="email"
-                  :append-icon="'mdi-email'"
-                  placeholder="Enter your email"
-              >
-              </v-text-field>
-              <v-text-field
-                  class="selector"
-                  background-color="#f0f0f0"
-                  dense
-                  solo
-                  rounded
-                  :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-                  :type="show ? 'text' : 'password'"
-                  @click:append="show = !show"
-                  v-model="password"
-                  @keyup.enter="isSignup == 0 ? login() : signup()"
-                  placeholder="Enter your password"
-              >
-              </v-text-field>
-              <input type="checkbox" v-model="consent" v-if="isSignup == 1" />
-              <span v-if="isSignup == 1">
-                I consent to the 
-                <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a>
-                 and to the 
-                <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms.</a>
-              </span>
-              <br v-if="isSignup == 1">
-              <input type="checkbox" v-model="verifyAge" v-if="isSignup == 1" />
-              <span v-if="isSignup == 1">I certify that I am at least 13 years of age.</span>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn @click="isSignup = !isSignup" text>{{ isSignup ? 'Login' : 'Join' }} Here</v-btn>
-            <span>&ensp;</span>
-            <v-btn nuxt
-              class="good-btn"
-              :disabled="isSignup == 1 && (!consent || !verifyAge)"
-              @click="isSignup == 0 ? login() : signup()"
-            >
-                Sign {{ isSignup == 0 ? 'In' : 'Up' }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-        </div>
+          Get Started
+        </v-btn>
       </v-col>
     </v-row>
+    
+    <SignupDialog style="margin: auto;" />
+    <LoginDialog style="margin: auto;" />
 
-    <v-dialog v-if="showLoginDialog"
-      v-model="showLoginDialog"
-      width="90%"
-    >
-      <v-card
-        class="windowWidth < '850' ? 'card-small' : 'card'" 
-        elevation="5"
-      >
-        <v-btn-toggle style="display: flex; justify-content: center;"
-          mandatory
-          rounded
-          v-model="isSignup"
-        >
-          <v-btn>Login</v-btn>
-          <v-btn>Signup</v-btn>
-        </v-btn-toggle>
-        <v-card-title class="headline" style="color: #2F2B28">
-          <em>Sign {{ isSignup == 0 ? 'In' : 'Up' }} Here</em>
-        </v-card-title>
-        <v-card-text>
-          <v-text-field
-              v-if="isSignup == 1"
-              class="selector"
-              background-color="#f0f0f0"
-              dense
-              solo
-              rounded
-              v-model="firstname"
-              placeholder="First name"
-          >
-          </v-text-field>
-          <v-text-field
-              v-if="isSignup == 1"
-              class="selector"
-              background-color="#f0f0f0"
-              dense
-              solo
-              rounded
-              v-model="lastname"
-              placeholder="Last name"
-          >
-          </v-text-field>
-          <v-text-field
-            class="selector"
-            background-color="#f0f0f0"
-            dense
-            solo
-            rounded
-            v-model="email"
-            :append-icon="'mdi-email'"
-            placeholder="Enter your email"
-          >
-          </v-text-field>
-          <v-text-field
-            class="selector"
-            background-color="#f0f0f0"
-            dense
-            solo
-            rounded
-            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="show ? 'text' : 'password'"
-            @click:append="show = !show"
-            v-model="password"
-            @keyup.enter="isSignup == 0 ? login() : signup()"
-            placeholder="Enter your password"
-          >
-          </v-text-field>
-          <input type="checkbox" v-model="consent" v-if="isSignup == 1" />
-          <span v-if="isSignup == 1">
-            I consent to the 
-            <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a>
-              and to the 
-            <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms.</a>
-          </span>
-          <br v-if="isSignup == 1">
-          <input type="checkbox" v-model="verifyAge" v-if="isSignup == 1" />
-          <span v-if="isSignup == 1">I certify that I am at least 13 years of age.</span>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn nuxt
-            class="good-btn"
-            :disabled="isSignup == 1 && (!consent || !verifyAge)"
-            @click="isSignup == 0 ? login() : signup()"
-          >
-            Sign {{ isSignup == 0 ? 'In' : 'Up' }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-app>
 </template>
 
 <script>
+import StripeCard from '~/components/StripeCard.vue'
+import SignupDialog from '~/components/SignupDialog.vue'
+import LoginDialog from '~/components/LoginDialog.vue'
+import RotateText from '~/components/RotateText.vue'
+import aosMixin from '~/mixins/aos'
+
 export default {
   name: 'LoginPage',
   layout: 'noauth',
+  mixins: [aosMixin],
 
   created() {
     window.addEventListener('resize', this.resizeHandler)
   },
 
+  components: {
+    StripeCard,
+    SignupDialog,
+    LoginDialog,
+    RotateText
+  },
+
   data () {
     return {
-      firstname: '',
-      lastname: '',
-      email: "",
-      password: "",
-      show: false,
-      isSignup: false,
       introIndex: 0,
-      consent: false,
-      verifyAge: false,
       introPhrases: [
         "note-taking.",
         "studying."
@@ -290,28 +165,8 @@ export default {
   },
 
   methods: {
-    login() {
-      if (this.email === "" || this.password === "") alert('No field may be left empty')
-      else {
-        this.$store.dispatch('users/login', {
-          email: this.email,
-          password: this.password
-        })
-      }
-    },
-
-    signup() {
-      if (this.firstname === "" || this.lastname === "" || this.email === "" 
-          || this.password === "") {
-          alert('No field may be left empty')
-      } else {
-          this.$store.dispatch('users/signup', {
-              firstname: this.firstname,
-              lastname: this.lastname,
-              email: this.email,
-              password: this.password
-          })
-      }
+    toggleSignupDialog() {
+      this.$store.dispatch('users/toggleSignupDialog')
     },
 
     resizeHandler() {
@@ -320,17 +175,13 @@ export default {
   },
 
   computed: {
-    user () {
-      return this.$store.state.users.user
-    },
-
-    showLoginDialog: {
+    showSignupDialog: {
       get() {
-        return this.$store.state.users.showLoginDialog
+        return this.$store.state.users.showSignupDialog
       },
 
       set() {
-        this.$store.commit('users/toggleLoginDialog', false)
+        this.$store.commit('users/toggleSignupDialog', false)
       }
     }
   },
@@ -356,83 +207,29 @@ export default {
     }
 }
 
-/*Vertical Sliding*/
-.slidingVertical{
-	display: inline;
-	text-indent: 8px;
-}
-.slidingVertical span{
-	animation: topToBottom 12.5s linear infinite 0s;
-	-webkit-animation: topToBottom 12.5s linear infinite 0s;
-	color: #385b69;
-	opacity: 0;
-	overflow: hidden;
-	position: absolute;
-}
-.slidingVertical span:nth-child(2){
-	animation-delay: 2.5s;
-	-webkit-animation-delay: 2.5s;
-}
-
-/*topToBottom Animation*/
-@-moz-keyframes topToBottom{
-	0% { opacity: 0; }
-	5% { opacity: 0; -moz-transform: translateY(-50px); }
-	10% { opacity: 1; -moz-transform: translateY(0px); }
-	25% { opacity: 1; -moz-transform: translateY(0px); }
-	30% { opacity: 0; -moz-transform: translateY(50px); }
-	80% { opacity: 0; }
-	100% { opacity: 0; }
-}
-@-webkit-keyframes topToBottom{
-	0% { opacity: 0; }
-	5% { opacity: 0; -webkit-transform: translateY(-50px); }
-	10% { opacity: 1; -webkit-transform: translateY(0px); }
-	25% { opacity: 1; -webkit-transform: translateY(0px); }
-	30% { opacity: 0; -webkit-transform: translateY(50px); }
-	80% { opacity: 0; }
-	100% { opacity: 0; }
-}
-
-.card {
-  background-color: #faf9e2;
-  position: fixed;
-  top: 16%;
-  right: 2%;
-  animation: fadeInAnimation ease 2s;
-  opacity: 0;
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
-  animation-delay: 1s;
-}
-
-.card-small {
-  background-color: #faf9e2;
-  position: relative;
-  top: 15%;
-  animation: fadeInAnimation ease 2s;
-  opacity: 0;
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
-  animation-delay: 1s;
-}
-
 .full-intro {
+  padding: 15px;
   background-color: transparent;
-  border-radius: 20px;
-  box-shadow: 0px 0px 4px #2F2B28;
+  border-radius: 100px;
+  box-shadow: 0px 0px 2px #2F2B28;
+  margin-bottom: 60px;
 }
 
 h3, h4 {
-  font-size: 22px;
+  font-size: 24px;
   color: #2F2B28;
   font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 .intro {
-  font-size: 20px;
+  font-size: 22px;
   color: #2F2B28;
   font-family: Cochin;
+}
+
+.basic-header {
+  margin-top: 50px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 .intro-rows {
@@ -446,6 +243,18 @@ h3, h4 {
 .intro-img {
   border-radius: 10px;
   box-shadow: 0px 0px 4px #2F2B28;
+}
+
+.good-btn {
+  width: 400px;
+  height: 50px !important;
+  font-size: 18px;
+  color: #2F2B28 !important;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  border-radius: 10px;
+  box-shadow: 0px 0px 8px #2b8f2b;
+  margin: 20px auto;
+  display: grid;
 }
 
 </style>

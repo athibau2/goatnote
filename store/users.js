@@ -39,7 +39,16 @@ export const state = () => ({
     notesSharedWithMe: [],
     publicOrgs: [],
     foundOrg: null,
+    showSignupDialog: false,
     showLoginDialog: false,
+    consented: false,
+    verifiedAge: false,
+    signupInfo: {
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: ''
+    },
   })
   
 // mutations should update state
@@ -187,8 +196,24 @@ export const mutations = {
         state.foundOrg = data
     },
 
+    toggleSignupDialog(state, data) {
+        state.showSignupDialog = data
+    },
+
     toggleLoginDialog(state, data) {
         state.showLoginDialog = data
+    },
+
+    toggleConsented(state) {
+        state.consented = !state.consented
+    },
+
+    toggleVerifiedAge(state) {
+        state.verifiedAge = !state.verifiedAge
+    },
+
+    setSignupInfo(state, data) {
+        state.signupInfo = data
     },
 }
 
@@ -1150,6 +1175,10 @@ export const actions = {
         }
     },
 
+    async toggleSignupDialog({ commit, state }) {
+        await commit('toggleSignupDialog', !state.showSignupDialog)
+    },
+
     async toggleLoginDialog({ commit, state }) {
         await commit('toggleLoginDialog', !state.showLoginDialog)
     },
@@ -1173,9 +1202,10 @@ export const actions = {
                 if (!error && data.token != null) {
                     setJwtToken(data.token)
                     await commit('setUser', getUserIdFromToken(getJwtToken()))
-                    dispatch('userData')
-                    dispatch('orgs')
-                    commit('toggleLoginDialog', false)
+                    await dispatch('userData')
+                    await dispatch('orgs')
+                    await commit('toggleSignupDialog', false)
+                    await commit('toggleLoginDialog', false)
                     this.$router.push('/')
                 } else if (error) {
                     console.log(error)

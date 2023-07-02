@@ -45,12 +45,19 @@
               </v-card-actions>
             </v-card>
           </v-row>
+
+          <h2>Current Subscription:</h2>
+
+          <!-- <StripeCard style="margin: auto" /> -->
+
         </v-col>
     </v-app>
 </template>
 
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
+import StripeCard from '~/components/StripeCard.vue'
+
 export default {
   name: 'AccountPage',
   middleware: "auth",
@@ -59,6 +66,10 @@ export default {
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     this.$store.dispatch('users/userData')
     this.$store.dispatch('users/orgs')
+  },
+
+  components: {
+    StripeCard
   },
 
   data () {
