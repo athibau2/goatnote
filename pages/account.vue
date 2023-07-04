@@ -49,14 +49,21 @@
           <v-row justify="center" align="center">
             <v-card class="account-card" elevation="1" outlined width="500">
               <v-card-title class="name">Current Subscription</v-card-title>
-              <v-card-text>{{userData.subscriptionstatus}}</v-card-text>
+              <v-card-text class="card-text">
+                {{ userData.subscriptionstatus == 'active' ?
+                  'Premium Membership &ndash; $3.99 / month' : 'Basic Plan &ndash; Free'
+                }}
+              </v-card-text>
+              <v-card-subtitle>
+                <!-- TODO: ADD FEATURE LISTS HERE -->
+              </v-card-subtitle>
               <v-card-actions>
                 <v-spacer />
                 <a :href="portal" style="text-decoration: none;">
                   <v-btn text>Manage Your Account</v-btn>
                 </a>
-                <a :href="payLink" style="text-decoration: none;">
-                  <v-btn text>Upgrade</v-btn>
+                <a v-if="userData.subscriptionstatus == 'inactive'" :href="payLink" style="text-decoration: none;">
+                  <v-btn class="good-btn">Upgrade</v-btn>
                 </a>
               </v-card-actions>
             </v-card>
@@ -143,6 +150,11 @@ export default {
 .name {
   font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: 22px;
+}
+
+.card-text {
+  font-size: 16px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 </style>
