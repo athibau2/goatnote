@@ -12,14 +12,15 @@ exports.handler = async function(event, context) {
 
   try {
     eventStripe = stripe.webhooks.constructEvent(payload, sigHeader, process.env.STRIPE_WEBHOOK_SECRET);
+    console.log(eventStripe)
   } catch (err) {
+    console.log(err)
     return {
       statusCode: 400,
       body: `Webhook Error: ${err.message}`,
     };
   }
 
-  console.log(eventStripe)
 
   // Handle the event
   switch (eventStripe.type) {
