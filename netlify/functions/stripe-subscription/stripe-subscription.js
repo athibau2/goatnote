@@ -3,7 +3,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async function(event, context) {
-  const payload = JSON.parse(event.body);
+  // const payload = JSON.parse(event.body);
+  const payload = event.body;
   const sigHeader = event.headers['stripe-signature'];
 
   console.log('in webhook!')

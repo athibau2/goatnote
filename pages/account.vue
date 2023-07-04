@@ -48,18 +48,19 @@
 
           <v-row justify="center" align="center">
             <v-card class="account-card" elevation="1" outlined width="500">
-              <v-card-title>Current Subscription</v-card-title>
-              <span>{{userData.subscriptionstatus}}</span>
-              <a :href="portal" style="text-decoration: none;">
-                <v-btn text>Manage Your Account</v-btn>
-              </a>
+              <v-card-title class="name">Current Subscription</v-card-title>
+              <v-card-text>{{userData.subscriptionstatus}}</v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <a :href="portal" style="text-decoration: none;">
+                  <v-btn text>Manage Your Account</v-btn>
+                </a>
+                <a :href="payLink" style="text-decoration: none;">
+                  <v-btn text>Upgrade</v-btn>
+                </a>
+              </v-card-actions>
             </v-card>
           </v-row>
-
-          <a :href="payLink" style="text-decoration: none;">
-            <v-btn text>Upgrade</v-btn>
-          </a>
-
         </v-col>
     </v-app>
 </template>
