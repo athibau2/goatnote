@@ -11,7 +11,7 @@ exports.handler = async function(event, context) {
   let eventStripe;
 
   try {
-    eventStripe = stripe.webhooks.constructEvent(payload, sigHeader, process.env.STRIPE_WEBHOOK_SECRET);
+    eventStripe = stripe.webhooks.constructEvent(payload, sigHeader, process.env.NUXT_ENV_STRIPE_WEBHOOK_SIGNING_SECRET);
     console.log(eventStripe)
   } catch (err) {
     console.log(err)
