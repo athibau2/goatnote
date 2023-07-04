@@ -1,52 +1,60 @@
-// with thanks https://github.com/LukeMwila/stripe-subscriptions-backend/blob/master/stripe-api/index.ts
-const process = require('process')
+// ./netlify/functions/stripe-webhook.js
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+import { supabase } from '~/store/auth';
 
-const stripe = require('stripe')(process.env.NUXT_ENV_STRIPE_SECRET_KEY)
+exports.handler = async function(event, context) {
+  const payload = JSON.parse(event.body);
+  const sigHeader = event.headers['stripe-signature'];
 
-const respond = (fulfillmentText) => ({
-  statusCode: 200,
-  body: JSON.stringify(fulfillmentText),
-  headers: {
-    'Access-Control-Allow-Credentials': true,
-    'Access-Control-Allow-Origin': '*',
-    'Content-Type': 'application/json',
-  },
-})
+  let eventStripe;
 
-const handler = async function (event) {
-  let incoming
   try {
-    incoming = JSON.parse(event.body)
-  } catch (error) {
-    console.error(`error with parsing function parameters:`, error)
+    eventStripe = stripe.webhooks.constructEvent(payload, sigHeader, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
     return {
       statusCode: 400,
-      body: JSON.stringify(error),
-    }
+      body: `Webhook Error: ${err.message}`,
+    };
   }
-  try {
-    const { email, productPlan, stripeToken } = incoming
-    const data = await createCustomerAndSubscribeToPlan(stripeToken, email, productPlan)
-    return respond(data)
-  } catch (error) {
-    return respond(error)
+
+  // Handle the event
+  switch (eventStripe.type) {
+    case 'checkout.session.completed':
+      const session = eventStripe.data.object;
+
+      console.log('completed')
+
+      // Here you should update your database
+      // supabase
+
+      // Assuming you have a 'users' table and the 'id' of the user is stored in 'client_reference_id'
+      // const { data, error } = await supabase
+      //   .from('users')
+      //   .update({ subscription_status: 'active' })
+      //   .eq('id', session.client_reference_id);
+
+      // if (error) {
+      //   return {
+      //     statusCode: 500,
+      //     body: `Supabase Error: ${error.message}`,
+      //   };
+      // }
+
+      break;
+    case 'customer.subscription.created':
+      console.log('created')
+      break;    
+    case 'customer.subscription.updated':
+      console.log('updated')
+      break;    
+    case 'customer.subscription.deleted':
+      console.log('deleted')
+      break;    
+    default:
+      // Unexpected event type
+      return { statusCode: 400 };
   }
-}
 
-const createCustomerAndSubscribeToPlan = async function (stripeToken, email, productPlan) {
-  // create a customer
-  const customer = await stripe.customers.create({
-    email,
-    source: stripeToken,
-  })
-  // retrieve created customer id to add customer to subscription plan
-  const customerId = customer.id
-  // create a subscription for the newly created customer
-  const subscription = await stripe.subscriptions.create({
-    customer: customerId,
-    items: [{ plan: productPlan }],
-  })
-  return subscription
-}
-
-module.exports = { handler }
+  // Return a response to acknowledge receipt of the event
+  return { statusCode: 200 };
+};

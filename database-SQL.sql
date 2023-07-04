@@ -9,6 +9,7 @@ CREATE TABLE "user"
   loggedin BOOLEAN,
   onboarded BOOLEAN DEFAULT false,
   noteonboarded BOOLEAN DEFAULT false,
+  subscriptionstatus text NOT NULL default 'inactive',
   PRIMARY KEY (userid),
   UNIQUE (email)
 );

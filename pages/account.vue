@@ -46,7 +46,16 @@
             </v-card>
           </v-row>
 
-          <h2>Current Subscription:</h2>
+          <v-row justify="center" align="center">
+            <v-card class="account-card" elevation="1" outlined width="500">
+              <v-card-title>Current Subscription</v-card-title>
+              <span>{{userData.subscriptionstatus}}</span>
+              <a :href="portal" style="text-decoration: none;">
+                <v-btn text>Manage Your Account</v-btn>
+              </a>
+            </v-card>
+          </v-row>
+
 
           <!-- <StripeCard style="margin: auto" /> -->
 
@@ -55,7 +64,7 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
+import { stripePortal, getJwtToken, getUserIdFromToken } from "../store/auth"
 import StripeCard from '~/components/StripeCard.vue'
 
 export default {
@@ -78,6 +87,7 @@ export default {
       newPass: "",
       show1: false,
       show2: false,
+      portal: stripePortal
     }
   },
 
