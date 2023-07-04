@@ -6,6 +6,8 @@ exports.handler = async function(event, context) {
   const payload = JSON.parse(event.body);
   const sigHeader = event.headers['stripe-signature'];
 
+  console.log('in webhook!')
+
   let eventStripe;
 
   try {
@@ -16,6 +18,8 @@ exports.handler = async function(event, context) {
       body: `Webhook Error: ${err.message}`,
     };
   }
+
+  console.log(eventStripe)
 
   // Handle the event
   switch (eventStripe.type) {
@@ -30,17 +34,17 @@ exports.handler = async function(event, context) {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Assuming you have a 'users' table and the 'id' of the user is stored in 'client_reference_id'
-      // const { data, error } = await supabase
-      //   .from('users')
-      //   .update({ subscription_status: 'active' })
-      //   .eq('id', session.client_reference_id);
+      const { data, error } = await supabase
+        .from('users')
+        .update({ subscription_status: 'active' })
+        .eq('id', session.client_reference_id);
 
-      // if (error) {
-      //   return {
-      //     statusCode: 500,
-      //     body: `Supabase Error: ${error.message}`,
-      //   };
-      // }
+      if (error) {
+        return {
+          statusCode: 500,
+          body: `Supabase Error: ${error.message}`,
+        };
+      }
 
       break;
     case 'customer.subscription.created':

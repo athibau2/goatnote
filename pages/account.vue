@@ -56,8 +56,9 @@
             </v-card>
           </v-row>
 
-
-          <!-- <StripeCard style="margin: auto" /> -->
+          <a :href="payLink" style="text-decoration: none;">
+            <v-btn text>Upgrade</v-btn>
+          </a>
 
         </v-col>
     </v-app>
@@ -87,7 +88,8 @@ export default {
       newPass: "",
       show1: false,
       show2: false,
-      portal: stripePortal
+      portal: stripePortal,
+      payLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK
     }
   },
 
