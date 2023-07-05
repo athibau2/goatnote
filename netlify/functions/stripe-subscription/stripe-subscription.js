@@ -37,7 +37,7 @@ exports.handler = async function(event, context) {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Assuming you have a 'users' table and the 'id' of the user is stored in 'client_reference_id'
-      const { data, error, status } = await supabase.from('users')
+      const { data, error, status } = await supabase.from('user')
         .update({ subscriptionstatus: 'active' })
         .eq('email', customer.email);
       
