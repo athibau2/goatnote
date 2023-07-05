@@ -28,7 +28,8 @@ exports.handler = async function(event, context) {
       console.log('created')
       const session = eventStripe.data.object;
 
-      console.log(session)
+      // Get the customer object
+      const customer = await stripe.customers.retrieve(session.customer);
 
       // Here you should update your database
       const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
@@ -36,17 +37,16 @@ exports.handler = async function(event, context) {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Assuming you have a 'users' table and the 'id' of the user is stored in 'client_reference_id'
-      // const { data, error } = await supabase
-      //   .from('users')
-      //   .update({ subscription_status: 'active' })
-      //   .eq('userid', session.client_reference_id);
+      const { data, error, status } = await supabase.from('users')
+        .update({ subscriptionstatus: 'active' })
+        .eq('email', customer.email);
 
-      // if (error) {
-      //   return {
-      //     statusCode: 500,
-      //     body: `Supabase Error: ${error.message}`,
-      //   };
-      // }
+      if (error) {
+        return {
+          statusCode: 500,
+          body: `Supabase Error: ${error.message}`,
+        };
+      }
       break;    
     case 'customer.subscription.updated':
       console.log('updated')
