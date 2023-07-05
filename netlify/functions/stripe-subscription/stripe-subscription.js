@@ -42,12 +42,12 @@ exports.handler = async function(event, context) {
       //   .update({ subscription_status: 'active' })
       //   .eq('userid', session.client_reference_id);
 
-      if (error) {
-        return {
-          statusCode: 500,
-          body: `Supabase Error: ${error.message}`,
-        };
-      }
+      // if (error) {
+      //   return {
+      //     statusCode: 500,
+      //     body: `Supabase Error: ${error.message}`,
+      //   };
+      // }
       break;    
     case 'customer.subscription.updated':
       console.log('updated')
