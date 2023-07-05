@@ -33,7 +33,7 @@ exports.handler = async function(event, context) {
 
       // Here you should update your database
       const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
-      const supabaseKey = process.env.NUXT_ENV_SUPABASE_URL;
+      const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Assuming you have a 'users' table and the 'id' of the user is stored in 'client_reference_id'
