@@ -28,10 +28,8 @@ exports.handler = async function(event, context) {
       console.log('created')
       const session = eventStripe.data.object;
 
-      console.log(session.customer)
-
       // Get the customer object
-      const customer = await stripe.customers.retrieve(session.customer);
+      const customer = await stripe.customers.retrieve(`${session.customer}`);
 
       // Here you should update your database
       const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
