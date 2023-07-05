@@ -7,8 +7,6 @@ exports.handler = async function(event, context) {
   const payload = event.body;
   const sigHeader = event.headers['stripe-signature'];
 
-  console.log('in webhook!')
-
   let eventStripe;
 
   try {
@@ -22,13 +20,16 @@ exports.handler = async function(event, context) {
     };
   }
 
+  // TODO: FIGURE OUT WHAT EVENT TYPE CANCELLING DOES, HANDLE SWITCH CASE
+  // TODO: FIGURE OUT HOW TO RETURN THE USERID IN THE RESPONSE
 
   // Handle the event
   switch (eventStripe.type) {
-    case 'checkout.session.completed':
+    case 'customer.subscription.created':
+      console.log('created')
       const session = eventStripe.data.object;
 
-      console.log('completed')
+      console.log(session)
 
       // Here you should update your database
       const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
@@ -36,10 +37,10 @@ exports.handler = async function(event, context) {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Assuming you have a 'users' table and the 'id' of the user is stored in 'client_reference_id'
-      const { data, error } = await supabase
-        .from('users')
-        .update({ subscription_status: 'active' })
-        .eq('id', session.client_reference_id);
+      // const { data, error } = await supabase
+      //   .from('users')
+      //   .update({ subscription_status: 'active' })
+      //   .eq('userid', session.client_reference_id);
 
       if (error) {
         return {
@@ -47,10 +48,6 @@ exports.handler = async function(event, context) {
           body: `Supabase Error: ${error.message}`,
         };
       }
-
-      break;
-    case 'customer.subscription.created':
-      console.log('created')
       break;    
     case 'customer.subscription.updated':
       console.log('updated')

@@ -13,6 +13,7 @@
       </span>
       <v-tabs-items v-model="tab">
         <v-tab-item v-for="item in items" :key="item.tab">
+          <!-- TODO: ADD COLUMN FOR SUBSCRIPTION STATUS -->
           <table v-if="tab === 0"> <!--users-->
               <tr>
                 <th style="width: 28%">Name</th>

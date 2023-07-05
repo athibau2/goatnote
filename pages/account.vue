@@ -62,7 +62,11 @@
                 <a :href="portal" style="text-decoration: none;">
                   <v-btn text>Manage Your Account</v-btn>
                 </a>
-                <a v-if="userData.subscriptionstatus == 'inactive'" :href="payLink" style="text-decoration: none;">
+                <a
+                  v-if="userData.subscriptionstatus == 'inactive'"
+                  style="text-decoration: none;"
+                  :href="`${payLink}?prefilled_email=${encodedEmail}`"
+                >
                   <v-btn class="good-btn">Upgrade</v-btn>
                 </a>
               </v-card-actions>
@@ -128,8 +132,11 @@ export default {
 
     userData () {
         return this.$store.state.users.userData
-    }
+    },
 
+    encodedEmail () {
+      return encodeURIComponent(this.user.email)
+    }
   }
 }
 </script>
