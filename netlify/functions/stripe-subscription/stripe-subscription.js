@@ -40,6 +40,8 @@ exports.handler = async function(event, context) {
       const { data, error, status } = await supabase.from('users')
         .update({ subscriptionstatus: 'active' })
         .eq('email', customer.email);
+      
+      console.log(date, error, status)
 
       if (error) {
         return {
