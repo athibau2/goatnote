@@ -20,41 +20,61 @@ exports.handler = async function(event, context) {
   }
 
   // TODO: FIGURE OUT WHAT EVENT TYPE CANCELLING DOES, HANDLE SWITCH CASE
-  // TODO: FIGURE OUT HOW TO RETURN THE USERID IN THE RESPONSE
+
+  // Init database connection
+  const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
+  const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Handle the event
   switch (eventStripe.type) {
     case 'customer.subscription.created':
-      console.log('created')
-      const session = eventStripe.data.object;
-
-      // Get the customer object
-      const customer = await stripe.customers.retrieve(session.customer);
-
-      // Here you should update your database
-      const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
-      const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
-      // Assuming you have a 'users' table and the 'id' of the user is stored in 'client_reference_id'
-      const { data, error, status } = await supabase.from('user')
-        .update({ subscriptionstatus: 'active' })
-        .eq('email', customer.email);
-      
-      console.log(data, error, status)
-
-      if (error) {
-        return {
-          statusCode: 500,
-          body: `Supabase Error: ${error.message}`,
-        };
+      async function setActive() {
+        const session = eventStripe.data.object;
+  
+        // Get the customer object
+        const customer = await stripe.customers.retrieve(session.customer);
+  
+        // Update user table subscriptionstatus field to active
+        const { data, error, status } = await supabase.from('user')
+          .update({ subscriptionstatus: 'active' })
+          .eq('email', customer.email);
+        
+        if (error) {
+          console.log(error)
+          return {
+            statusCode: 500,
+            body: `Supabase Error: ${error.message}`,
+          };
+        }
       }
+      await setActive()
       break;    
-    case 'customer.subscription.updated':
-      console.log('updated')
-      break;    
+    // case 'customer.subscription.updated':
+    //   console.log('updated')
+    //   break;    
     case 'customer.subscription.deleted':
       console.log('deleted')
+      async function setInactive() {
+        const session = eventStripe.data.object;
+  
+        // Get the customer object
+        const customer = await stripe.customers.retrieve(session.customer);
+  
+        // Update user table subscriptionstatus field to active
+        const { data, error, status } = await supabase.from('user')
+          .update({ subscriptionstatus: 'active' })
+          .eq('email', customer.email);
+        
+        if (error) {
+          console.log(error)
+          return {
+            statusCode: 500,
+            body: `Supabase Error: ${error.message}`,
+          };
+        }
+      }
+      await setInactive()
       break;    
     default:
       // Unexpected event type
