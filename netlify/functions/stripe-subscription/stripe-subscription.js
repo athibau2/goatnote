@@ -41,7 +41,7 @@ exports.handler = async function(event, context) {
         .update({ subscriptionstatus: 'active' })
         .eq('email', customer.email);
       
-      console.log(date, error, status)
+      console.log(data, error, status)
 
       if (error) {
         return {
