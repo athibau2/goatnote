@@ -1,5 +1,5 @@
 // ./netlify/functions/stripe-webhook.js
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.NUXT_ENV_STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async function(event, context) {
@@ -29,7 +29,7 @@ exports.handler = async function(event, context) {
       const session = eventStripe.data.object;
 
       // Get the customer object
-      const customer = await stripe.customers.retrieve(`${session.customer}`);
+      const customer = await stripe.customers.retrieve(session.customer);
 
       // Here you should update your database
       const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
