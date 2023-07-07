@@ -101,7 +101,8 @@ export default {
       show1: false,
       show2: false,
       portal: stripePortal,
-      payLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK
+      payLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
+
     }
   },
 
@@ -119,7 +120,9 @@ export default {
     },
 
     deleteAccount () {
-      if(confirm("Are you sure you want to delete your account?")) {
+      if (this.userData.subscriptionstatus == 'active') {
+        alert('You cannot delete your account while subscribed to the Premium plan. Please first cancel your subscription, then delete your account.')
+      } else if (confirm("Are you sure you want to delete your account?")) {
         this.$store.dispatch('users/deleteAccount')
       }
     }

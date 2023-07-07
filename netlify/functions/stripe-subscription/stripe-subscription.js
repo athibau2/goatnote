@@ -3,7 +3,6 @@ const stripe = require('stripe')(process.env.NUXT_ENV_STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async function(event, context) {
-  // const payload = JSON.parse(event.body);
   const payload = event.body;
   const sigHeader = event.headers['stripe-signature'];
 
@@ -18,8 +17,6 @@ exports.handler = async function(event, context) {
       body: `Webhook Error: ${err.message}`,
     };
   }
-
-  // TODO: FIGURE OUT WHAT EVENT TYPE CANCELLING DOES, HANDLE SWITCH CASE
 
   // Init database connection
   const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
@@ -49,10 +46,7 @@ exports.handler = async function(event, context) {
         }
       }
       await setActive()
-      break;    
-    // case 'customer.subscription.updated':
-    //   console.log('updated')
-    //   break;    
+      break;
     case 'customer.subscription.deleted':
       console.log('deleted')
       async function setInactive() {
@@ -63,7 +57,7 @@ exports.handler = async function(event, context) {
   
         // Update user table subscriptionstatus field to active
         const { data, error, status } = await supabase.from('user')
-          .update({ subscriptionstatus: 'active' })
+          .update({ subscriptionstatus: 'inactive' })
           .eq('email', customer.email);
         
         if (error) {

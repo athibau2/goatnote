@@ -74,13 +74,13 @@ export default {
             || this.signupInfo.email === "" || this.signupInfo.password === "") {
             alert('No field may be left empty')
         } else {
-            await this.$store.dispatch('users/signup', {
+            const success = await this.$store.dispatch('users/signup', {
                 firstname: this.signupInfo.firstname,
                 lastname: this.signupInfo.lastname,
                 email: this.signupInfo.email,
                 password: this.signupInfo.password
             })
-            link ? window.open(link) : null
+            link ? success ? window.location.href = `${link}?prefilled_email=${this.encodedEmail}` : null : null
         }
     },
    },
@@ -96,6 +96,10 @@ export default {
 
     signupInfo () {
         return this.$store.state.users.signupInfo
+    },
+
+    encodedEmail () {
+      return encodeURIComponent(this.$store.state.users.user.email)
     }
    }
 }

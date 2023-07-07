@@ -1129,9 +1129,10 @@ export const actions = {
     },
 
     async updatePass({ dispatch, state }, { newPass, currentPass }) {
-        const response = await dispatch('getUser', { email: state.user.email })
-        if (response != null) {
-            if (await matchPassword(currentPass, response[0].password)) {
+        // const response = await dispatch('getUser', { email: state.user.email })
+        // if (response != null) {
+            // if (await matchPassword(currentPass, response[0].password)) {
+            if (await matchPassword(currentPass, state.userData.password)) {
                 const { data, error, status } = await supabase.from('user')
                     .update({
                         password: await encryptPassword(newPass)
@@ -1148,9 +1149,9 @@ export const actions = {
             else {
                 alert("The current password you entered is incorrect")
             }
-        } else {
-            alert('Something went wrong, please try again.')
-        }
+        // } else {
+        //     alert('Something went wrong, please try again.')
+        // }
     },
 
     async signup({ dispatch }, { firstname, lastname, email, password }) {
@@ -1166,6 +1167,7 @@ export const actions = {
                 email: email,
                 password: password
             })
+            return true
         } else if (error) {
             if (status === 409) {
                 alert('An account already exists with that email.')
