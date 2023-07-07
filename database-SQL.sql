@@ -50,6 +50,7 @@ CREATE TABLE note
   notedate timestamp,
   typednotes TEXT,
   collectionid SERIAL NOT NULL,
+  numgptcalls INT NOT NULL DEFAULT 0,
   PRIMARY KEY (noteid),
   FOREIGN KEY (collectionid) REFERENCES collection(collectionid) ON DELETE CASCADE
 );
@@ -143,7 +144,7 @@ create or replace view see_notes as
 	--this will be filtered later
   
 create or replace view see_note_with_data as
-  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid
+  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.numgptcalls
   from note n inner join collection c on n.collectionid = c.collectionid
   inner join "user" u on c.userid = u.userid;
   --this will be filtered later

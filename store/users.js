@@ -788,7 +788,7 @@ export const actions = {
             .eq('collectionid', collectionid)
         if (!error) {
             await commit('setNotes', data)
-            localStorage.setItem('collNotes', JSON.stringify(response.data))
+            localStorage.setItem('collNotes', JSON.stringify(data))
         } else if (error) {
             console.log(error)
             await commit('setNotes', [])
@@ -814,6 +814,24 @@ export const actions = {
         } else if (error) {
             console.log(error)
             alert('An error occurred opening the note, please try again.')
+        }
+    },
+
+    async updateGptCalls({ commit }, { num, noteid }) {
+        const { data, error, status } = await supabase.from('note')
+            .update({
+                numgptcalls: num
+            })
+            .eq('noteid', noteid)
+            .select()
+        console.log(data)
+        if (!error) {
+            let temp = JSON.parse(localStorage.getItem('note'))
+            temp.typednotes = data[0].typednotes
+            await commit('currentNote', temp)
+            localStorage.setItem('note', JSON.stringify(temp))
+        } else if (error) {
+            console.log(error)
         }
     },
 

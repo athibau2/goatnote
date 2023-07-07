@@ -109,8 +109,6 @@
                 rounded
                 readonly
                 color="#F4F4F4"
-                v-bind="attrs"
-                v-on="on"
                 :placeholder="currentNote.notename"
               >
               </v-text-field>          
@@ -140,21 +138,14 @@
             </div>
           </v-col>
 
+          <!-- Buttons area full screen -->
           <v-col class="text-center" cols="3">
             <div>
               <v-btn class="tool-btn"
-                @click="generateVocab()"
-                :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
+                @click="generateStudyTools()"
+                :disabled="(user.user_id == currentNote.userid ? false : true) || isGeneratingTools"
               >
-                <Loading v-if="isLoadingVocab" /> {{ !isLoadingVocab ? 'Generate Vocab' : null }}
-              </v-btn>
-            </div>
-            <div>
-              <v-btn class="tool-btn"
-                @click="generateQuestions()"
-                :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
-              >
-                <Loading v-if="isLoadingQuestions" /> {{ !isLoadingQuestions ? 'Generate Questions' : null }}
+                <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : null }}
               </v-btn>
             </div>
             <div id="note-step-2">
@@ -185,23 +176,15 @@
           </v-col>
         </v-row>
 
-        <!-- Notes area small screen -->
+        <!-- Buttons area small screen -->
         <v-col cols="12" v-else-if="windowWidth < 1271">
           <v-btn class="tool-btn"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto" 
-            @click="generateVocab()"
-            :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
+            @click="generateStudyTools()"
+            :disabled="(user.user_id == currentNote.userid ? false : true) || isGeneratingTools"
           >
-            <Loading v-if="isLoadingVocab" /> {{ !isLoadingVocab ? 'Generate Vocab' : null }}
-          </v-btn>
-          <v-btn class="tool-btn"
-            :style="windowWidth < 936 ? 'font-size: 12px' : null"
-            width="auto"
-            @click="generateQuestions()"
-            :disabled="(user.user_id == currentNote.userid ? false : true) || generating"
-          >
-            <Loading v-if="isLoadingQuestions" /> {{ !isLoadingQuestions ? 'Generate Questions' : null }}
+            <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : null }}
           </v-btn>
           <v-btn  class="tool-btn" id="note-step-2"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
@@ -240,6 +223,8 @@
           >
             Study Plans
           </v-btn>
+
+          <!-- Notes area small screen -->
           <div class="editor-wrapper">
             <vue-editor class="editor" id="note-step-1"
               :disabled="(user.user_id == currentNote.userid) ? false : true"
@@ -268,7 +253,7 @@ import StudyPlans from '~/components/StudyPlans.vue'
 import ShareNote from '~/components/ShareNote.vue'
 import { VueEditor } from "vue2-editor"
 import Shepherd from 'shepherd.js'
-import { openaiGenerateQuestions, openaiGenerateVocab } from '~/store/openai'
+import { openaiGenerateStudyTools } from '~/store/openai'
 import { debounce } from 'lodash'
 import Loading from '~/components/Loading.vue'
 
@@ -290,7 +275,8 @@ export default {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/userData')
     this.$store.dispatch('users/orgs')
-    this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
+    await this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
+    await this.$store.dispatch('users/notes', { collectionid: this.currentNote.collectionid })
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
@@ -310,13 +296,12 @@ export default {
 
   data () {
     return {
-        isLoadingVocab: false,
+        isGeneratingTools: false,
         isLoadingQuestions: false,
         showQuestions: false,
         showLinks: false,
         showWords: false,
         showStudyPlans: false,
-        generating: false,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
         editNote: false,
@@ -346,66 +331,44 @@ export default {
         this.noteText = this.currentNote.typednotes
       },
 
-      async generateVocab() {
-        if (confirm('Are you ready to generate vocab? This may take a minute to complete. Please do not refresh your page.')) {
-          console.log('Generating vocab...')
-          const wordsArr = await this.extractVocabWords()
-          this.isLoadingVocab = true
-          this.generating = true
-          const vocab = await openaiGenerateVocab({
+      async generateStudyTools() {
+        if (this.currentNote.numgptcalls == 4) {
+          alert('You have reached the maximum number of allowed AI parsing calls.')
+        } else if (this.noteText.length < 1500) {
+          alert(`The minimum character length to parse your notes is 1500 characters. You are currently at ${this.noteText.length} characters.`)
+        } else if (confirm('Are you ready to generate study tools? This will automatically parse your notes and create vocab flash cards and study question flash cards for you. For best results, use this function when you are closer to completing your notes, as repeating this function may cause duplicates. This may take a minute to complete. Please do not refresh your page.')) {
+          console.log('Generating study tools...')
+          this.isGeneratingTools = true
+          const studyTools = await openaiGenerateStudyTools({
             input: this.noteText,
-            ignore: wordsArr
           })
-          for (let i = 0; i < vocab.length; ++i) {
-            await this.$store.dispatch('users/addWord', {
-              newWord: vocab[i].word,
-              newDef: vocab[i].definition,
+          if (!studyTools) {
+            alert('Something went wrong and no study tools were generated. Please try again.')
+          } else {
+            await this.$store.dispatch('users/updateGptCalls', {
+              num: this.currentNote.numgptcalls + 1,
               noteid: this.currentNote.noteid
             })
+            const vocab = studyTools.vocab
+            const questions = studyTools.questions
+            for (let i = 0; i < vocab.length; ++i) {
+              await this.$store.dispatch('users/addWord', {
+                newWord: vocab[i].word,
+                newDef: vocab[i].definition,
+                noteid: this.currentNote.noteid
+              })
+            }
+            for (let i = 0; i < questions.length; ++i) {
+              await this.$store.dispatch('users/addQuestion', {
+                newQuestion: questions[i].question,
+                newAnswer: questions[i].answer,
+                noteid: this.currentNote.noteid
+              })
+            }
+            this.isGeneratingTools = false
+            alert(`Your study tools have been successfully generated. You can review the vocab words by clicking the \"Words\" button, and the study questions by clicking the \"Questions\" button. You have ${this.remainingGptCalls} remaning AI calls remaining for this note.`)
           }
-          this.generating = false
-          this.isLoadingVocab = false
-          alert('Your vocab words have been successfully generated. You can review them by clicking the \"Words\" button.')
         }
-      },
-      
-      async generateQuestions() {
-        if (confirm('Are you ready to generate questions? This may take a minute to complete. Please do not refresh your page.')) {
-          console.log('Generating questions...')
-          const questionsArr = await this.extractQuestionText()
-          this.isLoadingQuestions = true
-          this.generating = true
-          const questions = await openaiGenerateQuestions({
-            input: this.noteText,
-            ignore: questionsArr
-          })
-          for (let i = 0; i < questions.length; ++i) {
-            await this.$store.dispatch('users/addQuestion', {
-              newQuestion: questions[i].question,
-              newAnswer: questions[i].answer,
-              noteid: this.currentNote.noteid
-            })
-          }
-          this.generating = false
-          this.isLoadingQuestions = false
-          alert('Your study questions have been successfully generated. You can review them by clicking the \"Questions\" button.')
-        }
-      },
-
-      async extractVocabWords() {
-        let wordsArr = []
-        this.words.forEach(element => {
-          wordsArr.push(element.vocabword)
-        });
-        return wordsArr
-      },
-
-      async extractQuestionText() {
-        let questionsArr = []
-        this.questions.forEach(element => {
-          questionsArr.push(element.questiontext)
-        });
-        return questionsArr
       },
       
       addSteps() {
@@ -592,11 +555,13 @@ export default {
 
       saveNotes: debounce(async function () {
         this.$store.commit('users/saving', "Saving...")
-        await this.$store.dispatch('users/saveNotes', {
-          noteText: this.noteText,
-          noteid: this.currentNote.noteid
-        })
-        this.$store.commit('users/saving', 'Saved')
+        setTimeout(async () => {
+          await this.$store.dispatch('users/saveNotes', {
+            noteText: this.noteText,
+            noteid: this.currentNote.noteid
+          })
+          this.$store.commit('users/saving', 'Saved')
+        }, 500);
       }, 2000),
 
       async toggleStudy () {
@@ -620,6 +585,10 @@ export default {
   computed: {
     studyMode () {
       return this.$store.state.users.studyMode
+    },
+
+    remainingGptCalls () {
+      return 4 - this.currentNote.numgptcalls
     },
 
     saving () {
