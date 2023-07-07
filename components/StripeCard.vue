@@ -130,7 +130,7 @@ export default {
     margin: auto;
     height: 100px;
     width: 100px;
-    background-color: #F4F4F4;
+    background-color: #f9f9f9;
     border-radius: 10px;
 }
 

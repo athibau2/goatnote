@@ -381,7 +381,7 @@ h6 {
 }
 
 tr:nth-child(odd) {
-    background-color: #dfdfdf;
+  background-color: #dfdfdf;
 }
 
 .modal-bottom-content {

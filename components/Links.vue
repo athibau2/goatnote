@@ -35,6 +35,7 @@
                 <v-text-field 
                   v-model="newLink" 
                   placeholder="Enter New Link"
+                  @keyup.enter="addLink()"
                 >
                 </v-text-field>
               </v-row>

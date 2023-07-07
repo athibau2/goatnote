@@ -23,8 +23,8 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn text @click="removeColl(coll)">Remove</v-btn>
-                  <v-btn color="#85c59d"
+                  <v-btn text class="flat-btn" @click="removeColl(coll)">Remove</v-btn>
+                  <v-btn class="good-btn"
                     @click="loadNotes(coll)"
                   >
                     Open
@@ -63,7 +63,7 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="#85c59d" @click="openNote(note.noteid)">Open</v-btn>
+                  <v-btn class="good-btn" @click="openNote(note.noteid)">Open</v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
@@ -81,8 +81,8 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn text @click="removeNote(note)">Remove</v-btn>
-                  <v-btn color="#85c59d" @click="openNote(note.noteid)">Go</v-btn>
+                  <v-btn text class="flat-btn" @click="removeNote(note)">Remove</v-btn>
+                  <v-btn class="good-btn" @click="openNote(note.noteid)">Go</v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
@@ -170,7 +170,7 @@ export default {
 @import '~/assets/styles.css';
 
 .shared-list {
-  background-color: #F4F4F4;
+  background-color: #f9f9f9;
   padding-bottom: 10px;
 }
 

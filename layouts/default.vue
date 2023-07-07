@@ -324,7 +324,9 @@ export default {
 }
 
 .name-display {
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 22px;
+  letter-spacing: 1px;
 }
 
 .logo-btn {

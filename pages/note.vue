@@ -56,7 +56,7 @@
                   dense
                   solo
                   rounded
-                  color="#F4F4F4"
+                  color="#f9f9f9"
                   append-icon="mdi-chevron-down"
                   append-outer-icon="mdi-pencil"
                   @click:append-outer="editNote = !editNote"
@@ -79,7 +79,7 @@
                       solo
                       rounded
                       readonly
-                      color="#F4F4F4"
+                      color="#f9f9f9"
                       append-icon="mdi-chevron-down"
                       append-outer-icon="mdi-pencil"
                       @click:append-outer="editNote = !editNote"
@@ -108,7 +108,7 @@
                 solo
                 rounded
                 readonly
-                color="#F4F4F4"
+                color="#f9f9f9"
                 :placeholder="currentNote.notename"
               >
               </v-text-field>          
@@ -631,12 +631,12 @@ export default {
 
 .study-btn {
   color: #2F2B28;
-  background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
+  background-image: linear-gradient(to top right, #f9f9f9, #85c59d);
 }
 
 .editor-wrapper {
   /* background-color: #ffffec; */
-  background-image: linear-gradient(to top right, #ffffec, #F4F4F4);
+  background-image: linear-gradient(to top right, #ffffec, #f9f9f9);
   height: 500px;
   overflow: scroll;
 }
@@ -649,7 +649,7 @@ export default {
   width: 100%;
   color: #2F2B28;
   margin: 4px 2px;
-  background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
+  background-image: linear-gradient(to top right, #f9f9f9, #85c59d);
 }
 
 .noteselector {

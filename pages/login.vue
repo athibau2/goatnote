@@ -1,5 +1,5 @@
 <template>
-  <v-app style="background-color: #f4f4f4;">
+  <v-app style="background-color: #f9f9f9;">
     <v-row justify="center" align="center">
       <v-col class="intro-page"
         :cols="windowWidth > 800 ? '10' : null"
@@ -216,20 +216,23 @@ export default {
 }
 
 h3, h4 {
-  font-size: 24px;
+  font-weight: 400;
+  font-size: 26px;
   color: #2F2B28;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .intro {
   font-size: 22px;
   color: #2F2B28;
-  font-family: Cochin;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .basic-header {
+  font-weight: 300;
+  font-size: 26px;
   margin-top: 50px;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .intro-rows {

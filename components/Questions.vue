@@ -6,18 +6,27 @@
             <div v-if="questions.length !== 0">
               <v-list class="modal-list">
                 <v-list-item v-for="(q, i) in questions" :key="i">
-                  <span class="modal-list-item" v-if="!editingQuestion || (editingQuestion && q.questionid !== questionBeingEdited)">
-                      <strong>{{q.questiontext}}</strong>
-                      &nbsp;{{q.answer}}&nbsp;
-                      <v-btn 
-                        :disabled="(editingQuestion && q.questionid !== questionBeingEdited) ? true : false" 
-                        icon @click="setEditQuestion(q)"
-                      >
-                        <v-icon>mdi-pencil</v-icon>
-                      </v-btn>
-                      <v-icon @click="deleteQuestion(q.questionid)">mdi-delete</v-icon>
-                      <v-divider />
-                  </span>
+                  <div class="modal-list-item" v-if="!editingQuestion || (editingQuestion && q.questionid !== questionBeingEdited)">
+                    <v-row style="padding: 15px 5px;">
+                      <span style="max-width: 80%;">
+                        <strong>{{q.questiontext}}</strong>
+                        <br>{{q.answer}}
+                      </span>
+                      <v-spacer />
+                      <span>
+                        <v-btn
+                          :disabled="(editingQuestion && q.questionid !== questionBeingEdited) ? true : false" 
+                          icon @click="setEditQuestion(q)"
+                        >
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn icon @click="deleteQuestion(q.questionid)">
+                          <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                      </span>
+                    </v-row>
+                    <v-divider style="margin-top: 15px;" />
+                  </div>
                   <v-row align="center" justify="center" v-else>
                     <v-text-field
                       :value="q.questiontext"
@@ -27,7 +36,7 @@
                       @keyup.enter="updateQuestion(q)"
                     >
                     </v-text-field>
-                    &nbsp;&nbsp;
+                    &ensp;
                     <v-text-field
                       :value="q.answer"
                       counter
@@ -51,12 +60,13 @@
                   placeholder="Enter New Question"
                 >
                 </v-text-field>
-                &nbsp;&nbsp;
+                &ensp;
                 <v-text-field :class="windowWidth < '850' ? 'modal-bottom-sm' : null"
                   v-model="newAnswer"
                   counter
                   maxlength="350"
                   placeholder="Enter Question Answer"
+                  @keyup.enter="addQuestion()"
                 >
                 </v-text-field>
               </v-row>

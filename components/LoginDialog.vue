@@ -9,8 +9,10 @@
             <v-card class="dialog-card"
                 elevation="5"
             >
-                <v-card-title class="headline">
-                    <em>Your Info...</em>
+                <v-card-title>
+                    <span class="basic-header">
+                        <em>Your Info...</em>
+                    </span>
                 </v-card-title>
                 <v-card-text>
                     <v-text-field
@@ -41,7 +43,7 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer />
-                    <v-btn @click="switchToJoin()" text>Join Here</v-btn>
+                    <v-btn class="flat-btn" @click="switchToJoin()" text>Join Here</v-btn>
                     <v-btn nuxt
                         class="good-btn"
                         @click="login()"
@@ -109,7 +111,6 @@ export default {
 
 <style scoped>
 @import '~/assets/styles.css';
-
 
 
 </style>

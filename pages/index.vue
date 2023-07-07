@@ -55,7 +55,7 @@
                 dense
                 solo
                 rounded
-                background-color="#f4f4f4"
+                background-color="#f9f9f9"
                 v-model="newOrgName" 
                 placeholder="New Organization Name"
               >
@@ -65,10 +65,10 @@
               <label id="checkbox-label" for="private">Make Private</label>
               <input id="checkbox" type="checkbox" name="private" v-model="isPrivate" />
               <v-spacer />
-              <v-btn text nuxt @click="cancelNewOrg()">
+              <v-btn text class="flat-btn" @click="cancelNewOrg()">
                   Cancel
               </v-btn>
-              <v-btn class="submit-btn" nuxt @click="createOrg()">
+              <v-btn class="good-btn" nuxt @click="createOrg()">
                   Submit
               </v-btn>
           </v-card-actions>
@@ -92,7 +92,7 @@
                 dense
                 solo
                 rounded
-                background-color="#f4f4f4"
+                background-color="#f9f9f9"
                 v-model="newCollName" 
                 placeholder="New Collection Name"
               >
@@ -100,10 +100,10 @@
           </v-card-text>
           <v-card-actions>
               <v-spacer />
-              <v-btn text nuxt @click="cancelNewCollection()">
+              <v-btn text class="flat-btn" @click="cancelNewCollection()">
                   Cancel
               </v-btn>
-              <v-btn color="#85c59d" @click="createCollection()">
+              <v-btn class="good-btn" @click="createCollection()">
                   Add
               </v-btn>
           </v-card-actions>
@@ -127,7 +127,7 @@
                 dense
                 solo
                 rounded
-                background-color="#f4f4f4"
+                background-color="#f9f9f9"
                 v-model="newNoteName"
                 placeholder="New Note Name"
               >
@@ -135,10 +135,10 @@
           </v-card-text>
           <v-card-actions>
               <v-spacer />
-              <v-btn text nuxt @click="cancelNewNote()">
+              <v-btn text class="flat-btn" @click="cancelNewNote()">
                   Cancel
               </v-btn>
-              <v-btn color="#85c59d" @click="createNote()">
+              <v-btn class="good-btn" @click="createNote()">
                   Add
               </v-btn>
           </v-card-actions>
@@ -149,7 +149,7 @@
     <span class="notice text-center"
       v-if="(orgs === null || orgs === undefined || orgs.length === 0) && level == 1"
     >
-      You are currently not part of any organizations. Create one above or 
+      You are currently not part of any organizations, such as your school. Create one above or 
       <nuxt-link to="/joinOrg">join one</nuxt-link>!
     </span>
 
@@ -169,7 +169,7 @@
     <v-col v-if="level == 1">
       <v-row>
         <v-card class="card" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
-          <v-card-title style="word-break: break-word;">
+          <v-card-title class="card-title">
               {{org.orgname}}
               <v-spacer />
               <v-menu
@@ -194,8 +194,8 @@
           </v-card-title>
           <v-card-actions>
             <v-spacer />
-            <v-btn text @click="leaveOrg(org.orgid)">Leave</v-btn>
-            <v-btn color="#85c59d" @click="loadCollections(org)">Open</v-btn>
+            <v-btn text class="flat-btn" @click="leaveOrg(org.orgid)">Leave</v-btn>
+            <v-btn class="good-btn" @click="loadCollections(org)">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
@@ -205,9 +205,8 @@
     <v-col v-if="level == 2">
       <v-row>
         <v-card class="card" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
-          <v-card-title 
+          <v-card-title class="card-title"
             v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)"
-            style="word-break: break-word;"
           >
               {{coll.collectionname}}
               <v-spacer />
@@ -242,8 +241,8 @@
                 </template>
                 <span>Share</span>
               </v-tooltip>
-            <v-btn text @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
-            <v-btn color="#85c59d" @click="loadNotes(coll)">Open</v-btn>
+            <v-btn text class="flat-btn" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
+            <v-btn class="good-btn" @click="loadNotes(coll)">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
@@ -253,7 +252,7 @@
     <v-col v-if="level == 3">
       <v-row>
         <v-card class="card" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
-          <v-card-title style="word-break: break-word;">
+          <v-card-title class="card-title">
               {{note.notename}}
           </v-card-title>
           <v-card-actions>
@@ -270,8 +269,8 @@
               </template>
               <span>Share</span>
             </v-tooltip>
-            <v-btn text @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
-            <v-btn color="#85c59d" @click="openNote(note.noteid)">Open</v-btn>
+            <v-btn text class="flat-btn" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
+            <v-btn class="good-btn" @click="openNote(note.noteid)">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
@@ -538,7 +537,7 @@ export default {
 }
 
 #checkbox-label {
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   margin-left: 10px;
   margin-right: 10px;
 }
@@ -548,20 +547,24 @@ export default {
   height: 20px;
 }
 
+.card-title {
+  word-break: break-all;
+}
+
 .joincode-popup {
   background-color: #dddddd;
 }
 
 .joincode-1 {
   padding-left: 10px;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   text-decoration: underline;
 }
 
 .joincode-2 {
   padding-right: 10px;
   font-size: 13px;
-  font-family: cursive;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 </style>

@@ -7,7 +7,7 @@
               <v-card-title class="name">
                   {{userData.firstname}} {{userData.lastname}}
               </v-card-title>
-              <v-card-subtitle>
+              <v-card-subtitle class="subtitle">
                   {{userData.email}}
               </v-card-subtitle>
               <v-card-text>
@@ -40,7 +40,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
-                <v-btn text @click="deleteAccount()">Delete Account</v-btn>
+                <v-btn text class="flat-btn" @click="deleteAccount()">Delete Account</v-btn>
                 <v-btn class="good-btn" @click="updatePass()">Update Password</v-btn>
               </v-card-actions>
             </v-card>
@@ -60,7 +60,7 @@
               <v-card-actions>
                 <v-spacer />
                 <a :href="portal" style="text-decoration: none;">
-                  <v-btn text>Manage Your Account</v-btn>
+                  <v-btn text class="flat-btn">Manage Your Account</v-btn>
                 </a>
                 <a
                   v-if="userData.subscriptionstatus == 'inactive'"
@@ -148,6 +148,7 @@ export default {
 @import '~/assets/styles.css';
 
 .account-card {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   background-color: transparent;
   margin-top: 20px;
 }
@@ -158,13 +159,24 @@ export default {
 }
 
 .name {
-  font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: 22px;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 16px;
 }
 
 .card-text {
-  font-size: 16px;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 18px;
+}
+
+.flat-btn {
+  font-size: 15px !important;
+}
+
+.good-btn {
+  font-size: 15px !important;
 }
 
 </style>

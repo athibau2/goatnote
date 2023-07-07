@@ -38,7 +38,7 @@ export default {
 <style>
 .rotating-text {
   margin: auto;
-  font-size: 28px !important;
+  font-size: 24px !important;
 }
 
 .rotating-text span {

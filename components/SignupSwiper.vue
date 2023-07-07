@@ -1,6 +1,6 @@
 <template>
     <div class="signup-wrapper">
-        <span class="headline">
+        <span class="basic-header">
             <em>Your Info...</em>
         </span>
         <v-text-field

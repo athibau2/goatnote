@@ -1,46 +1,51 @@
 /*
     COLOR PALETTE:
-    white: #F4F4F4
+    white: #f9f9f9
     green: #85c59d
     blue: #B3E5FC
     black: #2F2B28
-    red/white gradient: to top right, #f4f4f4, #E57373
-    yellow/white gradient: to top right, #ffffec, #F4F4F4
-    blue/white gradient: to top right, #f4f4f4, #B3E5FC
-    green/white gradient: to top right, #f4f4f4, #85c59d
+    red/white gradient: to top right, #f9f9f9, #E57373
+    yellow/white gradient: to top right, #ffffec, #f9f9f9
+    blue/white gradient: to top right, #f9f9f9, #B3E5FC
+    green/white gradient: to top right, #f9f9f9, #85c59d
 */
 /* @import './spinkit.css'; */
 
 .main {
-    background-color: #f4f4f4 !important;
+    background-color: #f9f9f9 !important;
 }
 
 .app-bar {
-    background-image: linear-gradient(to top right, #f4f4f4, #B3E5FC);
+    background-image: linear-gradient(to top right, #f9f9f9, #B3E5FC);
 }
 
 .card {
-    background-image: linear-gradient(to top right, #f4f4f4, #B3E5FC) !important;
+    background-image: linear-gradient(to top right, #f9f9f9, #B3E5FC) !important;
     margin: 10px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
+.flat-btn {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 16px !important;
+    color: #2F2B28 !important;
+}
+
 .good-btn {
-    background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
+    background-image: linear-gradient(to top right, #f9f9f9, #85c59d);
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 16px !important;
+    color: #2F2B28 !important;
 }
 
 .bad-btn {
-    background-image: linear-gradient(to top right, #f4f4f4, #E57373);
+    background-image: linear-gradient(to top right, #f9f9f9, #E57373);
 }
 
 .basic-header {
     color: #2F2B28;
     font-size: 26px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-}
-
-.submit-btn {
-    background-color: #85c59d !important;
 }
 
 .notice {
@@ -50,7 +55,7 @@
     border-radius: 8px;
     padding: 10px;
     margin: 10px;
-    background-image: linear-gradient(to top right, #f4f4f4, #85c59d);
+    background-image: linear-gradient(to top right, #f9f9f9, #85c59d);
 }
 
 .modal, .modal-overlay {

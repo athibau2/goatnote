@@ -6,18 +6,27 @@
             <div v-if="words.length !== 0">
               <v-list class="modal-list">
                 <v-list-item v-for="(word, i) in words" :key="i">
-                  <span class="modal-list-item" v-if="!editingWord || (editingWord && word.wordid !== wordBeingEdited)">
-                      <strong>{{word.vocabword}}:</strong>
-                      &nbsp;{{word.definition}}&nbsp;
-                      <v-btn 
-                        :disabled="(editingWord && word.wordid !== wordBeingEdited) ? true : false" 
-                        icon @click="setEditWord(word)"
-                      >
-                        <v-icon>mdi-pencil</v-icon>
-                      </v-btn>
-                      <v-icon @click="deleteWord(word.wordid)">mdi-delete</v-icon>
-                      <v-divider />
-                  </span>
+                  <div class="modal-list-item" v-if="!editingWord || (editingWord && word.wordid !== wordBeingEdited)">
+                    <v-row style="padding: 15px 5px;">
+                      <span style="max-width: 80%;">
+                        <strong>{{word.vocabword}}:</strong>
+                        <br>{{word.definition}}
+                      </span>
+                      <v-spacer />
+                      <span>
+                        <v-btn icon
+                          :disabled="(editingWord && word.wordid !== wordBeingEdited) ? true : false" 
+                          @click="setEditWord(word)"
+                        >
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn icon @click="deleteWord(word.wordid)">
+                          <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                      </span>
+                    </v-row>
+                    <v-divider style="margin-top: 15px;" />
+                  </div>
                   <v-row align="center" justify="center" v-else>
                     <v-text-field
                       :value="word.vocabword"
@@ -27,7 +36,7 @@
                       @keyup.enter="updateWord(word)"
                     >
                     </v-text-field>
-                    &nbsp;&nbsp;
+                    &ensp;
                     <v-text-field
                       :value="word.definition"
                       counter
@@ -51,12 +60,13 @@
                   placeholder="Enter New Word"
                 >
                 </v-text-field>
-                &nbsp;&nbsp;
+                &ensp;
                 <v-text-field :class="windowWidth < '850' ? 'modal-bottom-sm' : null"
                   v-model="newDef"
                   counter
                   maxlength="200"
                   placeholder="Enter Word Definition"
+                  @keyup.enter="addWord()"
                 >
                 </v-text-field>
               </v-row>

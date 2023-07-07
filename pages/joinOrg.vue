@@ -13,7 +13,7 @@
               dense
               solo
               rounded
-              background-color="#f4f4f4"
+              background-color="#f9f9f9"
               v-model="searchText"
               placeholder="Find by join code"
               append-icon="mdi-magnify"
@@ -36,7 +36,7 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="#85c59d" @click="joinOrg(org)">Join</v-btn>
+                  <v-btn class="good-btn" @click="joinOrg(org)">Join</v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
@@ -54,7 +54,7 @@
                 </v-card-subtitle>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="light green lighten-3" @click="joinOrg(foundOrg)">Join</v-btn>
+                  <v-btn class="good-btn" @click="joinOrg(foundOrg)">Join</v-btn>
                 </v-card-actions>
               </v-card>
             </v-row>
@@ -118,7 +118,7 @@ export default {
 @import '~/assets/styles.css';
 
 .public-list {
-  background-color: #F4F4F4;
+  background-color: #f9f9f9;
   padding-bottom: 10px;
 }
 

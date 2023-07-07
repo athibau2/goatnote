@@ -8,7 +8,7 @@
     >
       <img class="logo" src="~/assets/logos/GOAT.png" :height="windowWidth < 850 ? '30px' : '45px'">
       <v-spacer />
-      <v-btn height="50px" @click="toggleLoginDialog()" text>Login</v-btn>
+      <v-btn class="flat-btn" @click="toggleLoginDialog()" text>Login</v-btn>
     </v-app-bar>
 
     <v-main class="main">
@@ -62,6 +62,10 @@ export default {
 
 .logo {
   justify-content: center;
+}
+
+.flat-btn {
+  height: 50px !important;
 }
 
 </style>
