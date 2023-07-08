@@ -48,14 +48,11 @@ exports.handler = async function(event, context) {
       await setActive()
       break;
     case 'customer.subscription.deleted':
-      console.log('deleted')
       async function setInactive() {
         const session = eventStripe.data.object;
   
         // Get the customer object
         const customer = await stripe.customers.retrieve(session.customer);
-
-        console.log(customer)
   
         // Update user table subscriptionstatus field to active
         const { data, error, status } = await supabase.from('user')

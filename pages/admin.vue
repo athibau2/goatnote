@@ -1,7 +1,7 @@
 <template>
     <v-app>
       <span>
-        <v-tabs background-color="transparent" left v-model="tab">
+        <v-tabs class="tabs" background-color="transparent" left v-model="tab">
           <v-tabs-slider></v-tabs-slider>
             <v-tab v-for="item in items" :key="item.tab">
               {{item.tab}}
@@ -14,10 +14,15 @@
       <v-tabs-items v-model="tab">
         <v-tab-item v-for="item in items" :key="item.tab">
           <!-- TODO: ADD COLUMN FOR SUBSCRIPTION STATUS -->
-          <table v-if="tab === 0"> <!--users-->
+          <div class="table-list"
+            style="height: auto;"
+            v-if="tab === 0"
+          > <!--users-->
+          <table>
               <tr>
-                <th style="width: 28%">Name</th>
-                <th style="width: 40%">Email</th>
+                <th style="width: 25%">Name</th>
+                <th style="width: 35%">Email</th>
+                <th style="width: 15%">Subscription</th>
                 <th>Admin Status</th>
                 <th>Remove User</th>
               </tr>
@@ -31,6 +36,7 @@
                     {{u.firstname}} {{u.lastname}}
                   </td>
                   <td>{{u.email}}</td>
+                  <td>{{u.subscriptionstatus == 'active' ? 'Premium' : 'Basic'}}</td>
                   <td>
                     <v-btn
                       :class="u.isadmin ? 'bad-btn' : 'good-btn'"
@@ -49,8 +55,13 @@
                   </td>
               </tr>
           </table>
+          </div>
 
-          <table v-else-if="tab === 1"> <!--orgs-->
+          <div class="table-list"
+            style="height: auto;"
+            v-else-if="tab === 1"
+          > <!--orgs-->
+          <table>
               <tr>
                 <th style="width: 50%">Name</th>
                 <th>Private</th>
@@ -81,8 +92,13 @@
                   </td>
               </tr>
           </table>
+          </div>
 
-          <table v-else-if="tab === 2"> <!--collections-->
+          <div class="table-list"
+            style="height: auto;"
+            v-else-if="tab === 2"
+          > <!--collections-->
+          <table>
               <tr>
                 <th style="width: 33%">Name</th>
                 <th style="width: 30%">Organization</th>
@@ -109,8 +125,13 @@
                   </td>
               </tr>
           </table>
+          </div>
 
-          <table v-else-if="tab === 3"> <!--notes-->
+          <div class="table-list"
+            style="height: auto;"
+            v-else-if="tab === 3"
+          > <!--notes-->
+          <table>
               <tr>
                 <th style="width: 31%">Name</th>
                 <th style="width: 15%">Date</th>
@@ -134,6 +155,7 @@
                   </td>
               </tr>
           </table>
+          </div>
         </v-tab-item>
       </v-tabs-items>
 
@@ -196,9 +218,9 @@
               </table>
             </div>
             <div class="modal-bottom-content">
-                <v-btn text @click="showCollNotes = false">
-                    Exit
-                </v-btn>
+              <v-btn text @click="showCollNotes = false">
+                  Exit
+              </v-btn>
             </div>
         </div>
       </div>
@@ -365,19 +387,23 @@ export default {
 <style scoped>
 @import '~/assets/styles.css';
 
+.tabs {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
 .modal {
   width: 650px;
 }
 
 h6 {
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   font-weight: 500;
   font-size: 28px;
 }
 
 .table-list {
   height: 370px;
-  overflow: auto;
+  overflow: scroll;
 }
 
 tr:nth-child(odd) {
@@ -389,8 +415,13 @@ tr:nth-child(odd) {
 }
 
 .admin-param {
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   font-weight: bold;
+}
+
+.good-btn {
+  font-size: 14px !important;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 </style>

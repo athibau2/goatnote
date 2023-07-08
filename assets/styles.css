@@ -154,9 +154,10 @@
 }
 
 table {
-    font-family: Georgia;
+    font-family: 'Times New Roman', Times, serif;
     border-collapse: collapse;
     width: 100%;
+    overflow-x: scroll !important;
 }
 
 td, th {

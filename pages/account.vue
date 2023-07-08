@@ -53,10 +53,12 @@
                 {{ userData.subscriptionstatus == 'active' ?
                   'Premium Membership &ndash; $3.99 / month' : 'Basic Plan &ndash; Free'
                 }}
+                <ul class="feature-list">
+                  <li v-for="(feature, i) in userData.subscriptionstatus == 'inactive' ? products[0].features : products[1].features" :key="i">
+                    {{feature}}
+                  </li>
+                </ul>
               </v-card-text>
-              <v-card-subtitle>
-                <!-- TODO: ADD FEATURE LISTS HERE -->
-              </v-card-subtitle>
               <v-card-actions>
                 <v-spacer />
                 <a :href="portal" style="text-decoration: none;">
@@ -102,7 +104,7 @@ export default {
       show2: false,
       portal: stripePortal,
       payLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
-
+      products: this.$store.state.users.products
     }
   },
 
@@ -177,6 +179,14 @@ export default {
 
 .good-btn {
   font-size: 15px !important;
+}
+
+.feature-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 5px;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
 </style>

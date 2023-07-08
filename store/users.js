@@ -49,6 +49,31 @@ export const state = () => ({
         email: '',
         password: ''
     },
+    products: [
+        {
+        name: 'Basic',
+        price: 'Free',
+        paymentLink: null,
+        features: [
+            'Unlimited collections and notes',
+            'Unlimited vocab words',
+            'Unlimited study questions',
+            'Unlimited content links',
+            'Share notes with up to 3 people',
+        ]
+        },
+        {
+        name: 'Premium',
+        price: '$3.99 / month',
+        paymentLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
+        features: [
+            'Everything in Basic, plus...',
+            'Create vocab words with AI',
+            'Create study questions with AI',
+            'Unlimited notes sharing',
+        ]
+        },
+    ],
   })
   
 // mutations should update state

@@ -114,11 +114,11 @@
               </v-text-field>          
             </v-col>
             <v-col>
-                <span style="font-family: Georgia; font-size: 16px;"
+                <span style="font-family: Times New Roman; font-size: 16px;"
                 >
                   {{this.currentNote.collectionname}}
                 </span>
-                <h5>{{prettyDate}} &ndash; {{this.saving}}</h5>
+                <h5 class="pretty-date">{{prettyDate}} &ndash; {{this.saving}}</h5>
             </v-col>
         </v-row>
 
@@ -186,7 +186,7 @@
           >
             <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : null }}
           </v-btn>
-          <v-btn  class="tool-btn" id="note-step-2"
+          <v-btn class="tool-btn" id="note-step-2"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto"
             @click="getSharedNoteList(currentNote)"
@@ -629,9 +629,8 @@ export default {
 <style scoped>
 @import '~/assets/styles.css';
 
-.study-btn {
-  color: #2F2B28;
-  background-image: linear-gradient(to top right, #f9f9f9, #85c59d);
+.pretty-date {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .editor-wrapper {
@@ -650,6 +649,7 @@ export default {
   color: #2F2B28;
   margin: 4px 2px;
   background-image: linear-gradient(to top right, #f9f9f9, #85c59d);
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .noteselector {

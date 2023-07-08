@@ -1,5 +1,5 @@
 <template>
-    <v-footer
+    <v-footer class="footer"
       absolute
       app
       color="#eeeeee"
@@ -38,6 +38,10 @@ export default {
 </script>
 
 <style scoped>
+
+.footer {
+  font-family: 'Times New Roman', Times, serif;
+}
 
 a {
     margin-left: 10px;
