@@ -1213,7 +1213,7 @@ export const actions = {
     async login({ dispatch, commit }, { email, password }) {
         email = email.toLowerCase()
         const res = await dispatch('getUser', { email: email })
-        if (res != null) {
+        if (res != null && res.length != 0) {
             if (await matchPassword(password, res[0].password)) {
                 const { data, error, status } = await supabase.rpc('login', {
                     email: email,

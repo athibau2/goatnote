@@ -84,10 +84,10 @@ export default {
   name: 'AccountPage',
   middleware: "auth",
 
-  mounted () {
-    this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
-    this.$store.dispatch('users/userData')
-    this.$store.dispatch('users/orgs')
+  async mounted () {
+    await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
+    await this.$store.dispatch('users/userData')
+    await this.$store.dispatch('users/orgs')
   },
 
   components: {

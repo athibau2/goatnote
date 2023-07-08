@@ -54,6 +54,8 @@ exports.handler = async function(event, context) {
   
         // Get the customer object
         const customer = await stripe.customers.retrieve(session.customer);
+
+        console.log(customer)
   
         // Update user table subscriptionstatus field to active
         const { data, error, status } = await supabase.from('user')
