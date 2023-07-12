@@ -35,15 +35,6 @@ exports.handler = async function(event, context) {
 
   function buildWelcomeEmail(name) {
     const welcomeMessage = `Dear ${name},<br><br>Welcome to our website! We are thrilled to have you on board. Enjoy exploring our services and let us know if you have any questions.<br><br>Best regards,<br>Delta Apps, LLC`;
-  
-    function getBase64Image(imgPath) {
-      let img = fs.readFileSync(path.resolve(imgPath));
-      let base64Image = Buffer.from(img).toString('base64');
-      return base64Image;
-    }
-    
-    let imgPath = './assets/logos/GN.png';
-    let base64Image = getBase64Image(imgPath);
 
     // Add HTML styling to the email template
     const emailTemplate = `
@@ -55,7 +46,7 @@ exports.handler = async function(event, context) {
         </head>
         <body>
           <center>
-            <img src="data:image/png;base64,${base64Image}" />
+            <img src="https://goatnotes.net/assets/logos/GN.png" />
             <h1>Welcome to GOAT Notes!</h1>
             <p>${welcomeMessage}</p>
           </center>
