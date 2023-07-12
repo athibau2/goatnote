@@ -1282,25 +1282,25 @@ export const actions = {
             },
             body: JSON.stringify(body)
         })
-        // const { data, error, status } = await supabase.rpc('signup', {
-        //     firstname: firstname,
-        //     lastname: lastname,
-        //     email: email,
-        //     password: await encryptPassword(password)
-        // })
-        // if (!error) {
-        //     await dispatch('login', {
-        //         email: email,
-        //         password: password
-        //     })
-        //     return true
-        // } else if (error) {
-        //     if (status === 409) {
-        //         alert('An account already exists with that email.')
-        //     } else {
-        //         alert('Something went wrong, please try again.')
-        //     }
-        // }
+        const { data, error, status } = await supabase.rpc('signup', {
+            firstname: firstname,
+            lastname: lastname,
+            email: email,
+            password: await encryptPassword(password)
+        })
+        if (!error) {
+            await dispatch('login', {
+                email: email,
+                password: password
+            })
+            return true
+        } else if (error) {
+            if (status === 409) {
+                alert('An account already exists with that email.')
+            } else {
+                alert('Something went wrong, please try again.')
+            }
+        }
     },
 
     async toggleSignupDialog({ commit, state }) {
