@@ -51,6 +51,7 @@ CREATE TABLE note
   typednotes TEXT,
   collectionid SERIAL NOT NULL,
   numgptcalls INT NOT NULL DEFAULT 0,
+  externalsharing BOOLEAN NOT NULL DEFAULT false,
   PRIMARY KEY (noteid),
   FOREIGN KEY (collectionid) REFERENCES collection(collectionid) ON DELETE CASCADE
 );
@@ -120,6 +121,16 @@ CREATE TABLE shared_note
 	FOREIGN KEY (ownerid) REFERENCES "user" (userid) ON DELETE CASCADE
 );
 
+CREATE TABLE "reset_code"
+(
+  codeid SERIAL NOT NULL,
+  code VARCHAR NOT NULL,
+  codeemail VARCHAR NOT NULL,
+  codeexpiration VARCHAR NOT NULL,
+  PRIMARY KEY (codeid),
+  UNIQUE (code)
+);
+
 
 create or replace view see_orgs as
   select o.orgname, u.email, o.orgid, o.joincode
@@ -144,7 +155,7 @@ create or replace view see_notes as
 	--this will be filtered later
   
 create or replace view see_note_with_data as
-  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.numgptcalls
+  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.numgptcalls, n.externalsharing                                        
   from note n inner join collection c on n.collectionid = c.collectionid
   inner join "user" u on c.userid = u.userid;
   --this will be filtered later
