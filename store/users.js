@@ -1,6 +1,7 @@
 import { supabase, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
+import randomstring from "randomstring"
 
 export const state = () => ({
     user: getJwtToken(),
@@ -51,33 +52,39 @@ export const state = () => ({
     },
     products: [
         {
-        name: 'Basic',
-        price: 'Free',
-        paymentLink: null,
-        features: [
-            'Unlimited collections and notes',
-            'Unlimited vocab words',
-            'Unlimited study questions',
-            'Unlimited content links',
-            'Share notes with up to 3 people',
-        ]
+            name: 'Basic',
+            price: 'Free',
+            paymentLink: null,
+            features: [
+                'Unlimited collections and notes',
+                'Unlimited vocab words',
+                'Unlimited study questions',
+                'Unlimited content links',
+                'Share notes with up to 3 people',
+            ]
         },
         {
-        name: 'Premium',
-        price: '$3.99 / month',
-        paymentLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
-        features: [
-            'Everything in Basic, plus...',
-            'Create vocab words with AI',
-            'Create study questions with AI',
-            'Unlimited notes sharing',
-        ]
+            name: 'Premium',
+            price: '$3.99 / month',
+            paymentLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
+            features: [
+                'Everything in Basic, plus...',
+                'Create vocab words with AI',
+                'Create study questions with AI',
+                'Unlimited notes sharing',
+                'External notes sharing',
+            ]
         },
     ],
+    resetCode: null,
   })
   
 // mutations should update state
 export const mutations = {
+    setResetCode(state, data) {
+        state.resetCode = data
+    },
+
     study(state, data) {
         state.studyMode = data
     },
@@ -244,6 +251,70 @@ export const mutations = {
 
 // actions should call mutations
 export const actions = {
+    async getPassResetCode({ commit, dispatch }, { email, code = randomstring.generate(6) }) {
+        const res = await dispatch('getUser', { email: email })
+        if (res != null) {
+            const fifteenMin = 900000
+            const expiration = Date.now() + fifteenMin
+            const { data, error, status } = await supabase.from('reset_code')
+                .insert({
+                    code: code,
+                    codeemail: email,
+                    codeexpiration: expiration.toString()
+                }).select()
+            if (!error) {
+                const params = {
+                    'name': res[0].firstname,
+                    'email': email,
+                    'code': code,
+                    'codeexpiration': new Date(expiration)
+                }
+                await fetch('http://localhost:8888/.netlify/functions/email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Type': 'reset-pass'
+                    },
+                    body: JSON.stringify(params)
+                }).then(async function(response) {
+                    if (response) {
+                        alert(`Check your email and enter the code in the space below. The code will expire in 15 minutes.`)
+                        await commit('setResetCode', data[0])
+                    } else {
+                        console.log('Failed to send email');
+                    }
+                })
+            } else if (error) {
+                console.log(error)
+                if (status === 409) {
+                    await dispatch('getPassResetCode', { email: email })
+                }
+            }
+        } else if (res == null) {
+            alert('No account found with that email.')
+        }
+    },
+
+    async resetPass({}, { email, password }) {
+        const { data, error, status } = await supabase.from('user')
+            .update({
+                password: await encryptPassword(password)
+            })
+            .eq('email', email)
+        if (!error) {
+            alert('Password reset successful.')
+            await commit('setResetCode', null)
+            this.$router.push('/login')
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
+                alert('No user found with that email.')
+            } else {
+                alert('Something went wrong, please try again.')
+            }
+        }
+    },
+
     async toggleAdmin({ dispatch }, { userid, isadmin }) {
         const { data, error, status } = await supabase.from('user')
             .update({
@@ -1199,25 +1270,37 @@ export const actions = {
 
     async signup({ dispatch }, { firstname, lastname, email, password }) {
         email = email.toLowerCase()
-        const { data, error, status } = await supabase.rpc('signup', {
-            firstname: firstname,
-            lastname: lastname,
-            email: email,
-            password: await encryptPassword(password)
-        })
-        if (!error) {
-            await dispatch('login', {
-                email: email,
-                password: password
-            })
-            return true
-        } else if (error) {
-            if (status === 409) {
-                alert('An account already exists with that email.')
-            } else {
-                alert('Something went wrong, please try again.')
-            }
+        const body= {
+            'name': firstname,
+            'email': email
         }
+        await fetch('http://localhost:8888/.netlify/functions/email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Type': 'welcome-email'
+            },
+            body: JSON.stringify(body)
+        })
+        // const { data, error, status } = await supabase.rpc('signup', {
+        //     firstname: firstname,
+        //     lastname: lastname,
+        //     email: email,
+        //     password: await encryptPassword(password)
+        // })
+        // if (!error) {
+        //     await dispatch('login', {
+        //         email: email,
+        //         password: password
+        //     })
+        //     return true
+        // } else if (error) {
+        //     if (status === 409) {
+        //         alert('An account already exists with that email.')
+        //     } else {
+        //         alert('Something went wrong, please try again.')
+        //     }
+        // }
     },
 
     async toggleSignupDialog({ commit, state }) {

@@ -4,35 +4,25 @@
             <h3>Share Note</h3>
             <h6>You can share this note with anyone in the same organization</h6>
             <v-divider />
-            <div>
-            <v-menu
-                bottom
-                :offset-y="true"
-                :close-on-content-click="false"
-            >
-                <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                    class="name-search"
-                    v-on="on"
-                    v-bind="attrs"
-                    v-model="searchText"
-                    placeholder="Search by email..."
-                    @input="search()"
-                >
-                </v-text-field>
-                </template>
-                <v-list class="result-list">
-                    <v-list-item 
-                        v-for="(r, i) in results" :key="i" link 
-                        @click="pushToList(r)"
-                    >
-                        <v-list-item-subtitle>
-                            {{r.firstname}} {{r.lastname}}<v-spacer />{{r.email}}
-                        </v-list-item-subtitle>
-                        <v-divider />
-                    </v-list-item>
-                </v-list>
-            </v-menu>
+            <div class="search-wrapper">
+              <v-text-field
+                  class="name-search"
+                  v-model="searchText"
+                  placeholder="Search by email..."
+                  @input="search()"
+              >
+              </v-text-field>
+              <v-list class="result-list">
+                  <v-list-item
+                      v-for="(r, i) in results" :key="i" link 
+                      @click="pushToList(r)"
+                  >
+                      <v-list-item-subtitle>
+                          {{r.firstname}} {{r.lastname}}<v-spacer />{{r.email}}
+                      </v-list-item-subtitle>
+                      <v-divider />
+                  </v-list-item>
+              </v-list>
             </div>
             <div class="share-list">
             <span class="shared-items" v-for="(s, i) in sharedNoteList" :key="i">
@@ -43,7 +33,7 @@
             </span>
             </div>
             <div class="bottom-buttons">
-              <v-btn text @click="close()">Exit</v-btn>
+              <v-btn text class="flat-btn" @click="close()">Exit</v-btn>
               <v-btn class="good-btn" @click="shareNote()">Share</v-btn>
             </div>
         </div>
@@ -85,6 +75,12 @@ export default {
     pushToList (r) {
         let counter1 = 0
         let counter2 = 0
+
+        if ((this.sharedNoteList.length + this.newShareList.length == 3) && this.userData.subscriptionstatus == 'inactive') {
+          alert('The maximum sharing limit for this note has been reached.')
+          return
+        }
+
         for (let i = 0; i < this.sharedNoteList.length; ++i) {
           if (this.sharedNoteList[i].userid === r.userid) {
             alert(`${r.email} has already been added`)
@@ -92,6 +88,7 @@ export default {
           }
           else counter1++
         }
+
         if (counter1 === this.sharedNoteList.length) {
           for (let i = 0; i < this.newShareList.length; ++i) {
             if (this.newShareList[i].userid === r.userid) {
@@ -133,6 +130,10 @@ export default {
   computed: {
     user () {
       return this.$store.state.users.user
+    },
+
+    userData () {
+      return this.$store.state.users.userData
     },
 
     results () {
@@ -185,15 +186,20 @@ export default {
 }
 
 .result-list {
-  max-height: 150px;
+  height: 200px;
+  overflow-y: scroll;
   position: relative;
+}
+
+.search-wrapper {
+  height: 260px !important;
 }
 
 .share-list {
   background-color: #eeeeee;
   position: inherit;
-  margin-top: 35%;
-  height: 140px;
+  margin-top: 10px;
+  height: 100px;
   overflow: auto;
   text-align: left;
   width: 100%;

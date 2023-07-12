@@ -332,7 +332,11 @@ export default {
       },
 
       async generateStudyTools() {
-        if (this.currentNote.numgptcalls == 4) {
+        if (this.userData.subscriptionstatus == 'inactive') {
+          if (confirm('This feature is only available for the Premium plan. Click \'OK\' to be redirected to upgrade your account.')) {
+            window.location.href = `${this.premiumLink}?prefilled_email=${this.encodedEmail}`
+          }
+        } else if (this.currentNote.numgptcalls == 4) {
           alert('You have reached the maximum number of allowed AI parsing calls.')
         } else if (this.noteText.length < 1500) {
           alert(`The minimum character length to parse your notes is 1500 characters. You are currently at ${this.noteText.length} characters.`)
@@ -622,6 +626,14 @@ export default {
     notes () {
       return this.$store.state.users.notes
     },
+
+    premiumLink () {
+      return this.$store.state.users.products[1].paymentLink
+    },
+
+    encodedEmail () {
+      return encodeURIComponent(this.$store.state.users.user.email)
+    }
   }
 }
 </script>

@@ -6,7 +6,9 @@
       fixed
       app
     >
-      <img class="logo" src="~/assets/logos/GOAT.png" :height="windowWidth < 850 ? '30px' : '45px'">
+      <button @click="toLogin()">
+        <img class="logo" src="~/assets/logos/GOAT.png" :height="windowWidth < 850 ? '30px' : '45px'">
+      </button>
       <v-spacer />
       <v-btn class="flat-btn" @click="toggleLoginDialog()" text>Login</v-btn>
     </v-app-bar>
@@ -46,6 +48,10 @@ export default {
   },
 
   methods: {
+    toLogin() {
+      this.$router.push('/login')
+    },
+
     toggleLoginDialog() {
       this.$store.dispatch('users/toggleLoginDialog')
     },
