@@ -46,7 +46,7 @@ exports.handler = async function(event, context) {
         </head>
         <body>
           <center>
-            <img src="https://goatnotes.net/assets/logos/GN.png" />
+            <img src="~/assets/logos/GN.png" />
             <h1>Welcome to GOAT Notes!</h1>
             <p>${welcomeMessage}</p>
           </center>
