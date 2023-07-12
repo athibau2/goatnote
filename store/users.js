@@ -267,7 +267,7 @@ export const actions = {
                     'name': res[0].firstname,
                     'email': email,
                     'code': code,
-                    'codeexpiration': new Date(expiration)
+                    'codeexpiration': `${new Date(expiration).toDateString()} at ${new Date(expiration).toLocaleTimeString()}`
                 }
                 await fetch('http://localhost:8888/.netlify/functions/email', {
                     method: 'POST',

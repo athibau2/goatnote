@@ -41,15 +41,65 @@ exports.handler = async function(event, context) {
       <html>
         <head>
           <style>
-            /* Add your CSS styles here */
+            body {
+              font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+              background-color: #f9f9f9;
+              margin: 0;
+              padding: 0;
+            }
+      
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+      
+            .logo {
+              display: block;
+              width: 150px;
+              margin: 0 auto;
+            }
+      
+            h1 {
+              text-align: center;
+              color: #2F2B28;
+              font-size: 24px;
+              margin-top: 30px;
+            }
+      
+            p {
+              color: #666666;
+              font-size: 16px;
+              line-height: 1.5;
+              margin-bottom: 20px;
+            }
+      
+            a {
+              color: #007bff;
+              text-decoration: none;
+            }
+      
+            span {
+              display: block;
+              text-align: center;
+              margin-top: 20px;
+              color: #999999;
+              font-size: 14px;
+            }
           </style>
         </head>
         <body>
-          <center>
-            <img src="~/assets/logos/GN.png" />
-            <h1>Welcome to GOAT Notes!</h1>
-            <p>${welcomeMessage}</p>
-          </center>
+          <div class="container">
+            <center>
+              <img class="logo" src="${process.env.NUXT_ENV_AWS_S3_BUCKET}/GN.png" />
+              <h1>Welcome to GOAT Notes!</h1>
+              <p>${welcomeMessage}</p>
+              <span>
+                You can modify your email settings
+                <a href="https://goatnotes.net/account">here.</a>
+              </span>
+            </center>
+          </div>
         </body>
       </html>
     `;
@@ -59,28 +109,67 @@ exports.handler = async function(event, context) {
   
   function buildResetEmail(name, code, codeExpiration) {
     const resetMessage = `Dear ${name},<br><br>We have received a request to reset your password. Please use the following code: <strong>${code}</strong>.<br><br>This code will expire on ${codeExpiration}. If you did not request a password reset, please disregard this email.<br><br>Best regards,<br>Delta Apps, LLC`;
-  
-    // Resolve the image file path
-    const imagePath = path.resolve(__dirname, 'assets', 'GN.png');
-    
-    // Read and encode the welcome image as a data URL
-    const welcomeImage = fs.readFileSync(imagePath, { encoding: 'base64' });
-    const welcomeImageSrc = `data:image/png;base64,${welcomeImage}`;
     
     // Add HTML styling to the email template
     const emailTemplate = `
       <html>
         <head>
           <style>
-            /* Add your CSS styles here */
+            body {
+              font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+              background-color: #f9f9f9;
+              margin: 0;
+              padding: 0;
+            }
+      
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+      
+            .logo {
+              display: block;
+              width: 150px;
+              margin: 0 auto;
+            }
+      
+            h1 {
+              text-align: center;
+              color: #2F2B28;
+              font-size: 24px;
+              margin-top: 30px;
+            }
+      
+            p {
+              color: #666666;
+              font-size: 16px;
+              line-height: 1.5;
+              margin-bottom: 20px;
+            }
+      
+            a {
+              color: #007bff;
+              text-decoration: none;
+            }
+      
+            span {
+              display: block;
+              text-align: center;
+              margin-top: 20px;
+              color: #999999;
+              font-size: 14px;
+            }
           </style>
         </head>
         <body>
-          <center>
-            <img src="${welcomeImageSrc}" />
-            <h1>Password Reset Request</h1>
-            <p>${resetMessage}</p>
-          </center>
+          <div class="container">
+            <center>
+              <img class="logo" src="${process.env.NUXT_ENV_AWS_S3_BUCKET}/GN.png" />
+              <h1>Password Reset Request</h1>
+              <p>${resetMessage}</p>
+            </center>
+          </div>
         </body>
       </html>
     `;
