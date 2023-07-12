@@ -40,6 +40,9 @@
                         placeholder="Enter your password"
                     >
                     </v-text-field>
+                    <center>
+                        <NuxtLink to="/forgot-password">Forgot Password</NuxtLink>
+                    </center>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer />
@@ -62,6 +65,7 @@ export default {
 
     created() {
         window.addEventListener('resize', this.resizeHandler)
+        this.showLoginDialog = false
     },
 
     data () {
