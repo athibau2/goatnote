@@ -278,6 +278,7 @@ export const actions = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
                         'Type': 'reset-pass'
                     },
                     body: JSON.stringify(params)
@@ -1331,6 +1332,7 @@ export const actions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
                 'Type': 'welcome-email'
             },
             body: JSON.stringify(body)

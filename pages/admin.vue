@@ -338,6 +338,7 @@ export default {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
                 'Type': 'admin-email'
             },
             body: JSON.stringify(body)

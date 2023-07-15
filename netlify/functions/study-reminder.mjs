@@ -24,6 +24,7 @@ exports.handler = async function(event, context) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
                     'Type': 'reminder-email'
                 },
                 body: JSON.stringify(body)
