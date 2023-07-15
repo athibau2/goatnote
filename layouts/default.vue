@@ -6,11 +6,11 @@
     <v-navigation-drawer
       class="main"
       id="menu-step-6"
-      :mini-variant="windowWidth < 1161 ? true : miniVariant"
+      :mini-variant="windowWidth < 1000 ? true : miniVariant"
       :clipped="true"
       fixed
       app
-      permanent
+      :permanent="windowWidth < 1000 ? !miniVariant : true"
     >
       <v-list>
         <v-list-item

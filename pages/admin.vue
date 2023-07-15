@@ -12,8 +12,7 @@
         </v-tabs>
       </span>
       <v-tabs-items v-model="tab">
-        <v-tab-item v-for="item in items" :key="item.tab">
-          <!-- TODO: ADD COLUMN FOR SUBSCRIPTION STATUS -->
+        <v-tab-item class="tab-data" v-for="item in items" :key="item.tab">
           <div class="table-list"
             style="height: auto;"
             v-if="tab === 0"
@@ -156,6 +155,62 @@
               </tr>
           </table>
           </div>
+
+          <div class="email-section"
+            v-else-if="tab === 4"
+          >
+            <center>
+              <form class="email-form">
+                <span class="basic-header">Send To: &ensp;</span>
+                <v-menu
+                  bottom
+                  open-on-hover
+                  close-on-content-click
+                  transition="slide-y-transition"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <span
+                      class="basic-header"
+                      style="font-size: 20px;"
+                      v-on="on"
+                      v-bind="attrs"
+                    >
+                      {{emailGroup}}
+                      <v-icon>mdi-chevron-down</v-icon>
+                      <span class="basic-header" style="font-size: 20px;">({{emailList.length}})</span>
+                    </span>
+                  </template>
+                  <v-list>
+                    <v-list-item @click="updateEmailGroup('All Users')" link>
+                      <span>All Users</span>
+                    </v-list-item>
+                    <v-list-item @click="updateEmailGroup('Paid Users')" link>
+                      <span>Paid Users</span>
+                    </v-list-item>
+                    <v-list-item @click="updateEmailGroup('Free Users')" link>
+                      <span>Free Users</span>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+                <input class="email-field" v-model="subject" placeholder="Subject" />
+                <v-textarea
+                  class="email-field"
+                  v-model="body"
+                  placeholder="Email body"
+                  clear-icon="mdi-eraser"
+                  clearable
+                ></v-textarea>
+                <v-btn
+                  class="good-btn"
+                  @click="sendEmails()"
+                  :disabled="emailList.length == 0 || subject == '' || body == ''"
+                >
+                  <v-icon color="#2F2B28">mdi-send</v-icon>
+                  Send
+                </v-btn>
+              </form>
+            </center>
+          </div>
         </v-tab-item>
       </v-tabs-items>
 
@@ -234,10 +289,12 @@ export default {
   middleware: ["auth", "admin"],
 
   async updated () {
-    await this.$store.dispatch('users/adminLoadOneUser', { userid: this.$route.query.userid })
+    if (this.$route.query.userid != undefined && this.$route.params.user != undefined) {
+      await this.$store.dispatch('users/adminLoadOneUser', { userid: this.$route.query.userid })
+    }
   },
 
-  async mounted () {
+  async created () {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/adminLoadUsers')
   },
@@ -250,14 +307,49 @@ export default {
         { tab: 'organizations' },
         { tab: 'collections' },
         { tab: 'notes' },
+        { tab: 'emails' },
       ],
       showOrgUsers: false,
       showCollNotes: false,
       collOpened: {},
+      subject: '',
+      body: '',
+      emailGroup: 'Select',
     }
   },
 
   methods: {
+    async updateEmailGroup(group) {
+      this.emailGroup = group
+      await this.$store.dispatch('users/getEmailList', {
+        group: this.emailGroup
+      })
+    },
+
+    async sendEmails() {
+      if (confirm(`Are you ready to email ${this.emailList.length} users?`)) {
+        this.emailList.forEach(async element => {
+          const body= {
+            'email': element.email,
+            'subject': this.subject,
+            'body': this.body
+          }
+          await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Type': 'admin-email'
+            },
+            body: JSON.stringify(body)
+          })
+        });
+        this.subject = ''
+        this.body = ''
+        this.emailGroup = 'Select'
+        await this.$store.commit('setEmailList', [])
+      }
+    },
+
     togglePrivate(org) {
       this.$store.dispatch('users/toggleOrg', {
         orgid: org.orgid,
@@ -379,6 +471,10 @@ export default {
 
     collNotes () {
       return this.$store.state.users.collNotes
+    },
+
+    emailList () {
+      return this.$store.state.users.emailList
     }
   }
 }
@@ -389,6 +485,10 @@ export default {
 
 .tabs {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.tab-data {
+  background-color: #f9f9f9 !important;
 }
 
 .modal {
@@ -404,6 +504,25 @@ h6 {
 .table-list {
   height: 370px;
   overflow: scroll;
+}
+
+.email-section {
+  margin: 20px;
+}
+
+.email-form {
+  width: 50%;
+}
+
+.email-field {
+  padding: 8px;
+  border: solid 1px #2F2B28;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.good-btn {
+  margin: 5px;
 }
 
 tr:nth-child(odd) {

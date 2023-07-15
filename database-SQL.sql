@@ -9,7 +9,8 @@ CREATE TABLE "user"
   loggedin BOOLEAN,
   onboarded BOOLEAN DEFAULT false,
   noteonboarded BOOLEAN DEFAULT false,
-  subscriptionstatus text NOT NULL default 'inactive',
+  subscriptionstatus text NOT NULL DEFAULT 'inactive',
+  notifsettings BOOLEAN NOT NULL DEFAULT true,
   PRIMARY KEY (userid),
   UNIQUE (email)
 );
@@ -131,6 +132,30 @@ CREATE TABLE "reset_code"
   UNIQUE (code)
 );
 
+CREATE OR REPLACE VIEW get_daily_plans AS
+	SELECT
+			u.firstname,
+			u.email,
+			u.userid,
+			s.studydate,
+			array_agg(DISTINCT n.notename) AS notenames,
+			array_agg(DISTINCT s.time) AS times
+	FROM
+			"user" u
+			INNER JOIN collection c ON u.userid = c.userid
+			INNER JOIN note n ON c.collectionid = n.collectionid
+			INNER JOIN study_plan s ON n.noteid = s.noteid
+	WHERE
+			u.notifsettings = true
+			AND s.studycompleted = false
+			AND DATE(s.studydate) = CURRENT_DATE
+	GROUP BY
+			u.firstname,
+			u.email,
+			u.userid,
+			s.studydate
+	ORDER BY
+			u.userid;
 
 create or replace view see_orgs as
   select o.orgname, u.email, o.orgid, o.joincode
@@ -195,6 +220,10 @@ create or replace view see_all_plans as
 create or replace view see_personal_data as
   select * from "user";
   --this will be filtered later
+
+create or replace view admin_get_email_group as
+	select email from "user";
+	--this will be filtered later
   
 create or replace view admin_see_all_users as
   select * from "user" order by isadmin desc, firstname asc;

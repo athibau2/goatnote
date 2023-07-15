@@ -1,6 +1,5 @@
 <template>
     <v-app>
-      
         <v-col v-if="(userData !== null && userData !== undefined)">
           <v-row justify="center" align="center">
             <v-card class="account-card" elevation="1" outlined width="500">
@@ -74,6 +73,19 @@
               </v-card-actions>
             </v-card>
           </v-row>
+
+          <v-row justify="center" align="center">
+            <v-card class="account-card" elevation="1" outlined width="500">
+              <v-card-title class="name">Notification Settings</v-card-title>
+              <v-card-text class="card-text">
+                <v-switch
+                  color="#85c59d"
+                  v-model="notifSettings"
+                  label="Study Plan Reminders"
+                ></v-switch>
+              </v-card-text>
+            </v-card>
+          </v-row>
         </v-col>
     </v-app>
 </template>
@@ -104,7 +116,7 @@ export default {
       show2: false,
       portal: stripePortal,
       payLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
-      products: this.$store.state.users.products
+      products: this.$store.state.users.products,
     }
   },
 
@@ -137,6 +149,16 @@ export default {
 
     userData () {
         return this.$store.state.users.userData
+    },
+
+    notifSettings: {
+      get () {
+        return this.userData.notifsettings
+      },
+
+      set () {
+        this.$store.dispatch('users/updateNotifSettings')
+      }
     },
 
     encodedEmail () {

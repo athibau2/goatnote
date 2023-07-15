@@ -77,6 +77,7 @@ export const state = () => ({
         },
     ],
     resetCode: null,
+    emailList: [],
   })
   
 // mutations should update state
@@ -247,6 +248,10 @@ export const mutations = {
     setSignupInfo(state, data) {
         state.signupInfo = data
     },
+
+    setEmailList(state, data) {
+        state.emailList = data
+    }
 }
 
 // actions should call mutations
@@ -269,7 +274,7 @@ export const actions = {
                     'code': code,
                     'codeexpiration': `${new Date(expiration).toDateString()} at ${new Date(expiration).toLocaleTimeString()}`
                 }
-                await fetch('http://localhost:8888/.netlify/functions/email', {
+                await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1242,6 +1247,39 @@ export const actions = {
         }
     },
 
+    async getEmailList({ commit }, { group }) {
+        if (group == 'All Users') {
+            const { data, error, status } = await supabase.from('user')
+                .select('email')
+            if (!error) {
+                await commit('setEmailList', data)
+            } else {
+                console.log(error)
+                alert('Something went wrong, please try again.')
+            }
+        } else if (group == 'Paid Users') {
+            const { data, error, status } = await supabase.from('user')
+                .select('email')
+                .eq('subscriptionstatus', 'active')
+            if (!error) {
+                await commit('setEmailList', data)
+            } else {
+                console.log(error)
+                alert('Something went wrong, please try again.')
+            }
+        } else if (group == 'Free Users') {
+            const { data, error, status } = await supabase.from('user')
+                .select('email')
+                .eq('subscriptionstatus', 'inactive')
+            if (!error) {
+                await commit('setEmailList', data)
+            } else {
+                console.log(error)
+                alert('Something went wrong, please try again.')
+            }
+        }
+    },
+
     async updatePass({ dispatch, state }, { newPass, currentPass }) {
         // const response = await dispatch('getUser', { email: state.user.email })
         // if (response != null) {
@@ -1268,13 +1306,28 @@ export const actions = {
         // }
     },
 
+    async updateNotifSettings({ commit, state }) {
+        const { data, error, status } = await supabase.from('user')
+            .update({
+                notifsettings: !state.userData.notifsettings
+            })
+            .eq('userid', state.user.user_id)
+            .select()
+        if (!error) {
+            await commit('setUserData', data[0])
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
     async signup({ dispatch }, { firstname, lastname, email, password }) {
         email = email.toLowerCase()
         const body= {
             'name': firstname,
             'email': email
         }
-        await fetch('http://localhost:8888/.netlify/functions/email', {
+        await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

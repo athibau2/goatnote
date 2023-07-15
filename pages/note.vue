@@ -50,7 +50,7 @@
               </v-tooltip>
             </v-col>
 
-            <v-col cols="7" v-if="user.user_id == currentNote.userid">
+            <v-col :cols="windowWidth < 600 ? '12' : '7'" v-if="user.user_id == currentNote.userid">
                 <v-text-field v-if="editNote"
                   class="noteselector"
                   dense
@@ -101,7 +101,7 @@
                   </v-list>
                 </v-menu>                
             </v-col>
-            <v-col cols="7" v-else>
+            <v-col :cols="windowWidth < 600 ? '12' : '7'" v-else>
               <v-text-field id="note-step-8"
                 class="noteselector"
                 dense
@@ -648,7 +648,7 @@ export default {
 .editor-wrapper {
   /* background-color: #ffffec; */
   background-image: linear-gradient(to top right, #ffffec, #f9f9f9);
-  height: 500px;
+  height: 600px;
   overflow: scroll;
 }
 
