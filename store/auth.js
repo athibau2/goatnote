@@ -3,7 +3,10 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL
 const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY
+const supabaseServiceKey = process.env.NUXT_ENV_SUPABASE_SERVICE_KEY
+
 export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabaseStorage = createClient(supabaseUrl, supabaseServiceKey)
 export const stripePortal = process.env.NUXT_ENV_STRIPE_PORTAL
 
 export function getJwtToken() {

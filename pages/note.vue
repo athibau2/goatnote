@@ -166,6 +166,9 @@
               <v-btn class="tool-btn" @click="showLinks = true">Links</v-btn>
             </div>
             <div id="note-step-6">
+              <v-btn class="tool-btn" @click="showFiles()">Files</v-btn>
+            </div>
+            <div id="note-step-7">
               <v-btn class="tool-btn"
                 @click="openPlans()"
                 :disabled="user.user_id == currentNote.userid ? false : true"
@@ -218,6 +221,13 @@
           <v-btn class="tool-btn" id="note-step-6"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto"
+            @click="showFiles()"
+          >
+            Files
+          </v-btn>
+          <v-btn class="tool-btn" id="note-step-7"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
             @click="openPlans()"
             :disabled="user.user_id == currentNote.userid ? false : true"
           >
@@ -239,6 +249,7 @@
         <Words v-show="showWords" @close-modal="showWords = false" />
         <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
         <Links v-show="showLinks" @close-modal="showLinks = false" />
+        <Files style="margin: auto;" />
         <StudyPlans v-show="showStudyPlans" @close-modal="showStudyPlans = false" />
     </v-container>
   </v-app>
@@ -249,6 +260,7 @@ import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Words from '~/components/Words.vue'
 import Questions from '~/components/Questions.vue'
 import Links from '~/components/Links.vue'
+import Files from '~/components/Files.vue'
 import StudyPlans from '~/components/StudyPlans.vue'
 import ShareNote from '~/components/ShareNote.vue'
 import { VueEditor } from "vue2-editor"
@@ -265,6 +277,7 @@ export default {
       Words,
       Questions,
       Links,
+      Files,
       StudyPlans,
       ShareNote,
       VueEditor,
@@ -277,6 +290,9 @@ export default {
     this.$store.dispatch('users/orgs')
     await this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
     await this.$store.dispatch('users/notes', { collectionid: this.currentNote.collectionid })
+    await this.$store.dispatch('users/getFiles', {
+      noteid: this.currentNote.noteid
+    })
     this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
     this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
@@ -320,6 +336,10 @@ export default {
   methods: {
       back() {
         this.$router.go(-1)
+      },
+
+      showFiles() {
+        this.$store.commit('users/showFiles', true)
       },
 
       async newNote() {

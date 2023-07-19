@@ -5,7 +5,7 @@
       color="#eeeeee"
     >
       <v-col cols="8">
-        <span>&copy; 2022 GOAT Notes</span><br>
+        <span>&copy; 2022 Delta Apps, LLC</span><br>
         <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a><br>
         <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms and Conditions</a><br>
       </v-col>

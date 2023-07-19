@@ -1,4 +1,5 @@
-import { supabase, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
+import { createClient } from "@supabase/supabase-js";
+import { supabase, supabaseStorage, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
 import randomstring from "randomstring"
@@ -78,6 +79,8 @@ export const state = () => ({
     ],
     resetCode: null,
     emailList: [],
+    showFiles: false,
+    noteFiles: []
   })
   
 // mutations should update state
@@ -251,6 +254,14 @@ export const mutations = {
 
     setEmailList(state, data) {
         state.emailList = data
+    },
+
+    showFiles(state, data) {
+        state.showFiles = data
+    },
+
+    setFiles(state, data) {
+        state.noteFiles = data
     }
 }
 
@@ -1322,21 +1333,76 @@ export const actions = {
         }
     },
 
+    async getFiles({ dispatch, commit, state }, { noteid }) {
+        const { data, error, status } = await supabaseStorage.storage.from(state.user.user_id)
+            .list(`${noteid}/`)
+        if (!error) {
+            for (let i = 0; i < data.length; ++i) {
+                data[i] = await dispatch('getFileURL', { file: data[i], noteid: noteid })
+            }
+            await commit('setFiles', data)
+        } else if (error) {
+            console.log(error)
+        }
+    },
+
+    async getFileURL({ state }, { file, noteid }) {
+        const { data, error } = supabaseStorage.storage.from(state.user.user_id)
+            .getPublicUrl(`${noteid}/${file.name}`);
+        if (!error) {
+            file.url = data.publicUrl
+            return file
+        } else if (error) {
+            console.log(error)
+        }
+    },
+
+    async uploadFiles({ dispatch, state }, { files, noteid }) {
+        let fail = false
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const { data, error, status } = await supabaseStorage.storage
+                .from(state.user.user_id)
+                .upload(`${noteid}/${file.name}`, file)
+            if (error) fail = true
+        }
+        if (fail) alert('One or more files failed to upload.')
+        await dispatch('getFiles', { noteid: noteid })
+    },
+
+    async removeFile({ dispatch, state }, { noteid, filename }) {
+        const { data, error } = await supabaseStorage.storage.from(state.user.user_id)
+            .remove([`${noteid}/${filename}`])
+        if (!error) {
+            await dispatch('getFiles', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async createBucket({ dispatch }, { email }) {
+        const user = await dispatch('getUser', { email: email })
+        if (user) {
+            const { data, error, status } = await supabaseStorage.storage.createBucket(`${user[0].userid}`, {
+                public: true,
+                fileSizeLimit: 2048
+            })
+            if (!error) {
+                return true
+            } else if (error) {
+                console.log(error)
+                return false
+            }
+        }
+    },
+
     async signup({ dispatch }, { firstname, lastname, email, password }) {
         email = email.toLowerCase()
         const body= {
             'name': firstname,
             'email': email
         }
-        await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Type': 'welcome-email'
-            },
-            body: JSON.stringify(body)
-        })
         const { data, error, status } = await supabase.rpc('signup', {
             firstname: firstname,
             lastname: lastname,
@@ -1344,9 +1410,19 @@ export const actions = {
             password: await encryptPassword(password)
         })
         if (!error) {
+            await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Type': 'welcome-email'
+                },
+                body: JSON.stringify(body)
+            })
+            await dispatch('createBucket', { email: email })
             await dispatch('login', {
                 email: email,
-                password: password
+                password: password,
             })
             return true
         } else if (error) {
