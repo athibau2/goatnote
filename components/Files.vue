@@ -42,10 +42,15 @@
 export default {
     name: 'Files',
 
+    created () {
+        window.addEventListener('resize', this.resizeHandler)
+    },
+
     data () {
         return {
             files: [],
-            openedFile: null
+            openedFile: null,
+            windowWidth: window.innerWidth
         }
     },
 
@@ -56,6 +61,10 @@ export default {
 
         handleFileInput(files) {
             this.files = files
+        },
+
+        resizeHandler() {
+            this.windowWidth = window.innerWidth
         },
 
         uploadFiles() {
