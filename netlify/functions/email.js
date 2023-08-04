@@ -64,6 +64,9 @@ exports.handler = async function(event, context) {
             } catch (err) {
               console.log(err)
             }
+          }, {
+            scheduled: true,
+            timezone: "America/Denver"
           });
         });
       } else if (error) {
