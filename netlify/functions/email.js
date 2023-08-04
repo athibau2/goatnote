@@ -53,12 +53,17 @@ exports.handler = async function(event, context) {
           const sendMin = (parseInt(element.times[0].split(':')[1]))
           console.log(element.email, sendHour, sendMin)
           cron.schedule(`0 ${(sendMin + 59) % 60} ${sendHour} * * *`, async () => {
-            await resend.emails.send({
-              from: 'andrew@deltaapps.dev',
-              to: element.email,
-              subject: payload.subject,
-              html: buildReminderEmail(element.firstname, element.notenames, element.times)
-            });
+            try {
+              const res = await resend.emails.send({
+                from: 'andrew@deltaapps.dev',
+                to: element.email,
+                subject: payload.subject,
+                html: buildReminderEmail(element.firstname, element.notenames, element.times)
+              });
+              console.log(res)
+            } catch (err) {
+              console.log(err)
+            }
           });
         });
       } else if (error) {
