@@ -8,12 +8,9 @@ exports.handler = async function(event, context) {
     const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('1')
-
     const { data, error, status } = await supabase.from('get_daily_plans')
         .select()
     if (!error) {
-        console.log('2')
         data.forEach(async element => {
             const body= {
                 'firstname': element.firstname,

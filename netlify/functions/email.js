@@ -41,9 +41,9 @@ exports.handler = async function(event, context) {
       });
       break;
     case 'reminder-email':
-      console.log('3')
       const sendHour = (parseInt(payload.times[0].split(':')[0]) + 23) % 24;
-      cron.schedule(`0 ${sendHour} * * *`, async () => {
+      const sendMin = (parseInt(payload.times[0].split(':')[1]))
+      cron.schedule(`${sendMin} ${sendHour} * * *`, async () => {
         await resend.emails.send({
           from: 'andrew@deltaapps.dev',
           to: payload.email,
@@ -54,7 +54,7 @@ exports.handler = async function(event, context) {
       break;
   }
 
-  // TODO: FIGURE OUT 3 NETLIFY FUNCTIONS
+  // TODO: FIGURE OUT EXTRA NETLIFY EMAIL FUNCTION
 
   function buildWelcomeEmail(name) {
     const welcomeMessage = `Dear ${name},<br><br>Welcome to our website! We are thrilled to have you on board. Enjoy exploring our services and let us know if you have any questions.<br><br>Best regards,<br>Delta Apps, LLC`;
@@ -274,7 +274,7 @@ exports.handler = async function(event, context) {
     times.forEach((time, index, array) => {
       if (time.split(':')[0] == 12) array[index] = time + 'pm';
       else if (time.split(':')[0] > 12) array[index] = (time.split(':')[0] - 12) + time.slice(2) + 'pm';
-      else if (time.split(':')[0] < 12) array[index] = (time.split(':')[0] - 12) + time.slice(2) + 'am';
+      else if (time.split(':')[0] < 12) array[index] = time + 'am';
     });
     const reminderMessage = `Dear ${firstname},<br><br>You have study plans in place today for the following notes:<br>
     ${notenames.map((element, index) => {
