@@ -55,7 +55,6 @@ exports.handler = async function(event, context) {
   }
 
   // TODO: FIGURE OUT 3 NETLIFY FUNCTIONS
-  // TODO: UPDATE NETLIFY ENV
 
   function buildWelcomeEmail(name) {
     const welcomeMessage = `Dear ${name},<br><br>Welcome to our website! We are thrilled to have you on board. Enjoy exploring our services and let us know if you have any questions.<br><br>Best regards,<br>Delta Apps, LLC`;
