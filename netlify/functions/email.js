@@ -3,7 +3,6 @@ const { createClient } = require('@supabase/supabase-js');
 const resend = new Resend(process.env.NUXT_ENV_RESEND_API_KEY);
 const fs = require('fs')
 const path = require('path');
-const cron = require('node-cron');
 const CronJob = require('cron').CronJob
 
 /**
@@ -62,7 +61,6 @@ exports.handler = async function(event, context) {
                   subject: payload.subject,
                   html: buildReminderEmail(element.firstname, element.notenames, element.times)
                 });
-                console.log(res)
               } catch (err) {
                 console.log(err)
               }
@@ -71,22 +69,6 @@ exports.handler = async function(event, context) {
             true,
             'America/Denver'
           );
-          // cron.schedule(`30 ${sendMin} ${sendHour} * * *`, async () => {
-          //   try {
-          //     const res = await resend.emails.send({
-          //       from: 'andrew@deltaapps.dev',
-          //       to: element.email,
-          //       subject: payload.subject,
-          //       html: buildReminderEmail(element.firstname, element.notenames, element.times)
-          //     });
-          //     console.log(res)
-          //   } catch (err) {
-          //     console.log(err)
-          //   }
-          // }, {
-          //   scheduled: true,
-          //   timezone: "America/Denver"
-          // });
         });
       } else if (error) {
           console.log(error)

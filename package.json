@@ -24,7 +24,6 @@
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "netlify-cli": "^15.8.1",
-    "node-cron": "^3.0.2",
     "node-fetch": "^3.3.1",
     "nuxt": "^2.15.8",
     "openai": "^3.2.1",
