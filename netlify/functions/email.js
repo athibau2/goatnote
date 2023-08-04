@@ -41,6 +41,7 @@ exports.handler = async function(event, context) {
       });
       break;
     case 'reminder-email':
+      console.log('3')
       const sendHour = (parseInt(payload.times[0].split(':')[0]) + 23) % 24;
       cron.schedule(`0 ${sendHour} * * *`, async () => {
         await resend.emails.send({
