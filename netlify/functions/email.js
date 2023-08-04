@@ -51,8 +51,8 @@ exports.handler = async function(event, context) {
         data.forEach(async element => {
           const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
           const sendMin = (parseInt(element.times[0].split(':')[1]))
+          console.log(element.email, sendHour, sendMin)
           cron.schedule(`${sendMin} ${sendHour} * * *`, async () => {
-            console.log(element.email, sendHour, sendMin)
             await resend.emails.send({
               from: 'andrew@deltaapps.dev',
               to: element.email,
