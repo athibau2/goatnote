@@ -1,4 +1,5 @@
 const { Resend } = require('resend');
+const { createClient } = require('@supabase/supabase-js');
 const resend = new Resend(process.env.NUXT_ENV_RESEND_API_KEY);
 const fs = require('fs')
 const path = require('path');
@@ -14,6 +15,9 @@ const cron = require('node-cron');
 exports.handler = async function(event, context) {
   const payload = JSON.parse(event.body);
   const headers = event.headers
+  const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
+  const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   switch(headers.type) {
     case 'welcome-email':
@@ -41,16 +45,24 @@ exports.handler = async function(event, context) {
       });
       break;
     case 'reminder-email':
-      const sendHour = (parseInt(payload.times[0].split(':')[0]) + 23) % 24;
-      const sendMin = (parseInt(payload.times[0].split(':')[1]))
-      cron.schedule(`${sendMin} ${sendHour} * * *`, async () => {
-        await resend.emails.send({
-          from: 'andrew@deltaapps.dev',
-          to: payload.email,
-          subject: payload.subject,
-          html: buildReminderEmail(payload.firstname, payload.notenames, payload.times)
+      const { data, error, status } = await supabase.from('get_daily_plans')
+        .select()
+      if (!error) {
+        data.forEach(async element => {
+          const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
+          const sendMin = (parseInt(element.times[0].split(':')[1]))
+          cron.schedule(`${sendMin} ${sendHour} * * *`, async () => {
+            await resend.emails.send({
+              from: 'andrew@deltaapps.dev',
+              to: element.email,
+              subject: 'Study Plan Reminder',
+              html: buildReminderEmail(element.firstname, element.notenames, element.times)
+            });
+          });
         });
-      });
+      } else if (error) {
+          console.log(error)
+      }
       break;
   }
 
