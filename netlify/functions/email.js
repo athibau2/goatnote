@@ -4,6 +4,7 @@ const resend = new Resend(process.env.NUXT_ENV_RESEND_API_KEY);
 const fs = require('fs')
 const path = require('path');
 const cron = require('node-cron');
+const CronJob = require('cron').CronJob
 
 /**
  * 
@@ -51,23 +52,41 @@ exports.handler = async function(event, context) {
         data.forEach(async element => {
           const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
           const sendMin = (parseInt(element.times[0].split(':')[1]))
-          console.log(element.email, sendHour, sendMin)
-          cron.schedule(`30 ${sendMin} ${sendHour} * * *`, async () => {
-            try {
-              const res = await resend.emails.send({
-                from: 'andrew@deltaapps.dev',
-                to: element.email,
-                subject: payload.subject,
-                html: buildReminderEmail(element.firstname, element.notenames, element.times)
-              });
-              console.log(res)
-            } catch (err) {
-              console.log(err)
-            }
-          }, {
-            scheduled: true,
-            timezone: "America/Denver"
-          });
+          const job = new CronJob(
+            `30 ${sendMin} ${sendHour} * * *`,
+            async function() {
+              try {
+                const res = await resend.emails.send({
+                  from: 'andrew@deltaapps.dev',
+                  to: element.email,
+                  subject: payload.subject,
+                  html: buildReminderEmail(element.firstname, element.notenames, element.times)
+                });
+                console.log(res)
+              } catch (err) {
+                console.log(err)
+              }
+            },
+            null,
+            true,
+            'America/Denver'
+          );
+          // cron.schedule(`30 ${sendMin} ${sendHour} * * *`, async () => {
+          //   try {
+          //     const res = await resend.emails.send({
+          //       from: 'andrew@deltaapps.dev',
+          //       to: element.email,
+          //       subject: payload.subject,
+          //       html: buildReminderEmail(element.firstname, element.notenames, element.times)
+          //     });
+          //     console.log(res)
+          //   } catch (err) {
+          //     console.log(err)
+          //   }
+          // }, {
+          //   scheduled: true,
+          //   timezone: "America/Denver"
+          // });
         });
       } else if (error) {
           console.log(error)

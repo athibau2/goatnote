@@ -9,7 +9,6 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@netlify/functions": "^1.6.0",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/dotenv": "1.4.1",
     "@nuxtjs/vuetify": "^1.12.3",
@@ -21,6 +20,7 @@
     "bootstrap": "^4.6.0",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.19.3",
+    "cron": "^2.4.0",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "netlify-cli": "^15.8.1",
