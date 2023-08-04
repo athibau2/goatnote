@@ -52,10 +52,11 @@ exports.handler = async function(event, context) {
           const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
           const sendMin = (parseInt(element.times[0].split(':')[1]))
           cron.schedule(`${sendMin} ${sendHour} * * *`, async () => {
+            console.log(element.email, sendHour, sendMin)
             await resend.emails.send({
               from: 'andrew@deltaapps.dev',
               to: element.email,
-              subject: 'Study Plan Reminder',
+              subject: payload.subject,
               html: buildReminderEmail(element.firstname, element.notenames, element.times)
             });
           });
