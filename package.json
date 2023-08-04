@@ -9,6 +9,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@netlify/functions": "^1.6.0",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/dotenv": "1.4.1",
     "@nuxtjs/vuetify": "^1.12.3",
