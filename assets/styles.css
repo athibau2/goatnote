@@ -19,6 +19,11 @@
     background-image: linear-gradient(to top right, #f9f9f9, #B3E5FC);
 }
 
+.dialog-card {
+    margin: auto !important;
+    height: auto;
+}
+
 .card {
     background-image: linear-gradient(to top right, #f9f9f9, #B3E5FC) !important;
     margin: 10px;
@@ -120,8 +125,7 @@
 }
 
 .modal-list {
-    height: 325px;
-    position: relative;
+    max-height: 300px;
     overflow: auto;
 }
 

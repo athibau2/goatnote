@@ -22,7 +22,7 @@ exports.handler = async function(event, context) {
   switch(headers.type) {
     case 'welcome-email':
       await resend.emails.send({
-        from: 'andrew@deltaapps.dev',
+        from: 'management@deltaapps.dev',
         to: payload.email,
         subject: `Welcome, ${payload.name}!`,
         html: buildWelcomeEmail(payload.name),
@@ -30,19 +30,29 @@ exports.handler = async function(event, context) {
       break;
     case 'reset-pass':
       await resend.emails.send({
-        from: 'andrew@deltaapps.dev',
+        from: 'GOAT Notes <management@deltaapps.dev>',
         to: payload.email,
         subject: 'Password Reset',
         html: buildResetEmail(payload.name, payload.code, payload.codeexpiration),
       });
       break;
     case 'admin-email':
-      await resend.emails.send({
-        from: 'andrew@deltaapps.dev',
-        to: payload.email,
-        subject: payload.subject,
-        html: buildAdminEmail(payload.body)
+      payload.emails.forEach(async element => {
+        await resend.emails.send({
+          from: 'management@deltaapps.dev',
+          to: element,
+          subject: payload.subject,
+          html: buildAdminEmail(payload.body)
+        });
       });
+      break;
+    case 'delete-email':
+      await resend.emails.send({
+        from: 'management@deltaapps.dev',
+        to: payload.email,
+        subject: 'Account Deletion Confirmation',
+        html: buildDeleteEmail(payload.name)
+      })
       break;
     case 'reminder-email':
       const { data, error, status } = await supabase.from('get_daily_plans')
@@ -56,7 +66,7 @@ exports.handler = async function(event, context) {
             async function() {
               try {
                 const res = await resend.emails.send({
-                  from: 'andrew@deltaapps.dev',
+                  from: 'management@deltaapps.dev',
                   to: element.email,
                   subject: payload.subject,
                   html: buildReminderEmail(element.firstname, element.notenames, element.times)
@@ -142,6 +152,79 @@ exports.handler = async function(event, context) {
               <span>
                 You can modify your email settings
                 <a href="https://goatnotes.net/account">here.</a>
+              </span>
+            </center>
+          </div>
+        </body>
+      </html>
+    `;
+  
+    return emailTemplate;
+  }
+
+  function buildDeleteEmail(name) {
+    const deleteMessage = `Dear ${name},<br><br>You have requested to delete your GOAT Notes account, and that process has successfully been completed. We will sure miss you, and we hope you come back soon!<br><br>Best regards,<br>Delta Apps, LLC`;
+
+    // Add HTML styling to the email template
+    const emailTemplate = `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+              background-color: #f9f9f9;
+              margin: 0;
+              padding: 0;
+            }
+      
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+      
+            .logo {
+              display: block;
+              width: 150px;
+              margin: 0 auto;
+            }
+      
+            h1 {
+              text-align: center;
+              color: #2F2B28;
+              font-size: 24px;
+              margin-top: 30px;
+            }
+      
+            p {
+              color: #666666;
+              font-size: 16px;
+              line-height: 1.5;
+              margin-bottom: 20px;
+            }
+      
+            a {
+              color: #007bff;
+              text-decoration: none;
+            }
+      
+            span {
+              display: block;
+              text-align: center;
+              margin-top: 20px;
+              color: #999999;
+              font-size: 14px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <center>
+              <img class="logo" src="${process.env.NUXT_ENV_AWS_S3_BUCKET}/GN.png" />
+              <h1>Account Deletion Successful</h1>
+              <p>${deleteMessage}</p>
+              <span>
+                Until you sign up again, you will no longer receive emails from us.
               </span>
             </center>
           </div>

@@ -12,6 +12,7 @@ export const state = () => ({
     collections: [],
     notes: [],
     currentNote: {},
+    flashcards: [],
     words: [],
     questions: [],
     links: [],
@@ -58,21 +59,21 @@ export const state = () => ({
             paymentLink: null,
             features: [
                 'Unlimited collections and notes',
-                'Unlimited vocab words',
-                'Unlimited study questions',
-                'Unlimited content links',
-                'Share notes with up to 3 people',
+                'Unlimited flashcards',
+                'Unlimited links',
+                'Unlimited whiteboards',
+                'Up to 3 file uploads per note',
+                'Share notes and collections with up to 3 people',
             ]
         },
         {
             name: 'Premium',
-            price: '$3.99 / month',
+            price: '$2.99 / month',
             paymentLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
             features: [
                 'Everything in Basic, plus...',
-                'Create vocab words with AI',
-                'Create study questions with AI',
-                'Unlimited notes sharing',
+                'Create flashcards with AI',
+                'Unlimited notes and collections sharing',
                 'External notes sharing',
             ]
         },
@@ -80,7 +81,17 @@ export const state = () => ({
     resetCode: null,
     emailList: [],
     showFiles: false,
-    noteFiles: []
+    showFlashcards: false,
+    showShareNote: false,
+    showShareColl: false,
+    showStudyTools: false,
+    showFileView: false,
+    showQuickWord: false,
+    showMyWhiteboards: false,
+    preparedWords: [],
+    openedFile: null,
+    noteFiles: [],
+    whiteboards: []
   })
   
 // mutations should update state
@@ -134,6 +145,10 @@ export const mutations = {
 
     currentNote(state, data) {
         state.currentNote = data
+    },
+
+    flashcards(state, data) {
+        state.flashcards = data
     },
 
     words(state, data) {
@@ -260,8 +275,56 @@ export const mutations = {
         state.showFiles = data
     },
 
+    showFlashcards(state, data) {
+        state.showFlashcards = data
+    },
+
+    setShowShareNote(state, data) {
+        state.showShareNote = data
+    },
+
+    setShowShareColl(state, data) {
+        state.showShareColl = data
+    },
+
+    setShowStudyTools(state, data) {
+        state.showStudyTools = data
+    },
+
     setFiles(state, data) {
         state.noteFiles = data
+    },
+
+    setOpenedFile(state, data) {
+        state.openedFile = data
+    },
+
+    setShowFileView(state, data) {
+        state.showFileView = data
+    },
+
+    setShowQuickWord(state, data) {
+        state.showQuickWord = data
+    },
+
+    setShowMyWhiteboards(state, data) {
+        state.showMyWhiteboards = data
+    },
+
+    setPreparedWords(state, data) {
+        state.preparedWords = data
+    },
+
+    setWhiteboards(state, data) {
+        state.whiteboards = data
+    },
+
+    updateCurrentWhiteboard(state, data) {
+        state.whiteboards.forEach(element => {
+            if (element.boardid == data.boardid) {
+                element.data = data.data
+            }
+        });
     }
 }
 
@@ -919,10 +982,12 @@ export const actions = {
             localStorage.setItem('prettyDate', prettyDate)
             await commit('currentNote', data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
+            await dispatch('getFlashcards', { noteid: noteid })
             await dispatch('getWords', { noteid: noteid })
             await dispatch('getQuestions', { noteid: noteid })
             await dispatch('getLinks', { noteid: noteid })
             await dispatch('getStudyPlans', { noteid: noteid })
+            await dispatch('getWhiteboards', { noteid: noteid })
             this.$router.push('/note')
         } else if (error) {
             console.log(error)
@@ -930,19 +995,16 @@ export const actions = {
         }
     },
 
-    async updateGptCalls({ commit }, { num, noteid }) {
-        const { data, error, status } = await supabase.from('note')
+    async updateAiCalls({ commit, state }, { date, num }) {
+        const { data, error, status } = await supabase.from('user')
             .update({
-                numgptcalls: num
+                numaicalls: num,
+                lastaicall: date
             })
-            .eq('noteid', noteid)
+            .eq('userid', state.user.user_id)
             .select()
-        console.log(data)
         if (!error) {
-            let temp = JSON.parse(localStorage.getItem('note'))
-            temp.typednotes = data[0].typednotes
-            await commit('currentNote', temp)
-            localStorage.setItem('note', JSON.stringify(temp))
+            await commit('setUserData', data[0])
         } else if (error) {
             console.log(error)
         }
@@ -1093,6 +1155,179 @@ export const actions = {
             .eq('questionid', questionid)
         if (!error) {
             await dispatch('getQuestions', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async getPreparedWords({ commit }, { noteid }) {
+        const { data, error, status } = await supabase.from('see_prepared_words')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            await commit('setPreparedWords', data)
+        } else if (error) {
+            console.log(error)
+            await commit('setPreparedWords', [])
+        }
+    },
+
+    async addPreparedWord({ dispatch }, { word, noteid }) {
+        const { data, error, status } = await supabase.from('prepared_words')
+            .insert({
+                word: word,
+                noteid: noteid
+            })
+        if (!error) {
+            await dispatch('getPreparedWords', { noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async removePreparedWord({ dispatch }, { wordid, noteid }) {
+        const { data, error, status } = await supabase.from('prepared_words')
+            .delete()
+            .eq('wordid', wordid)
+        if (!error) {
+            await dispatch('getPreparedWords', { noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async clearPreparedWords({ commit }, { noteid }) {
+        const { data, error, status } = await supabase.from('prepared_words')
+            .delete()
+            .eq('noteid', noteid)
+        if (!error) {
+            await commit('setPreparedWords', [])
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async getWhiteboards({ commit }, { noteid }) {
+        const { data, error, status } = await supabase.from('whiteboards')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            await commit('setWhiteboards', data)
+        } else if (error) {
+            console.log(error)
+            await commit('setWhiteboards', [])
+        }
+    },
+
+    async addWhiteboard({ dispatch }, { dataURL, noteid }) {
+        let currentWhiteboard = localStorage.getItem('current_whiteboard')
+        if (currentWhiteboard != null && currentWhiteboard != undefined && 
+        currentWhiteboard != 'null' && currentWhiteboard != 'undefined') {
+            let whiteboardObj = JSON.parse(currentWhiteboard)
+            await dispatch('updateWhiteboard', {
+                boardid: whiteboardObj.boardid,
+                dataURL: dataURL
+            })
+        } else {
+            const { data, error, status } = await supabase.from('whiteboards')
+                .insert({
+                    data: dataURL,
+                    noteid: noteid
+                }).select()
+            if (!error) {
+                localStorage.setItem('current_whiteboard', JSON.stringify(data[0]))
+                await dispatch('getWhiteboards', { noteid: noteid })
+            } else if (error) {
+                console.log(error)
+                alert('Something went wrong, please try again.')
+            }
+        }
+    },
+
+    async updateWhiteboard({ commit }, { boardid, dataURL }) {
+        const { data, error, status } = await supabase.from('whiteboards')
+            .update({
+                data: dataURL
+            })
+            .eq('boardid', boardid)
+            .select()
+        if (!error) {
+            await commit('updateCurrentWhiteboard', data[0])
+            localStorage.setItem('current_whiteboard', JSON.stringify(data[0]))
+        } else if (error) {
+            console.log(error)
+        }
+    },
+
+    async deleteWhiteboard({ dispatch }, { boardid, noteid }) {
+        const { data, error, status } = await supabase.from('whiteboards')
+            .delete()
+            .eq('boardid', boardid)
+        if (!error) {
+            await dispatch('getWhiteboards', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async getFlashcards({ commit, state }, { noteid }) {
+        const { data, error, status } = await supabase.from('see_flashcards')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            await commit('flashcards', data)
+            localStorage.setItem('flashcards', JSON.stringify(state.flashcards))
+        } else if (error) {
+            console.log(error)
+            await commit('flashcards', [])
+        }
+    },
+
+    async addFlashcard({ dispatch }, { newPrompt, newAnswer, noteid }) {
+        const { data, error, status } = await supabase.from('flashcards')
+            .insert({
+                cardprompt: newPrompt,
+                cardanswer: newAnswer,
+                noteid: noteid
+            })
+        if (!error) {
+            await dispatch('getFlashcards', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async updateFlashcard({ dispatch }, { cardid, editPrompt, editAnswer, noteid }) {
+        const { data, error, status } = await supabase.from('flashcards')
+            .update({
+                cardprompt: editPrompt,
+                cardanswer: editAnswer
+            })
+            .eq('cardid', cardid)
+        if (!error) {
+            await dispatch('getFlashcards', { noteid: noteid })
+        } else if (error) {
+            console.log(error)
+            if (status === 404) {
+                alert('Flashcard not found')
+            } else {
+                alert('Something went wrong, please try again.')
+            }
+        }
+    },
+
+    async deleteFlashcard({ dispatch }, { cardid, noteid }) {
+        const { data, error, status } = await supabase.from('flashcards')
+            .delete()
+            .eq('cardid', cardid)
+        if (!error) {
+            await dispatch('getFlashcards', { noteid: noteid })
         } else if (error) {
             console.log(error)
             alert('Something went wrong, please try again.')
@@ -1357,12 +1592,12 @@ export const actions = {
         }
     },
 
-    async uploadFiles({ dispatch, state }, { files, noteid }) {
+    async uploadFiles({ dispatch }, { files, noteid, userid }) {
         let fail = false
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             const { data, error, status } = await supabaseStorage.storage
-                .from(state.user.user_id)
+                .from(userid)
                 .upload(`${noteid}/${file.name}`, file)
             if (error) fail = true
         }
@@ -1370,8 +1605,8 @@ export const actions = {
         await dispatch('getFiles', { noteid: noteid })
     },
 
-    async removeFile({ dispatch, state }, { noteid, filename }) {
-        const { data, error } = await supabaseStorage.storage.from(state.user.user_id)
+    async removeFile({ dispatch }, { noteid, filename, userid }) {
+        const { data, error } = await supabaseStorage.storage.from(userid)
             .remove([`${noteid}/${filename}`])
         if (!error) {
             await dispatch('getFiles', { noteid: noteid })
@@ -1492,6 +1727,7 @@ export const actions = {
         localStorage.removeItem('questions')
         localStorage.removeItem('links')
         localStorage.removeItem('studyPlans')
+        localStorage.removeItem('current_whiteboard')
         deleteJwtToken()
         await commit('setUser', null)
         this.$router.push('/login')
@@ -1540,6 +1776,19 @@ export const actions = {
             .delete()
             .eq('userid', state.user.user_id)
         if (!error) {
+            const body = {
+                name: state.userData.firstname,
+                email: state.user.email
+            }
+            await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Type': 'delete-email'
+                },
+                body: JSON.stringify(body)
+            })
             deleteJwtToken()
             this.$router.push('/login')
             alert("Your account has been deleted")

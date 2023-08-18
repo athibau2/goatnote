@@ -11,6 +11,8 @@ CREATE TABLE "user"
   noteonboarded BOOLEAN DEFAULT false,
   subscriptionstatus text NOT NULL DEFAULT 'inactive',
   notifsettings BOOLEAN NOT NULL DEFAULT true,
+  lastaicall TEXT DEFAULT '',
+  numaicalls INT DEFAULT 0,
   PRIMARY KEY (userid),
   UNIQUE (email)
 );
@@ -51,7 +53,6 @@ CREATE TABLE note
   notedate timestamp,
   typednotes TEXT,
   collectionid SERIAL NOT NULL,
-  numgptcalls INT NOT NULL DEFAULT 0,
   externalsharing BOOLEAN NOT NULL DEFAULT false,
   PRIMARY KEY (noteid),
   FOREIGN KEY (collectionid) REFERENCES collection(collectionid) ON DELETE CASCADE
@@ -89,6 +90,24 @@ CREATE TABLE links
   FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
 );
 
+CREATE TABLE prepared_words
+(
+  wordid SERIAL NOT NULL,
+  word TEXT NOT NULL,
+  noteid SERIAL NOT NULL,
+  PRIMARY KEY (wordid),
+  FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
+);
+
+CREATE TABLE whiteboards
+(
+  boardid SERIAL NOT NULL,
+  data TEXT NOT NULL,
+  noteid SERIAL NOT NULL,
+  PRIMARY KEY (boardid),
+  FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
+);
+
 CREATE TABLE words
 (
   wordid SERIAL NOT NULL,
@@ -98,6 +117,16 @@ CREATE TABLE words
   PRIMARY KEY (wordid),
   FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE,
   UNIQUE (vocabword)
+);
+
+CREATE TABLE flashcards
+(
+  cardid SERIAL NOT NULL,
+  cardprompt TEXT NOT NULL,
+  cardanswer TEXT NOT NULL,
+  noteid SERIAL NOT NULL,
+  PRIMARY KEY (cardid),
+  FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
 );
 
 CREATE TABLE shared_collection
@@ -178,12 +207,27 @@ create or replace view see_notes as
 	inner join "user" u on c.userid = u.userid
 	order by n.noteid asc;
 	--this will be filtered later
-  
+
 create or replace view see_note_with_data as
-  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.numgptcalls, n.externalsharing                                        
+  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.externalsharing                                      
   from note n inner join collection c on n.collectionid = c.collectionid
   inner join "user" u on c.userid = u.userid;
   --this will be filtered later
+
+create or replace view see_flashcards as
+ 	select * from flashcards
+	order by cardid asc;
+	--this will be filtered later
+
+create or replace view see_prepared_words as
+  select * from prepared_words
+  order by wordid asc;
+  -- this will be filtered later
+
+create or replace view see_whiteboards as
+  select * from whiteboards
+  order by boardid asc;
+  -- this will be filtered later
 
 create or replace view see_words as
  	select * from words
@@ -409,3 +453,11 @@ GRANT EXECUTE ON FUNCTION
 
 ALTER TABLE <table_name> ADD CONSTRAINT cascade_delete
 	FOREIGN KEY (<id>) REFERENCES <table_name> (<id>) ON DELETE CASCADE;
+
+-- Use SQL to create a policy.
+create policy "Public Access"
+  on storage.buckets for select
+  using ( bucket_id = 'goatnotes-files' );
+
+create policy "Public Access"
+  on storage.buckets for select;

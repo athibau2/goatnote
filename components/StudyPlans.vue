@@ -1,10 +1,21 @@
 <template>
-    <div class="modal-overlay" @click="close()">
-        <div v-if="!showAddPlan" :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
-            <h6>Study Plans</h6>
-            <v-divider />
-            <div v-if="studyPlans.length !== 0">
-              <v-list class="modal-list">
+    <v-card class="dialog-card" elevation="5">
+        <div class="text-center">
+            <v-btn-toggle
+                v-model="toggle"
+                rounded
+                dense
+            >
+                <v-btn>My Plans</v-btn>
+                <v-btn>New Plan</v-btn>
+            </v-btn-toggle>
+        </div>
+        <div class="text-center" v-if="toggle == 0">
+            <v-card-text>
+              <span class="notice" v-if="studyPlans.length == 0">
+                This note currently has no study plans
+              </span>
+              <v-list class="modal-list" v-if="studyPlans.length !== 0">
                 <v-list-item v-for="(p, i) in studyPlans" :key="i">
                 <v-card height="190px" class="modal-list-item" elevation="2" color="#fcfcfc" flat>
                     <table>
@@ -34,78 +45,76 @@
                         >
                         </v-switch>
                         <v-spacer />
-                        <v-icon @click="deletePlan(p.planid)">mdi-delete</v-icon>
+                        <v-btn @click="deletePlan(p.planid)" icon>
+                            <v-icon>mdi-delete</v-icon>
+                        </v-btn>
                     </v-card-actions>
                 </v-card>
                 </v-list-item>
               </v-list>
-            </div>
-            <div class="modal-bottom-content">
-                <v-btn text @click="$emit('close-modal')">
-                    Exit
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn class="flat-btn" text @click="close()">
+                    Close
                 </v-btn>
-                <v-btn class="good-btn"
-                    @click="windowWidth < '850' ? switchModals() : showAddPlan = true"
-                >
-                    Add Plan
-                </v-btn>
-            </div>
+                <v-spacer />
+            </v-card-actions>
         </div>
 
         <!-- Add Plan Modal -->
-        <div :class="windowWidth < '850' ? 'modal-sm' : 'modal'" 
-            style="margin-left: 3px;" 
-            v-if="showAddPlan" @click.stop
+        <div class="text-center"
+            v-if="toggle == 1"
         >
-            <h6>Add Plan</h6>
-            <v-divider />
-            <div class="eachRow">
-                <v-btn color="light green lighten-2" @click="clearDate()">Date</v-btn>
-                <input class="when text-center" v-if="this.date.length !== 0" :placeholder="this.date">
-                <v-date-picker
-                    v-if="showDate"
-                    v-model="date"
-                    elevation="6"
-                    @click:date="prettyDate()"
-                >
-                </v-date-picker>
-                <v-time-picker
-                    v-if="showTime"
-                    v-model="time"
-                    elevation="6"
-                    :landscape="$vuetify.breakpoint.smAndUp"                    
-                >
-                    <v-btn
-                        text
-                        color="primary"
-                        @click="prettyTime()"
+            <v-card-text>
+                <div class="eachRow">
+                    <v-btn class="good-btn" @click="clearDate()">{{showDate ? 'Close' : 'Set Date'}}</v-btn>
+                    <span class="basic-header text-center" v-if="this.date.length !== 0">{{this.date}}</span>
+                    <v-date-picker
+                        v-if="showDate"
+                        v-model="date"
+                        elevation="6"
+                        @click:date="prettyDate()"
                     >
-                        OK
-                    </v-btn>
-                </v-time-picker>
-            </div>
-            <div class="eachRow">
-                <v-btn color="light yellow lighten-3" @click="clearTime()">Time</v-btn>
-                <input class="when text-center" v-if="this.time.length !== 0" :placeholder="this.time">
-            </div>
-            <div class="eachRow">
-                <h4>Study Duration (minutes)</h4>
-                <input class="text-center" type="number" min="5" max="120" v-model="timeAmount">
-            </div>
-            <div class="eachRow">
-                <h4>Priority Level</h4>
-                <input class="text-center" type="number" max="5" min="1" v-model="priority">
-            </div>
-            <div style="margin-top: 70px">
-                <v-btn text
-                    @click="windowWidth < '850' ? switchModals() : showAddPlan = false"
-                >
-                    Exit
+                    </v-date-picker>
+                </div>
+                <div class="eachRow">
+                    <v-btn class="good-btn" @click="clearTime()">{{showTime ? 'Close' : 'Set Time'}}</v-btn>
+                    <span class="basic-header text-center" v-if="this.time.length !== 0">{{this.time}}</span>
+                    <v-time-picker
+                        v-if="showTime"
+                        v-model="time"
+                        elevation="6"
+                        :landscape="$vuetify.breakpoint.smAndUp"                    
+                    >
+                        <v-btn
+                            text
+                            color="primary"
+                            @click="prettyTime()"
+                        >
+                            OK
+                        </v-btn>
+                    </v-time-picker>
+                </div>
+                <div class="eachRow">
+                    <span class="basic-header">Set Duration (minutes)</span>
+                    <input class="text-center" type="number" step="10" min="10" max="120" v-model="timeAmount">
+                </div>
+                <div class="eachRow">
+                    <span class="basic-header">Set Priority Level</span>
+                    <input class="text-center" type="number" max="5" min="1" v-model="priority">
+                </div>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn class="flat-btn" text @click="close()">
+                    Close
                 </v-btn>
                 <v-btn class="good-btn" @click="addPlan()">Save</v-btn>
-            </div>
+                <v-spacer />
+            </v-card-actions>
         </div>
-    </div>
+    </v-card>
 </template>
 
 <script>
@@ -124,9 +133,10 @@
 
       data () {
         return {
+            toggle: 0,
             date: "",
             time: "",
-            timeAmount: 5,
+            timeAmount: 10,
             priority: 1,
             plans: JSON.parse(localStorage.getItem('studyPlans')),
             showDate: false,
@@ -177,7 +187,9 @@
                         priority: this.priority,
                         noteid: this.currentNote.noteid
                     })
-                    this.close()
+                    this.date = ""
+                    this.time = ""
+                    this.toggle = 0
                 }
             },
 
@@ -208,12 +220,18 @@
 
             clearDate () {
                 this.date = ""
-                this.showDate = true
+                this.showDate = !this.showDate
             },
             
             clearTime () {
                 this.time = ""
-                this.showTime = true
+                this.showTime = !this.showTime
+            },
+
+            async close() {
+                this.date = ""
+                this.time = ""
+                await this.$store.commit('users/setShowStudyTools', false)
             }
       },
 
@@ -232,49 +250,21 @@
 <style scoped>
 @import '~/assets/styles.css';
 
-.modal-sm {
-  text-align: center;
-  background-color: white;
-  height: 475px;
-  width: 400px;
-  margin-top: 15%;
-  padding: 0px 0;
-  border-radius: 20px;
-}
-
-h6 {
-  font-weight: 500;
-  font-size: 28px;
-}
-
-p {
-  font-size: 16px;
-  margin: 10px 15px;
-}
-
 .eachRow {
-    margin-top: 25px;
+    margin-bottom: 20px;
 }
 
-.when {
-    border: solid 1px;
-    border-radius: 8px;
-    margin-left: 15px;
-    margin-top: 0;
-    width: 125px;
-    height: 30px;
-    font-weight: bold;
-    background-color: rgba(215, 236, 243, 0.781);
+.basic-header {
+    font-size: 20px;
+    margin-left: 10px;
 }
 
 input {
-    width: 50px;
-    background-color: rgba(215, 236, 243, 0.781);
+    margin-left: 10px;
+    font-size: 16px;
     border: solid 1px;
-    border-radius: 8px;
-    height: 30px;
-    padding-left: 5px;
-    margin-top: 10px;
+    border-radius: 10px;
+    padding: 3px;
 }
 
 </style>

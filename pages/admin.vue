@@ -215,11 +215,14 @@
       </v-tabs-items>
 
       <!-- List of org users -->
-      <div class="modal-overlay" v-if="showOrgUsers" @click="showOrgUsers = false">
-        <div class="modal" @click.stop>
-            <h6 v-if="$route.params.org !== undefined">Members of {{$route.params.org.orgname}}</h6>
-            <v-divider />
-            <div class="table-list">
+      <v-dialog
+        v-model="showOrgUsers"
+        :width="windowWidth < 800 ? '90%' : '50%'"
+      >
+        <v-card class="dialog-card" elevation="5">
+            <v-card-title class="basic-header justify-center" v-if="$route.params.org !== undefined">Members of {{$route.params.org.orgname}}</v-card-title>
+            <v-divider style="margin-bottom: 10px;" />
+            <v-card-text class="table-list">
               <table>
                 <tr>
                   <th style="width: 35%">Name</th>
@@ -240,21 +243,26 @@
                     </td>
                 </tr>
               </table>
-            </div>
-            <div class="modal-bottom-content">
-                <v-btn text @click="showOrgUsers = false">
-                    Exit
-                </v-btn>
-            </div>
-        </div>
-      </div>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn text @click="showOrgUsers = false">
+                  Close
+              </v-btn>
+              <v-spacer />
+            </v-card-actions>
+        </v-card>
+      </v-dialog>
 
       <!-- List of coll notes -->
-      <div class="modal-overlay" v-if="showCollNotes" @click="showCollNotes = false">
-        <div class="modal" @click.stop>
-            <h6 v-if="collOpened !== {}">Notes in {{collOpened.collectionname}}</h6>
-            <v-divider />
-            <div class="table-list">
+      <v-dialog
+        v-model="showCollNotes"
+        :width="windowWidth < 800 ? '90%' : '50%'"
+      >
+        <v-card class="dialog-card" elevation="5">
+            <v-card-title class="basic-header justify-center" v-if="collOpened !== {}">Notes in {{collOpened.collectionname}}</v-card-title>
+            <v-divider style="margin-bottom: 10px;" />
+            <v-card-text class="table-list">
               <table>
                 <tr>
                   <th style="width: 35%">Name</th>
@@ -271,14 +279,16 @@
                     </td>
                 </tr>
               </table>
-            </div>
-            <div class="modal-bottom-content">
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
               <v-btn text @click="showCollNotes = false">
-                  Exit
+                  Close
               </v-btn>
-            </div>
-        </div>
-      </div>
+              <v-spacer />
+            </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-app>
 </template>
 
@@ -297,6 +307,9 @@ export default {
   async created () {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/adminLoadUsers')
+    window.addEventListener('resize', () => {
+      this.windowWidth = window.innerWidth
+    })
   },
 
   data () {
@@ -315,6 +328,7 @@ export default {
       subject: '',
       body: '',
       emailGroup: 'Select',
+      windowWidth: window.innerWidth
     }
   },
 
@@ -328,22 +342,20 @@ export default {
 
     async sendEmails() {
       if (confirm(`Are you ready to email ${this.emailList.length} users?`)) {
-        this.emailList.forEach(async element => {
-          const body= {
-            'email': element.email,
-            'subject': this.subject,
-            'body': this.body
-          }
-          await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Type': 'admin-email'
-            },
-            body: JSON.stringify(body)
-          })
-        });
+        const body= {
+          'emails': this.emailList,
+          'subject': this.subject,
+          'body': this.body
+        }
+        await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Type': 'admin-email'
+          },
+          body: JSON.stringify(body)
+        })
         this.subject = ''
         this.body = ''
         this.emailGroup = 'Select'

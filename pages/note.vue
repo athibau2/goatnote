@@ -22,22 +22,7 @@
 
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                  <v-btn id="note-step-7"
-                    style="margin: 0 10px"
-                    v-bind="attrs"
-                    v-on="on"
-                    @click="toggleStudy()"
-                    icon
-                  >
-                    <v-icon size="32">mdi-head-question</v-icon>
-                  </v-btn>
-                </template>
-                <span>{{studyMode ? 'Turn off study mode' : 'Begin Study'}}</span>
-              </v-tooltip>
-
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
+                  <v-btn style="margin-left: 5px;"
                     v-bind="attrs"
                     v-on="on"
                     @click="newNote()"
@@ -48,11 +33,26 @@
                 </template>
                 <span>New Note</span>
               </v-tooltip>
+
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn style="margin-left: 5px;"
+                    v-on="on"
+                    v-bind="attrs"
+                    @click="runTutorial()"
+                    icon
+                  >
+                    <v-icon size="26">mdi-help</v-icon>
+                  </v-btn>
+                </template>
+                <span>Run Tutorial</span>
+              </v-tooltip>
             </v-col>
 
             <v-col :cols="windowWidth < 600 ? '12' : '7'" v-if="user.user_id == currentNote.userid">
                 <v-text-field v-if="editNote"
                   class="noteselector"
+                  id="note-name"
                   dense
                   solo
                   rounded
@@ -73,7 +73,7 @@
                   close-on-content-click
                 >
                   <template v-slot:activator="{ on, attrs }">
-                    <v-text-field id="note-step-8"
+                    <v-text-field id="note-name"
                       class="noteselector"
                       dense
                       solo
@@ -102,7 +102,7 @@
                 </v-menu>                
             </v-col>
             <v-col :cols="windowWidth < 600 ? '12' : '7'" v-else>
-              <v-text-field id="note-step-8"
+              <v-text-field id="note-name"
                 class="noteselector"
                 dense
                 solo
@@ -113,7 +113,8 @@
               >
               </v-text-field>          
             </v-col>
-            <v-col>
+
+            <v-col class="text-right">
                 <span style="font-family: Times New Roman; font-size: 16px;"
                 >
                   {{this.currentNote.collectionname}}
@@ -122,66 +123,135 @@
             </v-col>
         </v-row>
 
-        <v-divider />
-        <br>
-
         <!-- Notes area fullscreen -->
-        <v-row v-if="windowWidth >= 1271">
+        <v-row v-if="windowWidth >= 1200">
           <v-col cols="9">
-            <div class="editor-wrapper">
-              <vue-editor class="editor" id="note-step-1"
+            <v-btn-toggle
+              v-model="editorOrWhiteboard"
+              style="margin-bottom: 5px;"
+              class="small-header"
+              rounded
+              dense
+            >
+              <v-btn style="font-size: 13px !important;">Text Editor</v-btn>
+              <v-btn style="font-size: 13px !important;">Whiteboard</v-btn>
+            </v-btn-toggle>
+            <v-tooltip top v-if="editorOrWhiteboard == 1">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon
+                  @click="newWhiteboard()"
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  <v-icon size="30">mdi-plus</v-icon>
+                </v-btn>
+              </template>
+              <span>New Whiteboard</span>
+            </v-tooltip>
+            <v-tooltip top v-if="editorOrWhiteboard == 1">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn text
+                  class="flat-btn"
+                  style="border-radius: 50px;"
+                  @click="showMyWhiteboards()"
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  <v-icon size="30">mdi-draw</v-icon> ({{whiteboards.length}})
+                </v-btn>
+              </template>
+              <span>My Whiteboards</span>
+            </v-tooltip>
+            <div class="editor-wrapper" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
+              <vue-editor class="editor" id="editor"
                 :disabled="(user.user_id == currentNote.userid) ? false : true"
                 @text-change="saveNotes()"
                 v-model="noteText"
               >
               </vue-editor>
             </div>
+            <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
+              <div id="painterro"></div>
+            </div>
           </v-col>
 
-          <!-- Buttons area full screen -->
+          <!-- Buttons area large screen -->
           <v-col class="text-center" cols="3">
             <div>
-              <v-btn class="tool-btn"
+              <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 5</span>
+            </div>
+            <div>
+              <v-btn class="tool-btn" id="ai-btn"
                 @click="generateStudyTools()"
                 :disabled="(user.user_id == currentNote.userid ? false : true) || isGeneratingTools"
               >
-                <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : null }}
+                <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : `&ensp;${generatingStatus}` }}
               </v-btn>
             </div>
+            <div id="note-step-3">
+              <v-btn class="tool-btn" id="tools-btn" @click="showStudyTools()">Study Tools</v-btn>
+            </div>
             <div id="note-step-2">
-              <v-btn class="tool-btn"
+              <v-btn class="tool-btn" id="share-btn"
                 @click="getSharedNoteList(currentNote)"
                 :disabled="user.user_id == currentNote.userid ? false : true"
               >
                 Share Note
               </v-btn>
             </div>
-            <div id="note-step-3">
-              <v-btn class="tool-btn" @click="showWords = true">Words</v-btn>
-            </div>
-            <div id="note-step-4">
-              <v-btn class="tool-btn" @click="showQuestions = true">Questions</v-btn>
-            </div>
-            <div id="note-step-5">
-              <v-btn class="tool-btn" @click="showLinks = true">Links</v-btn>
-            </div>
-            <div id="note-step-6">
-              <v-btn class="tool-btn" @click="showFiles()">Files</v-btn>
-            </div>
-            <div id="note-step-7">
-              <v-btn class="tool-btn"
-                @click="openPlans()"
-                :disabled="user.user_id == currentNote.userid ? false : true"
+            <v-divider style="margin: 20px 0;" />
+            <div id="queue-area">
+              <span>
+                <span class="small-header">Flashcard Queue</span>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn v-on="on" v-bind="attrs" @click="clearPreparedWords()" icon>
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Remove All</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn v-on="on" v-bind="attrs" @click="quickWord()" icon>
+                      <v-icon size="28">mdi-plus</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Add Word</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-icon v-on="on" v-bind="attrs">mdi-help</v-icon>
+                  </template>
+                  <span>Click 'Ctrl + Space' inside your text editor</span>
+                </v-tooltip>
+              </span><br>
+              <span class="subtitle">
+                Click to Remove
+                &ndash;
+                {{preparedWords.length}} / 20
+              </span>
+              <div class="prepared-words-wrapper"
+                :style="preparedWords.length == 20 ? {'border': 'solid #E57373 2px'} : null"
               >
-                Study Plans
-              </v-btn>
+                <span v-for="(word, i) in preparedWords"
+                  :key="i"
+                >
+                  <button class="prepared-word" @click="removePreparedWord(word)">
+                    {{word.word}}
+                  </button>
+                </span>
+              </div>
             </div>
           </v-col>
         </v-row>
 
         <!-- Buttons area small screen -->
-        <v-col cols="12" v-else-if="windowWidth < 1271">
-          <v-btn class="tool-btn"
+        <v-col cols="12" v-else-if="windowWidth < 1200">
+          <div>
+            <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 5</span>
+          </div>
+          <v-btn class="tool-btn" id="ai-btn"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto" 
             @click="generateStudyTools()"
@@ -189,7 +259,14 @@
           >
             <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : null }}
           </v-btn>
-          <v-btn class="tool-btn" id="note-step-2"
+          <v-btn class="tool-btn" id="tools-btn"
+            :style="windowWidth < 936 ? 'font-size: 12px' : null"
+            width="auto"
+            @click="showStudyTools()"
+          >
+            Study Tools
+          </v-btn>
+          <v-btn class="tool-btn" id="share-btn"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto"
             @click="getSharedNoteList(currentNote)"
@@ -197,108 +274,155 @@
           >
             Share Note
           </v-btn>
-          <v-btn class="tool-btn" id="note-step-3"
-            :style="windowWidth < 936 ? 'font-size: 12px' : null"
-            width="auto"
-            @click="showWords = true"
-          >
-            Words
-          </v-btn>
-          <v-btn class="tool-btn" id="note-step-4"
-            :style="windowWidth < 936 ? 'font-size: 12px' : null"
-            width="auto"
-            @click="showQuestions = true"
-          >
-            Questions
-          </v-btn>
-          <v-btn class="tool-btn" id="note-step-5"
-            :style="windowWidth < 936 ? 'font-size: 12px' : null"
-            width="auto"
-            @click="showLinks = true"
-          >
-            Links
-          </v-btn>
-          <v-btn class="tool-btn" id="note-step-6"
-            :style="windowWidth < 936 ? 'font-size: 12px' : null"
-            width="auto"
-            @click="showFiles()"
-          >
-            Files
-          </v-btn>
-          <v-btn class="tool-btn" id="note-step-7"
-            :style="windowWidth < 936 ? 'font-size: 12px' : null"
-            width="auto"
-            @click="openPlans()"
-            :disabled="user.user_id == currentNote.userid ? false : true"
-          >
-            Study Plans
-          </v-btn>
+          <div id="queue-area">
+            <span>
+              <span class="small-header" style="vertical-align: bottom;">Flashcard Queue</span>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn v-on="on" v-bind="attrs" @click="clearPreparedWords()" style="align-items: flex-end;" icon>
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </template>
+                <span>Remove All</span>
+              </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn v-on="on" v-bind="attrs" @click="quickWord()" style="align-items: flex-end;" icon>
+                    <v-icon size="28">mdi-plus</v-icon>
+                  </v-btn>
+                </template>
+                <span>Add Word</span>
+              </v-tooltip>
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn style="align-items: flex-end;" v-on="on" v-bind="attrs" icon>
+                    <v-icon>mdi-help</v-icon>
+                  </v-btn>
+                </template>
+                <span>Click 'Ctrl + Space' inside your text editor</span>
+              </v-tooltip>
+            </span>
+            <span class="subtitle" style="float: right; margin-top: 15px">
+              Click to Remove
+              &ndash;
+              {{preparedWords.length}} / 20
+            </span>
+            <div class="prepared-words-wrapper"
+              :style="preparedWords.length == 20 ? {'border': 'solid #E57373 2px'} : null"
+            >
+              <span v-for="(word, i) in preparedWords"
+                :key="i"
+              >
+                <button class="prepared-word" @click="removePreparedWord(word)">
+                  {{word.word}}
+                </button>
+              </span>
+            </div>
+          </div>
 
           <!-- Notes area small screen -->
-          <div class="editor-wrapper">
-            <vue-editor class="editor" id="note-step-1"
+          <v-btn-toggle
+            v-model="editorOrWhiteboard"
+            style="margin: 5px 0;"
+            class="small-header"
+            rounded
+            dense
+          >
+            <v-btn style="font-size: 13px !important;">Text Editor</v-btn>
+            <v-btn style="font-size: 13px !important;">Whiteboard</v-btn>
+          </v-btn-toggle>
+          <v-tooltip right v-if="editorOrWhiteboard == 1">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn icon
+                @click="newWhiteboard()"
+                v-on="on"
+                v-bind="attrs"
+              >
+                <v-icon size="30">mdi-plus</v-icon>
+              </v-btn>
+            </template>
+            <span>New Whiteboard</span>
+          </v-tooltip>
+          <v-tooltip right v-if="editorOrWhiteboard == 1">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn text
+                class="flat-btn"
+                style="border-radius: 50px;"
+                @click="showMyWhiteboards()"
+                v-on="on"
+                v-bind="attrs"
+              >
+                <v-icon size="30">mdi-draw</v-icon> ({{whiteboards.length}})
+              </v-btn>
+            </template>
+            <span>My Whiteboards</span>
+          </v-tooltip>
+          <div class="editor-wrapper" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
+            <vue-editor class="editor" id="editor"
               :disabled="(user.user_id == currentNote.userid) ? false : true"
               @text-change="saveNotes()"
               v-model="noteText"
             >
             </vue-editor>
           </div>
+          <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
+            <div id="painterro"></div>
+          </div>
         </v-col>
 
-        <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
-        <Words v-show="showWords" @close-modal="showWords = false" />
-        <Questions v-show="showQuestions" @close-modal="showQuestions = false" />
-        <Links v-show="showLinks" @close-modal="showLinks = false" />
-        <Files style="margin: auto;" />
-        <StudyPlans v-show="showStudyPlans" @close-modal="showStudyPlans = false" />
+        <ShareNote style="margin: auto;" />
+        <Tools style="margin: auto;" />
+        <QuickWord style="margin: auto;" />
+        <Whiteboards style="margin: auto;" @opened-board="openBoard()" />
     </v-container>
   </v-app>
 </template>
 
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
-import Words from '~/components/Words.vue'
-import Questions from '~/components/Questions.vue'
-import Links from '~/components/Links.vue'
-import Files from '~/components/Files.vue'
-import StudyPlans from '~/components/StudyPlans.vue'
+import Tools from '~/components/Tools.vue'
 import ShareNote from '~/components/ShareNote.vue'
+import QuickWord from '~/components/QuickWord.vue'
+import Whiteboards from '~/components/Whiteboards.vue'
 import { VueEditor } from "vue2-editor"
 import Shepherd from 'shepherd.js'
 import { openaiGenerateStudyTools } from '~/store/openai'
 import { debounce } from 'lodash'
 import Loading from '~/components/Loading.vue'
+import Painterro from 'painterro'
 
 export default {
   name: 'NotePage',
   middleware: "auth",
 
   components: {
-      Words,
-      Questions,
-      Links,
-      Files,
-      StudyPlans,
+      Tools,
       ShareNote,
+      QuickWord,
       VueEditor,
-      Loading
+      Loading,
+      Whiteboards
   },
 
   async mounted() {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/userData')
-    this.$store.dispatch('users/orgs')
+    await this.$store.dispatch('users/orgs')
     await this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
     await this.$store.dispatch('users/notes', { collectionid: this.currentNote.collectionid })
     await this.$store.dispatch('users/getFiles', {
       noteid: this.currentNote.noteid
     })
-    this.$store.commit('users/words', JSON.parse(localStorage.getItem('words')))
-    this.$store.commit('users/questions', JSON.parse(localStorage.getItem('questions')))
+    await this.$store.dispatch('users/getPreparedWords', {
+      noteid: this.currentNote.noteid
+    })
+    await this.$store.dispatch('users/getWhiteboards', {
+      noteid: this.currentNote.noteid
+    })
+    this.$store.commit('users/flashcards', JSON.parse(localStorage.getItem('flashcards')))
     this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
     this.$store.commit('users/studyPlans', JSON.parse(localStorage.getItem('studyPlans')))
     this.$store.commit('users/setNotes', JSON.parse(localStorage.getItem('collNotes')))
-    this.$store.commit('users/study', false)
     if (!this.userData.noteonboarded) {
       this.addSteps()
       this.noteTour.start()
@@ -313,16 +437,14 @@ export default {
   data () {
     return {
         isGeneratingTools: false,
-        isLoadingQuestions: false,
-        showQuestions: false,
+        generatingStatus: '',
         showLinks: false,
-        showWords: false,
         showStudyPlans: false,
+        editorOrWhiteboard: 0,
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
         editNote: false,
         newNoteName: JSON.parse(localStorage.getItem('note')).notename,
-        showShareNote: false,
         windowWidth: window.innerWidth,
         noteTour: new Shepherd.Tour({
           useModalOverlay: true,
@@ -330,6 +452,50 @@ export default {
             classes: 'shadow-md bg-purple-dark',
           }
         }),
+        ptro: null,
+    }
+  },
+
+  watch: {
+    editorOrWhiteboard(newValue, oldValue) {
+      if (newValue == 1) {
+        this.$nextTick(() => {
+          this.ptro = Painterro({
+            id: 'painterro',
+            defaultTool: 'brush',
+            defaultTextStrokeAndShadow: false,
+            activeColor: '#000000',
+            defaultLineWidth: '3',
+            defaultEraserWidth: '20',
+            hiddenTools: ['close', 'resize', 'pixelize', 'settings'],
+            toolbarPosition: 'top',
+            saveHandler: async (image, done) => {
+              this.blobToDataURL(image.asBlob(), async (dataURL) => {
+                await this.$store.dispatch('users/addWhiteboard', { 
+                  dataURL: dataURL,
+                  noteid: this.currentNote.noteid
+                });
+                done(false);
+              });
+            },
+            onChange: async () => {
+              this.ptro.save()
+            }
+          })
+
+          let currentWhiteboard = localStorage.getItem('current_whiteboard')
+          if (currentWhiteboard != null && currentWhiteboard != undefined && 
+          currentWhiteboard != 'null' && currentWhiteboard != 'undefined') {
+            let whiteboardObj = JSON.parse(currentWhiteboard)
+            this.ptro.show(whiteboardObj.data)
+          } else {
+            this.ptro.show()
+          }
+
+        });
+      } else if (newValue == 0 && oldValue == 1) {
+        this.ptro.close()
+      }
     }
   },
 
@@ -338,8 +504,60 @@ export default {
         this.$router.go(-1)
       },
 
+      newWhiteboard() {
+        localStorage.removeItem('current_whiteboard')
+        this.ptro.show()
+      },
+
+      openBoard() {
+        let whiteboard = JSON.parse(localStorage.getItem('current_whiteboard'))
+        this.ptro.show(whiteboard.data)
+      },
+
+      blobToDataURL(blob, callback) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          callback(event.target.result);
+        };
+        reader.readAsDataURL(blob);
+      },
+
+      runTutorial() {
+        this.addSteps()
+        this.noteTour.start()
+      },
+
+      async quickWord() {
+        await this.$store.commit('users/setShowQuickWord', true)
+      },
+
+      async showMyWhiteboards() {
+        await this.$store.commit('users/setShowMyWhiteboards', true)
+      },
+
+      async removePreparedWord(word) {
+        await this.$store.dispatch('users/removePreparedWord', {
+          wordid: word.wordid,
+          noteid: word.noteid
+        })
+      },
+
+      async clearPreparedWords() {
+        await this.$store.dispatch('users/clearPreparedWords', {
+          noteid: this.currentNote.noteid
+        })
+      },
+
+      showStudyTools() {
+        this.$store.commit('users/setShowStudyTools', true)
+      },
+
       showFiles() {
         this.$store.commit('users/showFiles', true)
+      },
+
+      showFlashcards() {
+        this.$store.commit('users/showFlashcards', true)
       },
 
       async newNote() {
@@ -356,41 +574,57 @@ export default {
           if (confirm('This feature is only available for the Premium plan. Click \'OK\' to be redirected to upgrade your account.')) {
             window.location.href = `${this.premiumLink}?prefilled_email=${this.encodedEmail}`
           }
-        } else if (this.currentNote.numgptcalls == 4) {
-          alert('You have reached the maximum number of allowed AI parsing calls.')
-        } else if (this.noteText.length < 1500) {
-          alert(`The minimum character length to parse your notes is 1500 characters. You are currently at ${this.noteText.length} characters.`)
-        } else if (confirm('Are you ready to generate study tools? This will automatically parse your notes and create vocab flash cards and study question flash cards for you. For best results, use this function when you are closer to completing your notes, as repeating this function may cause duplicates. This may take a minute to complete. Please do not refresh your page.')) {
-          console.log('Generating study tools...')
+        } else if (this.calledAiToday && this.userData.numaicalls == 5) {
+          alert('You have reached the maximum number of allowed AI parsing calls for today.')
+        } else if (confirm('Are you ready to generate study tools? This will automatically create flash cards for you from your Flashcard Queue. This may take a minute to complete. Please do not refresh your page.')) {
           this.isGeneratingTools = true
-          const studyTools = await openaiGenerateStudyTools({
-            input: this.noteText,
+          let words = []
+          this.preparedWords.forEach(word => {
+            words.push(word.word)
           })
-          if (!studyTools) {
-            alert('Something went wrong and no study tools were generated. Please try again.')
-          } else {
-            await this.$store.dispatch('users/updateGptCalls', {
-              num: this.currentNote.numgptcalls + 1,
-              noteid: this.currentNote.noteid
+          if (words.length >= 10) {
+            this.generatingStatus = 'Waiting for AI'
+            const studyTools = await openaiGenerateStudyTools({
+              input: words,
+              notename: this.currentNote.notename
             })
-            const vocab = studyTools.vocab
-            const questions = studyTools.questions
-            for (let i = 0; i < vocab.length; ++i) {
-              await this.$store.dispatch('users/addWord', {
-                newWord: vocab[i].word,
-                newDef: vocab[i].definition,
-                noteid: this.currentNote.noteid
+            if (!studyTools) {
+              this.isGeneratingTools = false
+              this.generatingStatus = ''
+              alert('Something went wrong and no study tools were generated. Please try again.')
+            } else {
+              this.generatingStatus = 'Waiting for Database'
+              await this.$store.dispatch('users/updateAiCalls', {
+                date: this.getDate,
+                num: this.calledAiToday ? this.userData.numaicalls + 1 : 1
               })
+
+              let words = studyTools.words ?? []
+              let questions = studyTools.questions ?? []
+
+              for (let i = 0; i < words.length; ++i) {
+                await this.$store.dispatch('users/addFlashcard', {
+                  newPrompt: words[i].cardprompt,
+                  newAnswer: words[i].cardanswer,
+                  noteid: this.currentNote.noteid
+                })
+              }
+
+              for (let i = 0; i < questions.length; ++i) {
+                await this.$store.dispatch('users/addFlashcard', {
+                  newPrompt: questions[i].cardprompt,
+                  newAnswer: questions[i].cardanswer,
+                  noteid: this.currentNote.noteid
+                })
+              }
+
+              this.clearPreparedWords()
+              this.isGeneratingTools = false
+              this.generatingStatus = ''
+              alert(`Your study tools have been successfully generated. You can review them by clicking the \"Study Tools\" button.`)
             }
-            for (let i = 0; i < questions.length; ++i) {
-              await this.$store.dispatch('users/addQuestion', {
-                newQuestion: questions[i].question,
-                newAnswer: questions[i].answer,
-                noteid: this.currentNote.noteid
-              })
-            }
-            this.isGeneratingTools = false
-            alert(`Your study tools have been successfully generated. You can review the vocab words by clicking the \"Words\" button, and the study questions by clicking the \"Questions\" button. You have ${this.remainingGptCalls} remaning AI calls remaining for this note.`)
+          } else {
+            alert('You need at least 10 words in the queue before you can generate study tools.')
           }
         }
       },
@@ -399,7 +633,6 @@ export default {
         this.noteTour.addSteps([
           {
             id: 'note-step-0',
-            title: 'Hello there!',
             text: 'Welcome to the note page. Let me show you around a little bit!',
             buttons: [
               {
@@ -410,10 +643,9 @@ export default {
           },
           {
             id: 'note-step-1',
-            title: 'Hello there!',
             text: 'First and foremost, this area is where you can type out any notes you take.',
             attachTo: {
-              element: '#note-step-1',
+              element: '#editor',
               on: 'top'
             },
             buttons: [
@@ -425,10 +657,9 @@ export default {
           },
           {
             id: 'note-step-2',
-            title: 'Hello there!',
-            text: 'Here, you can share this note with anyone who is also in this organization. They won\'t be able to change the notes you type, but they can add words, questions, and links.',
+            text: 'You can switch between different notes in the same collection here, or edit the name of your note by clicking the pencil icon on the right.',
             attachTo: {
-              element: '#note-step-2',
+              element: '#note-name',
               on: 'bottom'
             },
             buttons: [
@@ -440,10 +671,9 @@ export default {
           },
           {
             id: 'note-step-3',
-            title: 'Hello there!',
-            text: 'Instead of putting all your vocab words in the notes editor to be disorganized and lost forever, put them here so they\'re all in one spot and easy to see.',
+            text: 'This button will use AI to create flashcards for you from your Flashcard Queue. As a subscriber to the Premium membership, you can use this button 5 times every day.',
             attachTo: {
-              element: '#note-step-3',
+              element: '#ai-btn',
               on: 'bottom'
             },
             buttons: [
@@ -455,10 +685,9 @@ export default {
           },
           {
             id: 'note-step-4',
-            title: 'Hello there!',
-            text: 'Same goes for review questions. Add the question and the answer here so you can refer to them quickly and easily.',
+            text: 'All your study tools are in one place. Here you can see and edit flashcards, files, links, and study plans. Generating flashcards with AI will automatically upload them here. Take a look at Study Mode!',
             attachTo: {
-              element: '#note-step-4',
+              element: '#tools-btn',
               on: 'bottom'
             },
             buttons: [
@@ -470,10 +699,9 @@ export default {
           },
           {
             id: 'note-step-5',
-            title: 'Hello there!',
-            text: 'Trying to keep track of links to related content is normally really difficult and useless, but not with GOAT Notes. Put them here so you don\'t lose them!',
+            text: 'Here, you can share your notes with others in the same organization. They can\'t change your written notes, but they can collaborate on the study tools.',
             attachTo: {
-              element: '#note-step-5',
+              element: '#share-btn',
               on: 'bottom'
             },
             buttons: [
@@ -485,40 +713,9 @@ export default {
           },
           {
             id: 'note-step-6',
-            title: 'Hello there!',
-            text: 'You can create up to 3 study plans for each note. Put in a date, time, how long you want to study, and the priority level, and GOAT Notes will send you an email when it\'s time to study!',
+            text: 'As you take notes, add vocab words to the Flashcard Queue to prepare for AI flashcard generation. To do this, press \'Ctrl + Space\' while inside your text editor. You can have up to 20 entries in the Queue at a time before you need to generate.',
             attachTo: {
-              element: '#note-step-6',
-              on: 'bottom'
-            },
-            buttons: [
-              {
-                text: 'Next',
-                action: this.noteTour.next
-              }
-            ]
-          },
-          {
-            id: 'note-step-7',
-            title: 'Hello there!',
-            text: 'When you\'re ready to study your note, this button will change the page to study mode. Then go back into your words and questions to study them as flashcards. The links also become clickable URLs. Click here again to turn study mode off.',
-            attachTo: {
-              element: '#note-step-7',
-              on: 'bottom'
-            },
-            buttons: [
-              {
-                text: 'Next',
-                action: this.noteTour.next
-              }
-            ]
-          },
-          {
-            id: 'note-step-8',
-            title: 'Hello there!',
-            text: 'You can switch between different notes in the same collection here, or edit the name of your note by clicking the pencil icon on the right.',
-            attachTo: {
-              element: '#note-step-8',
+              element: '#queue-area',
               on: 'bottom'
             },
             buttons: [
@@ -530,7 +727,6 @@ export default {
           },
           {
             id: 'note-final-step',
-            title: 'Hello there!',
             text: 'That concludes our tour! Now, get to it!',
             buttons: [
               {
@@ -543,7 +739,6 @@ export default {
       },
 
       onboardingComplete () {
-        console.log('Complete')
         this.$store.dispatch('users/noteOnboardingComplete')
       },
 
@@ -555,18 +750,11 @@ export default {
         this.newNoteName = event
       },
 
-      getSharedNoteList (note) {
-        this.showShareNote = true
-        this.$store.dispatch('users/getSharedNoteList', {
+      async getSharedNoteList (note) {
+        await this.$store.dispatch('users/getSharedNoteList', {
           note: note
         })
-      },
-
-      openPlans () {
-        this.showStudyPlans = true
-        this.$store.dispatch('users/getStudyPlans', {
-          noteid: this.currentNote.noteid
-        })
+        await this.$store.commit('users/setShowShareNote', true)
       },
 
       async updateNoteName () {
@@ -588,16 +776,6 @@ export default {
         }, 500);
       }, 2000),
 
-      async toggleStudy () {
-        await this.$store.commit('users/study', !this.studyMode)
-        if (!this.studyMode) {
-          alert('Study mode has been turned off.')
-        }
-        else {
-          alert('Study mode has been turned on.')
-        }
-      },
-
       async switchNote(noteid) {
         await this.$store.dispatch('users/openNote', {
           noteid: noteid
@@ -611,8 +789,20 @@ export default {
       return this.$store.state.users.studyMode
     },
 
-    remainingGptCalls () {
-      return 4 - this.currentNote.numgptcalls
+    getDate () {
+      return new Date().toDateString()
+    },
+
+    calledAiToday () {
+      return this.userData.lastaicall == this.getDate
+    },
+
+    preparedWords () {
+      return this.$store.state.users.preparedWords
+    },
+
+    remainingAiCalls () {
+      return this.calledAiToday ? 5 - this.userData.numaicalls : 5
     },
 
     saving () {
@@ -631,12 +821,8 @@ export default {
         return this.$store.state.users.currentNote
     },
 
-    words () {
-      return this.$store.state.users.words
-    },
-
-    questions () {
-      return this.$store.state.users.questions
+    flashcards () {
+      return this.$store.state.users.flashcards
     },
 
     links () {
@@ -653,6 +839,10 @@ export default {
 
     encodedEmail () {
       return encodeURIComponent(this.$store.state.users.user.email)
+    },
+
+    whiteboards () {
+      return this.$store.state.users.whiteboards
     }
   }
 }
@@ -672,12 +862,55 @@ export default {
   overflow: scroll;
 }
 
+.canvas-wrapper {
+  height: 80vh;
+  width: 100%;
+}
+
+#painterro {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
 .editor {
   margin-top: 5px;
 }
 
+.small-header {
+  font-size: 18px !important;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.subtitle {
+  font-size: 13px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.prepared-words-wrapper {
+  margin: 4px 2px;
+  border: solid grey 1px;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow: auto;
+  padding: 5px;
+}
+
+.prepared-word {
+  background-color: #cccccc;
+  padding: 3px 5px;
+  margin: 2px;
+  border-radius: 4px;
+}
+
+.prepared-word:hover {
+  opacity: 0.85;
+}
+
 .tool-btn {
   width: 100%;
+  height: 50px !important;
   color: #2F2B28;
   margin: 4px 2px;
   background-image: linear-gradient(to top right, #f9f9f9, #85c59d);

@@ -1,10 +1,15 @@
 <template>
-    <div class="modal-overlay" @click="close()">
-        <div :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
-            <h3>Share Note</h3>
-            <h6>You can share this note with anyone in the same organization</h6>
-            <v-divider />
-            <div class="search-wrapper">
+    <v-dialog
+        v-model="showShareNote"
+        :width="windowWidth < 800 ? '90%' : '50%'"
+    >
+        <v-card class="dialog-card" elevation="5">
+            <v-card-title class="basic-header justify-center">Share Note</v-card-title>
+            <v-card-subtitle class="text-center">
+              You can share this note with anyone in the same organization
+            </v-card-subtitle>
+            <v-divider style="margin-bottom: 10px;" />
+            <v-card-text class="search-wrapper">
               <v-text-field
                   class="name-search"
                   v-model="searchText"
@@ -13,31 +18,33 @@
               >
               </v-text-field>
               <v-list class="result-list">
-                  <v-list-item
-                      v-for="(r, i) in results" :key="i" link 
-                      @click="pushToList(r)"
-                  >
-                      <v-list-item-subtitle>
-                          {{r.firstname}} {{r.lastname}}<v-spacer />{{r.email}}
-                      </v-list-item-subtitle>
-                      <v-divider />
-                  </v-list-item>
+                <v-list-item
+                    v-for="(r, i) in results" :key="i" link 
+                    @click="pushToList(r)"
+                >
+                    <v-list-item-subtitle>
+                        {{r.firstname}} {{r.lastname}}<v-spacer />{{r.email}}
+                    </v-list-item-subtitle>
+                    <v-divider />
+                </v-list-item>
               </v-list>
-            </div>
-            <div class="share-list">
-            <span class="shared-items" v-for="(s, i) in sharedNoteList" :key="i">
-                {{s.email}}&nbsp;<v-icon size="20" @click="unshareNote(s)">mdi-close</v-icon>
-            </span>
-            <span class="share-item" v-for="(s, i) in newShareList" :key="i">
-                {{s.email}}&nbsp;<v-icon size="20" @click="newShareList.splice(i, 1)">mdi-close</v-icon>
-            </span>
-            </div>
-            <div class="bottom-buttons">
-              <v-btn text class="flat-btn" @click="close()">Exit</v-btn>
+              <div class="share-list">
+                <span class="shared-items" v-for="(s, i) in sharedNoteList" :key="i">
+                    {{s.email}}&nbsp;<v-icon size="20" @click="unshareNote(s)">mdi-close</v-icon>
+                </span>
+                <span class="share-item" v-for="(s, i) in newShareList" :key="i">
+                    {{s.email}}&nbsp;<v-icon size="20" @click="newShareList.splice(i, 1)">mdi-close</v-icon>
+                </span>
+              </div>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn text class="flat-btn" @click="close()">Close</v-btn>
               <v-btn class="good-btn" @click="shareNote()">Share</v-btn>
-            </div>
-        </div>
-    </div>
+              <v-spacer />
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -66,10 +73,12 @@ export default {
     },
 
     async search () {
-      await this.$store.dispatch('users/search', {
-          searchText: this.searchText,
-          orgid: this.noteBeingShared.orgid
-      })
+      if (this.searchText != '') {
+        await this.$store.dispatch('users/search', {
+            searchText: this.searchText,
+            orgid: this.noteBeingShared.orgid
+        })
+      }
     },
 
     pushToList (r) {
@@ -77,7 +86,9 @@ export default {
         let counter2 = 0
 
         if ((this.sharedNoteList.length + this.newShareList.length == 3) && this.userData.subscriptionstatus == 'inactive') {
-          alert('The maximum sharing limit for this note has been reached.')
+          if (confirm('The maximum sharing limit for this note on your current plan has been reached. Click \'OK\' to be redirected to upgrade your account.')) {
+            window.location.href = `${this.premiumLink}?prefilled_email=${this.encodedEmail}`
+          }
           return
         }
 
@@ -120,10 +131,10 @@ export default {
       })
     },
 
-    close () {
+    async close () {
       this.searchText = ""
       this.newShareList = []
-      this.$emit('close-modal')
+      await this.$store.commit('users/setShowShareNote', false)
     }
   },
 
@@ -134,6 +145,16 @@ export default {
 
     userData () {
       return this.$store.state.users.userData
+    },
+
+    showShareNote: {
+      get () {
+        return this.$store.state.users.showShareNote
+      },
+
+      async set () {
+        await this.$store.commit('users/setShowShareNote', false)
+      }
     },
 
     results () {
@@ -147,6 +168,14 @@ export default {
     noteBeingShared () {
       return this.$store.state.users.noteBeingShared
     },
+
+    premiumLink () {
+      return this.$store.state.users.products[1].paymentLink
+    },
+
+    encodedEmail () {
+      return encodeURIComponent(this.$store.state.users.user.email)
+    },
   },
 }
 </script>
@@ -154,56 +183,21 @@ export default {
 <style scoped>
 @import '~/assets/styles.css';
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  background-color: #000000da;
-}
-
-.modal {
-  text-align: center;
-  background-color: white;
-  height: 475px;
-  width: 500px;
-  margin-top: 6%;
-  padding: 0px 0;
-  border-radius: 20px;
-}
-
-.modal-sm {
-  text-align: center;
-  background-color: white;
-  height: 475px;
-  width: 400px;
-  margin-top: 15%;
-  padding: 0px 0;
-  border-radius: 20px;
+.search-wrapper {
+  height: auto !important;
 }
 
 .result-list {
-  height: 200px;
+  max-height: 200px;
   overflow-y: scroll;
-  position: relative;
-}
-
-.search-wrapper {
-  height: 260px !important;
 }
 
 .share-list {
   background-color: #eeeeee;
-  position: inherit;
-  margin-top: 10px;
   height: 100px;
   overflow: auto;
   text-align: left;
   width: 100%;
-  bottom: 30px;
   border-radius: 10px;
 }
 
@@ -229,18 +223,9 @@ export default {
   display: inline-block;
   background-color: #cccccc;
   font-size: 12px;
-  top: 5px;
-  left: 5px;
-  right: 5px;
-  bottom: 5px;
+  margin: 3px 3px;
   padding: 3px;
-  margin-right: 3px;
-  margin-top: 5px;
   border-radius: 10px;
-}
-
-.bottom-buttons {
-  margin-top: 5px;
 }
 
 .name-search {

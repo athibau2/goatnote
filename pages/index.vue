@@ -57,7 +57,7 @@
                 rounded
                 background-color="#f9f9f9"
                 v-model="newOrgName" 
-                placeholder="New Organization Name"
+                placeholder="Name (e.g. Harvard University)"
               >
               </v-text-field>
           </v-card-text>
@@ -94,7 +94,7 @@
                 rounded
                 background-color="#f9f9f9"
                 v-model="newCollName" 
-                placeholder="New Collection Name"
+                placeholder="Name (e.g. History 100)"
               >
               </v-text-field>
           </v-card-text>
@@ -129,7 +129,7 @@
                 rounded
                 background-color="#f9f9f9"
                 v-model="newNoteName"
-                placeholder="New Note Name"
+                placeholder="Name (e.g. World War II)"
               >
               </v-text-field>
           </v-card-text>
@@ -275,8 +275,8 @@
         </v-card>
       </v-row>
     </v-col>
-    <ShareColl v-show="showShareColl" @close-modal="showShareColl = false" />
-    <ShareNote v-show="showShareNote" @close-modal="showShareNote = false" />
+    <ShareColl style="margin: auto" />
+    <ShareNote style="margin: auto" />
   </v-app>
 </template>
 
@@ -354,18 +354,18 @@ export default {
       }
     },
 
-    getSharedCollList (coll) {
-      this.showShareColl = true
-      this.$store.dispatch('users/getSharedCollList', {
+    async getSharedCollList (coll) {
+      await this.$store.dispatch('users/getSharedCollList', {
         collection: coll
       })
+      await this.$store.commit('users/setShowShareColl', true)
     },
 
-    getSharedNoteList (note) {
-      this.showShareNote = true
-      this.$store.dispatch('users/getSharedNoteList', {
+    async getSharedNoteList (note) {
+      await this.$store.dispatch('users/getSharedNoteList', {
          note: note
       })
+      await this.$store.commit('users/setShowShareNote', true)
     },
 
     textChanged (event) {

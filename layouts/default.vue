@@ -62,7 +62,7 @@
     </v-app-bar>
 
     <v-main class="main">
-      <v-container class="main">
+      <v-container class="main" id="step-5">
         <Nuxt class="main" />
       </v-container>
     </v-main>
@@ -137,6 +137,11 @@ export default {
           to: '/admin',
         },
         {
+          icon: 'mdi-help',
+          title: 'Tutorial',
+          click: this.runTutorial,
+        },
+        {
           icon: 'mdi-logout-variant',
           title: 'Logout',
           click: this.logout
@@ -161,7 +166,6 @@ export default {
       this.tour.addSteps([
         {
           id: 'step-1',
-          title: 'Hello there!',
           text: 'Welcome to GOAT Notes. Let\'s get you started on your tour!',
           buttons: [
             {
@@ -172,8 +176,25 @@ export default {
         },
         {
           id: 'step-5',
-          title: 'Hello there!',
-          text: 'The organizations you are a part of will show up here. Click \'Go\' to expand and see your collections, and then again to see your notes.',
+          text: 'The organizations you are a part of will show up here. Click \'Open\' to expand and see your collections, and then again to see your notes.',
+          attachTo: {
+            element: '#step-5',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Next',
+              action: this.tour.next
+            }
+          ]
+        },
+        {
+          id: 'step-6',
+          text: 'The \'+\' button next to \'Your Organizations\' is where you can create new objects. Create an Organization (e.g. University name), a Collection (e.g. Class name), or a Note (e.g. Lecture title).',
+          attachTo: {
+            element: '#step-5',
+            on: 'top'
+          },
           buttons: [
             {
               text: 'Next',
@@ -183,8 +204,7 @@ export default {
         },
         {
           id: 'menu-step-1',
-          title: 'Hello there!',
-          text: 'If the organization you want to be part of already exists, go to this page to find and join them! If they are a private organization, you\'ll need the join code from someone in the organization.',
+          text: 'This page lets you search for existing organizations to join. If they are a private organization, you\'ll need to get the join code from someone in the organization.',
           attachTo: {
             element: '#menu-step-1',
             on: 'right'
@@ -198,8 +218,7 @@ export default {
         },
         {
           id: 'menu-step-2',
-          title: 'Hello there!',
-          text: 'You can create up to three study plans for each of your notes. On this page, you will see all the study plans you haven\'t completed for all your notes.',
+          text: 'This page helps you keep track of all the study plans you haven\'t completed for all of your notes.',
           attachTo: {
             element: '#menu-step-2',
             on: 'right'
@@ -213,8 +232,7 @@ export default {
         },
         {
           id: 'menu-step-3',
-          title: 'Hello there!',
-          text: 'You have the ability to share entire collections or individual notes with people as long as they are also in the same organization. On this page, you can see all the collections and notes that have been shared with you. You can\'t edit the notes they have written, but you can add vocab words, study questions, and links to their notes.',
+          text: 'You have the ability to share entire collections or just individual notes with people as long as they are also in the same organization. On this page, you can see all the collections and notes that have been shared with you. You can\'t edit the notes they have written, but you can add flashcards, files, and links to their notes.',
           attachTo: {
             element: '#menu-step-3',
             on: 'right'
@@ -227,38 +245,7 @@ export default {
           ]
         },
         {
-          id: 'menu-step-5',
-          title: 'Hello there!',
-          text: 'If you are promoted to be a site admin, this is where you will go to see all the users and the data of GOAT Notes.',
-          attachTo: {
-            element: '#menu-step-5',
-            on: 'right'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: this.tour.next
-            }
-          ]
-        },
-        {
-          id: 'menu-step-6',
-          title: 'Hello there!',
-          text: 'Using touch screen, you can swipe this menu back and forth to completely hide it or show it again.',
-          attachTo: {
-            element: '#menu-step-6',
-            on: 'right'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: this.tour.next
-            }
-          ]
-        },
-        {
           id: 'final-step',
-          title: 'Hello there!',
           text: 'That concludes our tour! Now, get to it!',
           buttons: [
             {
@@ -270,8 +257,13 @@ export default {
       ]);
     },
 
+    runTutorial() {
+      this.toHome()
+      this.addSteps()
+      this.tour.start()
+    },
+
     onboardingComplete () {
-      console.log('Complete')
       this.$store.dispatch('users/basicOnboardingComplete')
     },
 

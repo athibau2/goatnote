@@ -1,14 +1,9 @@
 <template>
-    <v-dialog
-        v-model="showFiles"
-        :width="windowWidth < 800 ? '90%' : openedFile ? '70%' : '50%'"
-    >
+    <div>
         <v-btn class="close-btn" v-if="openedFile" @click="openedFile = null" icon>
             <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-card class="dialog-card" v-if="!openedFile" elevation="5">
-            <v-card-title class="basic-header justify-center">Files</v-card-title>
-            <v-divider style="margin-bottom: 10px;" />
             <v-card-text class="card-text">
                 <div v-for="(file, i) in allFiles" :key="i">
                     <a href="#" @click="openFile(file)">
@@ -20,47 +15,76 @@
                     <v-divider class="divider" />
                 </div>
             </v-card-text>
-            <v-card-actions>
+            <v-card-text>
                 <v-file-input
                     class="file-upload"
-                    label="Upload File"
+                    label="Upload File (pdf, docx)"
                     accept=".pdf, .docx"
                     multiple
                     chips
                     @change="handleFileInput"
+                    :error-messages="errorMessages"
                     v-model="files"
                 ></v-file-input>
-                <v-btn class="flat-btn" @click="uploadFiles" text>Upload</v-btn>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn class="flat-btn" @click="close()" text>
+                    Close
+                </v-btn>
+                <v-btn class="good-btn" @click="uploadFiles">Upload</v-btn>
+                <v-spacer />
             </v-card-actions>
         </v-card>
-        <iframe class="file-frame" v-if="openedFile && isDoc" :src="`https://docs.google.com/gview?url=${openedFile.url}&embedded=true`"></iframe>
-        <iframe class="file-frame" v-if="openedFile && !isDoc" :src="openedFile?.url"></iframe>
-    </v-dialog>
+        <FileView style="margin: auto" />
+    </div>
 </template>
 
 <script>
+import FileView from '~/components/FileView.vue'
 export default {
     name: 'Files',
+
+    components: {
+        FileView
+    },
 
     created () {
         window.addEventListener('resize', this.resizeHandler)
     },
 
+    mounted () {
+        this.maxFiles = this.userData.subscriptionstatus == 'active' ? 5 : 2
+    },
+
     data () {
         return {
             files: [],
+            maxFiles: null,
+            errorMessages: '',
             openedFile: null,
             windowWidth: window.innerWidth
         }
     },
 
     methods: {
-        openFile(file) {
-            this.openedFile = file
+        async openFile(file) {
+            await this.$store.commit('users/setOpenedFile', file)
+            await this.$store.commit('users/setShowFileView', true)
+        },
+
+        validateFileInput() {
+            if (this.files.length + this.allFiles.length > this.maxFiles) {
+                this.errorMessages = `You can only upload a maximum of ${this.maxFiles} files.`;
+                this.files = []; 
+            } else {
+                this.errorMessages = '';
+            }
         },
 
         handleFileInput(files) {
             this.files = files
+            this.validateFileInput()
         },
 
         resizeHandler() {
@@ -70,16 +94,23 @@ export default {
         uploadFiles() {
             this.$store.dispatch('users/uploadFiles', {
                 files: this.files,
-                noteid: this.$store.state.users.currentNote.noteid
+                noteid: this.currentNote.noteid,
+                userid: this.currentNote.userid
             })
             this.files = []
         },
 
         deleteFile(file) {
             this.$store.dispatch('users/removeFile', {
-                noteid: this.$store.state.users.currentNote.noteid,
-                filename: file.name
+                noteid: this.currentNote.noteid,
+                filename: file.name,
+                userid: this.currentNote.userid
             })
+        },
+
+        async close() {
+          this.files = []
+          await this.$store.commit('users/setShowStudyTools', false)
         }
     },
 
@@ -94,6 +125,10 @@ export default {
             }
         },
 
+        currentNote () {
+            return this.$store.state.users.currentNote
+        },
+
         allFiles () {
             return this.$store.state.users.noteFiles
         },
@@ -101,6 +136,10 @@ export default {
         isDoc() {
             console.log(this.openedFile.name.includes('docx'))
             return this.openedFile.name.includes('docx')
+        },
+
+        userData () {
+            return this.$store.state.users.userData
         }
     }
 }
@@ -118,11 +157,6 @@ export default {
     display: grid;
 }
 
-.dialog-card {
-    margin: auto !important;
-    height: auto;
-}
-
 .file-frame {
     margin: auto !important;
     height: 600px;
@@ -137,6 +171,12 @@ export default {
     margin: 15px !important;
     font-size: 18px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.file-upload {
+    width: 90%;
+    display: flex;
+    margin: auto;
 }
 
 .delete-icon {

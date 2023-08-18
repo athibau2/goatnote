@@ -10,11 +10,11 @@
         >
           <h3 class="text-center" v-if="windowWidth >= 900"
           >
-            Note-taking Done Right!
+            All Your Study Tools in One Place
           </h3>
           <h4 class="text-center" style="font-size: 22px" v-else-if="windowWidth < 900"
           >
-            Note-taking Done Right!
+            All Your Study Tools in One Place
           </h4>
           <RotateText class="intro" />
         </div>

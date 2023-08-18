@@ -1,56 +1,60 @@
 <template>
-    <div class="modal-overlay" @click="$emit('close-modal')">
-        <div v-if="!studyMode" :class="windowWidth < '850' ? 'modal-sm' : 'modal'" @click.stop>
-            <h6>Links</h6>
-            <v-divider />
-            <div v-if="links.length !== 0">
-              <v-list class="modal-list">
-                <v-list-item v-for="(link, i) in links" :key="i">
-                  <span class="modal-list-item" v-if="!editingLink || (editingLink && link.linkid !== linkBeingEdited)">
-                      {{link.url}}&nbsp;
-                      <v-btn 
-                        :disabled="(editingLink && link.linkid !== linkBeingEdited) ? true : false" 
-                        icon @click="setEditLink(link)"
-                      >
-                        <v-icon>mdi-pencil</v-icon>
-                      </v-btn>
-                      <v-icon @click="deleteLink(link.linkid)">mdi-delete</v-icon>
-                      <v-divider />
-                  </span>
-                  <v-row align="center" justify="center" v-else>
-                    <v-text-field
-                      :value="link.url"
-                      append-icon="mdi-pencil"
-                      @click:append="editingLink = !editingLink"
-                      @input="linkChanged($event)"
-                      @keyup.enter="updateLink(link)"
-                    >
-                    </v-text-field>
-                  </v-row>
-                </v-list-item>
-              </v-list>
+    <v-card class="dialog-card" elevation="5">
+        <div v-if="!studyMode">
+          <v-card-text>
+            <v-list class="modal-list" v-if="links.length !== 0">
+              <v-list-item v-for="(link, i) in links" :key="i">
+                <div class="modal-list-item" v-if="!editingLink || (editingLink && link.linkid !== linkBeingEdited)">
+                    <v-row style="padding: 15px 5px;">
+                      <span style="max-width: 80%;">{{link.url}}</span>
+                      <v-spacer />
+                      <span>
+                        <v-btn
+                          :disabled="(editingLink && link.linkid !== linkBeingEdited) ? true : false" 
+                          icon @click="setEditLink(link)"
+                        >
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn @click="deleteLink(link.linkid)" icon>
+                          <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                      </span>
+                    </v-row>
+                    <v-divider />
+                </div>
+                <v-row align="center" justify="center" v-else>
+                  <v-text-field
+                    :value="link.url"
+                    append-icon="mdi-pencil"
+                    @click:append="editingLink = !editingLink"
+                    @input="linkChanged($event)"
+                    @keyup.enter="updateLink(link)"
+                  >
+                  </v-text-field>
+                </v-row>
+              </v-list-item>
+            </v-list>
+            <div>
+              <v-text-field
+                class="text-field"
+                v-model="newLink" 
+                placeholder="Enter New Link"
+                @keyup.enter="addLink()"
+              >
+              </v-text-field>
             </div>
-            <div class="modal-bottom-content-2">
-              <v-row>
-                <v-text-field 
-                  v-model="newLink" 
-                  placeholder="Enter New Link"
-                  @keyup.enter="addLink()"
-                >
-                </v-text-field>
-              </v-row>
-              <div class="modal-bottom-content-3">
-                <v-btn text @click="$emit('close-modal')">
-                    Exit
-                </v-btn>
-                <v-btn class="good-btn" @click="addLink()">Add</v-btn>
-              </div>
-            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn class="flat-btn" @click="close()" text>
+                Close
+            </v-btn>
+            <v-btn class="good-btn" @click="addLink()">Add</v-btn>
+            <v-spacer />
+          </v-card-actions>
         </div>
 
-        <div v-else class="modal" @click.stop>
-            <h6>Links</h6>
-            <v-divider />
+        <div v-else>
             <div v-if="links.length !== 0">
               <v-list class="modal-list">
                 <v-list-item v-for="(link, i) in links" :key="i">
@@ -61,12 +65,15 @@
                 </v-list-item>
               </v-list>
             </div>
-            <br>
-            <v-btn text @click="$emit('close-modal')">
-                Exit
-            </v-btn>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn class="flat-btn" @click="close()" text>
+                  Close
+              </v-btn>
+              <v-spacer />
+          </v-card-actions>
         </div>
-    </div>
+    </v-card>
 </template>
 
 <script>
@@ -80,7 +87,6 @@
       mounted () {
         this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
         this.$store.commit('users/links', JSON.parse(localStorage.getItem('links')))
-        this.$store.commit('users/study', localStorage.getItem('studyMode'))
       },
 
       data () {
@@ -137,6 +143,11 @@
 
         launchUrl (url) {
           window.open(url)
+        },
+
+        async close() {
+          this.newLink = ""
+          await this.$store.commit('users/setShowStudyTools', false)
         }
       },
 
@@ -177,6 +188,12 @@ h6 {
 p {
   font-size: 16px;
   margin: 10px 15px;
+}
+
+.text-field {
+  width: 95%;
+  display: flex;
+  margin: auto;
 }
 
 /* .link {
