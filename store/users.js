@@ -13,8 +13,6 @@ export const state = () => ({
     notes: [],
     currentNote: {},
     flashcards: [],
-    words: [],
-    questions: [],
     links: [],
     studyPlans: [],
     allPlans: [],
@@ -149,14 +147,6 @@ export const mutations = {
 
     flashcards(state, data) {
         state.flashcards = data
-    },
-
-    words(state, data) {
-        state.words = data
-    },
-
-    questions(state, data) {
-        state.questions = data
     },
 
     links(state, data) {
@@ -983,8 +973,6 @@ export const actions = {
             await commit('currentNote', data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
             await dispatch('getFlashcards', { noteid: noteid })
-            await dispatch('getWords', { noteid: noteid })
-            await dispatch('getQuestions', { noteid: noteid })
             await dispatch('getLinks', { noteid: noteid })
             await dispatch('getStudyPlans', { noteid: noteid })
             await dispatch('getWhiteboards', { noteid: noteid })
@@ -1096,65 +1084,6 @@ export const actions = {
             .eq('linkid', linkid)
         if (!error) {
             await dispatch('getLinks', { noteid: noteid })
-        } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
-        }
-    },
-
-    async getQuestions({ commit, state }, { noteid }) {
-        const { data, error, status } = await supabase.from('see_questions')
-            .select()
-            .eq('noteid', noteid)
-        if (!error) {
-            await commit('questions', data)
-            localStorage.setItem('questions', JSON.stringify(state.questions))
-        } else if (error) {
-            console.log(error)
-            await commit('questions', [])
-        }
-    },
-
-    async addQuestion({ dispatch }, { newQuestion, newAnswer, noteid }) {
-        const { data, error, status } = await supabase.from('questions')
-            .insert({
-                questiontext: newQuestion,
-                answer: newAnswer,
-                noteid: noteid
-            })
-        if (!error) {
-            await dispatch('getQuestions', { noteid: noteid })
-        } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try agian.')
-        }
-    },
-
-    async updateQuestion({ dispatch }, { questionid, editQuestion, editAnswer, noteid }) {
-        const { data, error, status } = await supabase.from('questions')
-            .update({
-                questiontext: editQuestion,
-                answer: editAnswer
-            })
-            .eq('questionid', questionid)
-        if (!error) {
-            await dispatch('getQuestions', { noteid: noteid })
-        } else if (error) {
-            console.log(error)
-            if (status === 404) {
-                alert('Question not found.')
-            } else {
-                alert('Something went wrong, please try again.')
-            }
-        }
-    },
-
-    async deleteQuestion({ dispatch }, { questionid, noteid }) {
-        const { data, error, status } = await supabase.from('questions')
-            .delete()
-            .eq('questionid', questionid)
-        if (!error) {
-            await dispatch('getQuestions', { noteid: noteid })
         } else if (error) {
             console.log(error)
             alert('Something went wrong, please try again.')
@@ -1328,65 +1257,6 @@ export const actions = {
             .eq('cardid', cardid)
         if (!error) {
             await dispatch('getFlashcards', { noteid: noteid })
-        } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
-        }
-    },
-
-    async getWords({ commit, state }, { noteid }) {
-        const { data, error, status } = await supabase.from('see_words')
-            .select()
-            .eq('noteid', noteid)
-        if (!error) {
-            await commit('words', data)
-            localStorage.setItem('words', JSON.stringify(state.words))
-        } else if (error) {
-            console.log(error)
-            await commit('words', [])
-        }
-    },
-
-    async addWord({ dispatch }, { newWord, newDef, noteid }) {
-        const { data, error, status } = await supabase.from('words')
-            .insert({
-                vocabword: newWord,
-                definition: newDef,
-                noteid: noteid
-            })
-        if (!error) {
-            await dispatch('getWords', { noteid: noteid })
-        } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
-        }
-    },
-
-    async updateWord({ dispatch }, { wordid, editWord, editDef, noteid }) {
-        const { data, error, status } = await supabase.from('words')
-            .update({
-                vocabword: editWord,
-                definition: editDef
-            })
-            .eq('wordid', wordid)
-        if (!error) {
-            await dispatch('getWords', { noteid: noteid })
-        } else if (error) {
-            console.log(error)
-            if (status === 404) {
-                alert('Word not found')
-            } else {
-                alert('Something went wrong, please try again.')
-            }
-        }
-    },
-
-    async deleteWord({ dispatch }, { wordid, noteid }) {
-        const { data, error, status } = await supabase.from('words')
-            .delete()
-            .eq('wordid', wordid)
-        if (!error) {
-            await dispatch('getWords', { noteid: noteid })
         } else if (error) {
             console.log(error)
             alert('Something went wrong, please try again.')
@@ -1723,8 +1593,6 @@ export const actions = {
         await commit('newNote', false)
         localStorage.removeItem('note')
         localStorage.removeItem('collNotes')
-        localStorage.removeItem('words')
-        localStorage.removeItem('questions')
         localStorage.removeItem('links')
         localStorage.removeItem('studyPlans')
         localStorage.removeItem('current_whiteboard')

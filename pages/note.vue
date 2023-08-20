@@ -134,7 +134,7 @@
               dense
             >
               <v-btn style="font-size: 13px !important;">Text Editor</v-btn>
-              <v-btn style="font-size: 13px !important;">Whiteboard</v-btn>
+              <v-btn id="whiteboard-btn" style="font-size: 13px !important;">Whiteboard</v-btn>
             </v-btn-toggle>
             <v-tooltip top v-if="editorOrWhiteboard == 1">
               <template v-slot:activator="{ on, attrs }">
@@ -162,13 +162,18 @@
               </template>
               <span>My Whiteboards</span>
             </v-tooltip>
-            <div class="editor-wrapper" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
-              <vue-editor class="editor" id="editor"
+            <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
+              <Loading v-if="!showEditor" style="align-items: start;" />
+              <Editor class="editor" v-if="showEditor"
                 :disabled="(user.user_id == currentNote.userid) ? false : true"
-                @text-change="saveNotes()"
                 v-model="noteText"
-              >
-              </vue-editor>
+                :api-key="tinyApi"
+                @onKeyDown.ctrl.space="quickWord"
+                :init="{
+                  plugins: 'lists link image media table code help wordcount',
+                  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                }"
+              />
             </div>
             <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
               <div id="painterro"></div>
@@ -229,11 +234,9 @@
               <span class="subtitle">
                 Click to Remove
                 &ndash;
-                {{preparedWords.length}} / 20
+                {{preparedWords.length}}
               </span>
-              <div class="prepared-words-wrapper"
-                :style="preparedWords.length == 20 ? {'border': 'solid #E57373 2px'} : null"
-              >
+              <div class="prepared-words-wrapper">
                 <span v-for="(word, i) in preparedWords"
                   :key="i"
                 >
@@ -305,11 +308,9 @@
             <span class="subtitle" style="float: right; margin-top: 15px">
               Click to Remove
               &ndash;
-              {{preparedWords.length}} / 20
+              {{preparedWords.length}}
             </span>
-            <div class="prepared-words-wrapper"
-              :style="preparedWords.length == 20 ? {'border': 'solid #E57373 2px'} : null"
-            >
+            <div class="prepared-words-wrapper">
               <span v-for="(word, i) in preparedWords"
                 :key="i"
               >
@@ -329,7 +330,7 @@
             dense
           >
             <v-btn style="font-size: 13px !important;">Text Editor</v-btn>
-            <v-btn style="font-size: 13px !important;">Whiteboard</v-btn>
+            <v-btn id="whiteboard-btn" style="font-size: 13px !important;">Whiteboard</v-btn>
           </v-btn-toggle>
           <v-tooltip right v-if="editorOrWhiteboard == 1">
             <template v-slot:activator="{ on, attrs }">
@@ -357,13 +358,18 @@
             </template>
             <span>My Whiteboards</span>
           </v-tooltip>
-          <div class="editor-wrapper" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
-            <vue-editor class="editor" id="editor"
+          <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
+            <Loading v-if="!showEditor" style="align-items: start;" />
+            <Editor class="editor" v-if="showEditor"
               :disabled="(user.user_id == currentNote.userid) ? false : true"
-              @text-change="saveNotes()"
               v-model="noteText"
-            >
-            </vue-editor>
+              :api-key="tinyApi"
+              @onKeyDown.ctrl.space="quickWord"
+              :init="{
+                plugins: 'lists link image media table code help wordcount',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+              }"
+            />
           </div>
           <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
             <div id="painterro"></div>
@@ -384,12 +390,12 @@ import Tools from '~/components/Tools.vue'
 import ShareNote from '~/components/ShareNote.vue'
 import QuickWord from '~/components/QuickWord.vue'
 import Whiteboards from '~/components/Whiteboards.vue'
-import { VueEditor } from "vue2-editor"
 import Shepherd from 'shepherd.js'
 import { openaiGenerateStudyTools } from '~/store/openai'
 import { debounce } from 'lodash'
 import Loading from '~/components/Loading.vue'
 import Painterro from 'painterro'
+import Editor from '@tinymce/tinymce-vue'
 
 export default {
   name: 'NotePage',
@@ -399,7 +405,7 @@ export default {
       Tools,
       ShareNote,
       QuickWord,
-      VueEditor,
+      Editor,
       Loading,
       Whiteboards
   },
@@ -428,6 +434,9 @@ export default {
       this.noteTour.start()
       this.noteTour.on('complete', this.onboardingComplete)
     }
+    this.$nextTick(() => {
+      this.showEditor = true
+    })
   },
 
   created () {
@@ -436,6 +445,7 @@ export default {
 
   data () {
     return {
+        showEditor: false,
         isGeneratingTools: false,
         generatingStatus: '',
         showLinks: false,
@@ -444,6 +454,7 @@ export default {
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
         editNote: false,
+        tinyApi: process.env.NUXT_ENV_TINY_API_KEY,
         newNoteName: JSON.parse(localStorage.getItem('note')).notename,
         windowWidth: window.innerWidth,
         noteTour: new Shepherd.Tour({
@@ -453,10 +464,15 @@ export default {
           }
         }),
         ptro: null,
+        wordsToRemove: []
     }
   },
 
   watch: {
+    noteText(newValue) {
+      this.saveNotes(newValue)
+    },
+
     editorOrWhiteboard(newValue, oldValue) {
       if (newValue == 1) {
         this.$nextTick(() => {
@@ -489,7 +505,10 @@ export default {
             let whiteboardObj = JSON.parse(currentWhiteboard)
             this.ptro.show(whiteboardObj.data)
           } else {
-            this.ptro.show()
+            if (this.whiteboards.length > 0) {
+              localStorage.setItem('current_whiteboard', JSON.stringify(this.whiteboards[this.whiteboards.length - 1]))
+              this.ptro.show(this.whiteboards[this.whiteboards.length - 1].data)
+            } else this.ptro.show()
           }
 
         });
@@ -579,9 +598,19 @@ export default {
         } else if (confirm('Are you ready to generate study tools? This will automatically create flash cards for you from your Flashcard Queue. This may take a minute to complete. Please do not refresh your page.')) {
           this.isGeneratingTools = true
           let words = []
-          this.preparedWords.forEach(word => {
-            words.push(word.word)
-          })
+
+          if (this.preparedWords.length <= 20) {
+            this.preparedWords.forEach(word => {
+              words.push(word.word)
+            })
+          } else {
+            for (let i = 0; i < 20; ++i) {
+              let word = this.preparedWords[i]
+              words.push(word.word)
+              this.wordsToRemove.push(word)
+            }
+          }
+
           if (words.length >= 10) {
             this.generatingStatus = 'Waiting for AI'
             const studyTools = await openaiGenerateStudyTools({
@@ -591,6 +620,7 @@ export default {
             if (!studyTools) {
               this.isGeneratingTools = false
               this.generatingStatus = ''
+              this.wordsToRemove = []
               alert('Something went wrong and no study tools were generated. Please try again.')
             } else {
               this.generatingStatus = 'Waiting for Database'
@@ -618,12 +648,21 @@ export default {
                 })
               }
 
-              this.clearPreparedWords()
+              if (this.preparedWords.length <= 20) {
+                await this.clearPreparedWords()
+              } else {
+                for (let i = 0; i < this.wordsToRemove.length; ++i) {
+                  await this.removePreparedWord(this.wordsToRemove[i])
+                }
+                this.wordsToRemove = []
+              }
+
               this.isGeneratingTools = false
               this.generatingStatus = ''
               alert(`Your study tools have been successfully generated. You can review them by clicking the \"Study Tools\" button.`)
             }
           } else {
+            this.wordsToRemove = []
             alert('You need at least 10 words in the queue before you can generate study tools.')
           }
         }
@@ -656,6 +695,20 @@ export default {
             ]
           },
           {
+            id: 'note-step-1.5',
+            text: 'The whiteboard tab gives you a canvas to take notes however you want! You can draw and add text, images, or shapes, all to create whatever kind of notes you need!',
+            attachTo: {
+              element: '#whiteboard-btn',
+              on: 'right'
+            },
+            buttons: [
+              {
+                text: 'Next',
+                action: this.noteTour.next
+              }
+            ]
+          },
+          {
             id: 'note-step-2',
             text: 'You can switch between different notes in the same collection here, or edit the name of your note by clicking the pencil icon on the right.',
             attachTo: {
@@ -671,7 +724,7 @@ export default {
           },
           {
             id: 'note-step-3',
-            text: 'This button will use AI to create flashcards for you from your Flashcard Queue. As a subscriber to the Premium membership, you can use this button 5 times every day.',
+            text: 'This button will use AI to create flashcards for you from your Flashcard Queue, taking 20 entries at a time. As a subscriber to the Premium membership, you can use this button 5 times every day.',
             attachTo: {
               element: '#ai-btn',
               on: 'bottom'
@@ -713,7 +766,7 @@ export default {
           },
           {
             id: 'note-step-6',
-            text: 'As you take notes, add vocab words to the Flashcard Queue to prepare for AI flashcard generation. To do this, press \'Ctrl + Space\' while inside your text editor. You can have up to 20 entries in the Queue at a time before you need to generate.',
+            text: 'As you take notes, add vocab words to the Flashcard Queue to prepare for AI flashcard generation. To do this, press \'Ctrl + Space\' while inside your text editor. When you click \'Generate Study Tools\', it will take the top 20 from here.',
             attachTo: {
               element: '#queue-area',
               on: 'bottom'
@@ -856,10 +909,11 @@ export default {
 }
 
 .editor-wrapper {
-  /* background-color: #ffffec; */
-  background-image: linear-gradient(to top right, #ffffec, #f9f9f9);
-  height: 600px;
-  overflow: scroll;
+  height: 80vh;
+}
+
+.editor {
+  height: 100%;
 }
 
 .canvas-wrapper {
@@ -872,10 +926,6 @@ export default {
   width: 100%;
   height: 100%;
   z-index: 1;
-}
-
-.editor {
-  margin-top: 5px;
 }
 
 .small-header {

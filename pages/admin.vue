@@ -425,7 +425,7 @@ export default {
     },
 
     deleteNote(n) {
-      if (confirm(`Are you sure you want to delete ${n.notename}? All words, questions, links, and study plans will also be deleted.`)) {
+      if (confirm(`Are you sure you want to delete ${n.notename}? All flashcards, links, files, whiteboards, and study plans will also be deleted.`)) {
         this.$store.dispatch('users/deleteNote', {
           noteid: n.noteid
         })

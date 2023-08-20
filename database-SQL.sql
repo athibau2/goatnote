@@ -71,16 +71,6 @@ CREATE TABLE study_plan
   FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
 );
 
-CREATE TABLE questions
-(
-  questionid SERIAL NOT NULL,
-  questiontext TEXT NOT NULL,
-  answer TEXT,
-  noteid SERIAL NOT NULL,
-  PRIMARY KEY (questionid),
-  FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
-);
-
 CREATE TABLE links
 (
   linkid SERIAL NOT NULL,
@@ -106,17 +96,6 @@ CREATE TABLE whiteboards
   noteid SERIAL NOT NULL,
   PRIMARY KEY (boardid),
   FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
-);
-
-CREATE TABLE words
-(
-  wordid SERIAL NOT NULL,
-  vocabword TEXT NOT NULL,
-  definition TEXT NOT NULL,
-  noteid SERIAL NOT NULL,
-  PRIMARY KEY (wordid),
-  FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE,
-  UNIQUE (vocabword)
 );
 
 CREATE TABLE flashcards
@@ -228,16 +207,6 @@ create or replace view see_whiteboards as
   select * from whiteboards
   order by boardid asc;
   -- this will be filtered later
-
-create or replace view see_words as
- 	select * from words
-	order by wordid asc;
-	--this will be filtered later
-
-create or replace view see_questions as
- 	select * from questions
-	order by questionid asc;
-	--this will be filtered later
 
 create or replace view see_links as
  	select * from links

@@ -141,23 +141,23 @@ export default {
       introCards: [
         {
           img: 'note.png',
-          description: 'Create collections to organize your notes. In your notes, you have a dedicated space for vocab words, study questions, helpful links, and study plans!',
+          description: 'Create collections to organize your notes. In your notes, you have a dedicated space for flashcards, whiteboard drawings, files, helpful links, and study plans!',
         },
         {
           img: 'goatnotes-ai.gif',
-          description: 'AI is your study buddy. You can utilize AI to generate vocab words and study questions based off your notes!',
+          description: 'AI is your study buddy. You can utilize our AI tools to generate flashcards based off your notes!',
         },
         {
           img: 'goatnotes-study.gif',
-          description: 'When it\'s time to study, the study mode button changes the layout of your notes page and lets you review your vocab words and study questions as flashcards!',
+          description: 'When it\'s time to study, the study mode button changes the layout of your Study Tools to help you study your flashcards!',
         },
         {
           img: 'share.png',
-          description: 'Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add study resources!',
+          description: 'Sharing notes is even easier now! Share entire collections or just individual notes with those in your organization; they can even add to your study tools!',
         },
         {
           img: 'shared-with-me.png',
-          description: 'The Shared With Me page shows all of the collections and notes you have access to. You can\'t change the typed notes, but you can add to and study the vocab words and study questions!',
+          description: 'The Shared With Me page shows all of the collections and notes you have access to. You can\'t change the typed notes, but you can add to and study the flashcards and other Study Tools!',
         },
       ],
       windowWidth: window.innerWidth,

@@ -6,8 +6,7 @@
             <v-text-field
                 autofocus
                 v-model="word"
-                :label="preparedWords.length == 20 ? 'Max list hit, please generate study tools' : 'Press Enter when finished or Esc key to exit'"
-                :disabled="preparedWords.length == 20"
+                label="Press Enter when finished or Esc key to exit"
             ></v-text-field>
         </div>
     </v-dialog>

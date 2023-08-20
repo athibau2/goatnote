@@ -42,7 +42,6 @@ export default {
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
     '@nuxtjs/dotenv',
-    'vue2-editor/nuxt',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules

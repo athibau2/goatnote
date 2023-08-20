@@ -270,7 +270,10 @@
               <span>Share</span>
             </v-tooltip>
             <v-btn text class="flat-btn" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
-            <v-btn class="good-btn" @click="openNote(note.noteid)">Open</v-btn>
+            <v-btn class="good-btn" @click="openNote(note.noteid)" :disabled="loadingNote">
+              <Loading v-if="loadingNote && noteBeingOpened == note.noteid" />
+              {{loadingNote && noteBeingOpened == note.noteid ? null : 'Open'}}
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
@@ -304,6 +307,8 @@ export default {
 
   data () {
     return {
+      loadingNote: false,
+      noteBeingOpened: null,
       newOrgName: "",
       newCollName: "",
       newNoteName: "",
@@ -404,6 +409,8 @@ export default {
     },
 
     openNote (noteid) {
+      this.noteBeingOpened = noteid
+      this.loadingNote = true
       this.$store.dispatch('users/openNote', {
         noteid: noteid
       })
@@ -468,7 +475,7 @@ export default {
     },
 
     deleteNote(noteid, collectionid) {
-      if (confirm("Are you sure you want to delete this note? This will also delete all words, questions, and links inside this note.")) {
+      if (confirm("Are you sure you want to delete this note? This will also delete all flashcards, files, whiteboards, and links inside this note.")) {
         this.$store.dispatch('users/deleteNote', {
           noteid: noteid,
           collectionid: collectionid
