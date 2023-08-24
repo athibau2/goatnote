@@ -78,6 +78,16 @@ export default {
   name: 'PlansPage',
   middleware: "auth",
 
+  head() {
+    return {
+      title: 'Study Plans - GOAT Notes',
+      meta: [
+        { hid: 'plans-description', name: 'description', content: 'See all your study plans in GOAT Notes' },
+        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, plans, reminder' }
+      ]
+    }
+  },
+
   mounted () {
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     this.$store.dispatch('users/getAllPlans')

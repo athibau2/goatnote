@@ -401,6 +401,16 @@ export default {
   name: 'NotePage',
   middleware: "auth",
 
+  head() {
+    return {
+      title: 'Note - GOAT Notes',
+      meta: [
+        { hid: 'note-description', name: 'description', content: 'Use AI to take better notes and study more effectively in GOAT Notes.' },
+        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, whiteboard, flashcards, tools' }
+      ]
+    }
+  },
+
   components: {
       Tools,
       ShareNote,

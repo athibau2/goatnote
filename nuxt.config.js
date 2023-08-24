@@ -18,7 +18,7 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
+      { hid: 'description', name: 'description', content: 'Note-taking and studying tools with artificial intelligence (AI)' },
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
@@ -49,7 +49,13 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
     '@nuxtjs/dotenv',
+    '@nuxtjs/sitemap'
   ],
+
+  sitemap: {
+    hostname: 'https://goatnotes.net',
+    // Add any additional configuration as needed
+  },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {

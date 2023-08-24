@@ -98,6 +98,16 @@ export default {
   name: 'SharedPage',
   middleware: "auth",
 
+  head() {
+    return {
+      title: 'Shared Notes - GOAT Notes',
+      meta: [
+        { hid: 'shared-description', name: 'description', content: 'See collections and notes that have been shared with you in GOAT Notes' },
+        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, share, collaborate' }
+      ]
+    }
+  },
+
   async mounted () {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/loadSharedWithMe')

@@ -293,6 +293,16 @@ export default {
   name: 'IndexPage',
   middleware: "auth",
 
+  head() {
+    return {
+      title: 'Home - GOAT Notes',
+      meta: [
+        { hid: 'home-description', name: 'description', content: 'GOAT Notes home page; view your organizations, collections, and notes' },
+        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, home page, organization' }
+      ]
+    }
+  },
+
   mounted() {
     this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     this.$store.dispatch('users/orgs')

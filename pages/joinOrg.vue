@@ -70,6 +70,16 @@ export default {
   name: 'JoinOrgPage',
   middleware: "auth",
 
+  head() {
+    return {
+      title: 'Join Organization - GOAT Notes',
+      meta: [
+        { hid: 'join-org-description', name: 'description', content: 'Find an organization to join in GOAT Notes' },
+        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, organization' }
+      ]
+    }
+  },
+
   async mounted () {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/loadPublicOrgs')

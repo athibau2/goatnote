@@ -98,6 +98,16 @@ export default {
   name: 'AccountPage',
   middleware: "auth",
 
+  head() {
+    return {
+      title: 'Account - GOAT Notes',
+      meta: [
+        { hid: 'account-description', name: 'description', content: 'See your account details on GOAT Notes' },
+        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, account settings' }
+      ]
+    }
+  },
+
   async mounted () {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/userData')

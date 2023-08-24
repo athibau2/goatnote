@@ -154,6 +154,16 @@ export default {
   layout: 'noauth',
   mixins: [aosMixin],
 
+  head() {
+    return {
+      title: 'Login - GOAT Notes',
+      meta: [
+        { hid: 'login-description', name: 'description', content: 'Login to your account on GOAT Notes' },
+        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, login, landing page, signup' }
+      ]
+    }
+  },
+
   created() {
     window.addEventListener('resize', this.resizeHandler)
   },
