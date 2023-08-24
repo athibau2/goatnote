@@ -83,6 +83,7 @@ export default {
   async mounted () {
     await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/userData')
+    await this.$store.dispatch('users/getSupabaseUser')
     this.$store.dispatch('users/allColls')
     if (!this.userData.onboarded) {
       this.addSteps()

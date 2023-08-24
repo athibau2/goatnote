@@ -49,19 +49,21 @@
                       </template>
                       <span>Delete Plan</span>
                     </v-tooltip>
-                    <v-tooltip bottom>
+                    <v-tooltip bottom v-if="!loading || selected != i">
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn
                           icon
                           v-bind="attrs"
                           v-on="on"
-                          @click="openNote(p.noteid)"
+                          @click="openNote(p.noteid, i)"
+                          :disabled="loading"
                         >
                           <v-icon>mdi-chevron-right-circle</v-icon>
                         </v-btn>
                       </template>
                       <span>Study</span>
                     </v-tooltip>
+                    <Loading v-if="loading && selected == i" />
                 </v-card-actions>
             </v-card>
           </v-row>
@@ -71,6 +73,7 @@
 
 <script>
 import { getJwtToken, getUserIdFromToken } from "../store/auth"
+import Loading from '~/components/Loading.vue'
 export default {
   name: 'PlansPage',
   middleware: "auth",
@@ -84,9 +87,15 @@ export default {
     window.addEventListener('resize', this.resizeHandler)
   },
 
+  components: {
+    Loading,
+  },
+
   data () {
     return {
-      windowWidth: window.innerWidth
+      windowWidth: window.innerWidth,
+      loading: false,
+      selected: null,
     }
   },
 
@@ -102,10 +111,13 @@ export default {
         })
     },
 
-    openNote (noteid) {
-      this.$store.dispatch('users/openNote', {
+    async openNote (noteid, i) {
+      this.selected = i
+      this.loading = true
+      await this.$store.dispatch('users/openNote', {
         noteid
       })
+      this.loading = false
     },
   },
 

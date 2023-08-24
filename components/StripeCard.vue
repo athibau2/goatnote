@@ -17,10 +17,10 @@
                     </v-card-text>
                     <v-btn class="payment-btn"
                         elevation="1"
-                        @click="signup(product.paymentLink)"
-                        :disabled="!consented || !verifiedAge"
+                        @click="signup(product.paymentLink, i)"
+                        :disabled="!consented || !verifiedAge || loading"
                     >
-                        Subscribe
+                        <Loading v-if="loading && selected == i" /> {{loading ? selected == i ? null : 'Subscribe' : 'Subscribe'}}
                     </v-btn>
                     <v-card-text>
                         <h4>Features:</h4>
@@ -35,27 +35,39 @@
 </template>
 
 <script>
+import Loading from '~/components/Loading.vue'
 export default {
    name: 'StripeCard',
 
+   components: {
+        Loading,
+    },
+
    data () {
     return {
-        products: this.$store.state.users.products
+        products: this.$store.state.users.products,
+        selected: null,
+        loading: false,
     }
    },
 
    methods: {
-    async signup(link) {
+    async signup(link, i) {
         if (this.signupInfo.firstname === "" || this.signupInfo.lastname === ""
             || this.signupInfo.email === "" || this.signupInfo.password === "") {
             alert('No field may be left empty')
+        } else if (this.signupInfo.password.length < 6) {
+            alert('Your password must be at least 6 characters')
         } else {
+            this.selected = i
+            this.loading = true
             const success = await this.$store.dispatch('users/signup', {
                 firstname: this.signupInfo.firstname,
                 lastname: this.signupInfo.lastname,
                 email: this.signupInfo.email,
                 password: this.signupInfo.password
             })
+            this.loading = false
             link ? success ? window.location.href = `${link}?prefilled_email=${this.encodedEmail}` : null : null
         }
     },

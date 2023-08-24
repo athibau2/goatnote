@@ -6,7 +6,6 @@ CREATE TABLE "user"
   email text NOT NULL,
   password text NOT NULL,
   isadmin BOOLEAN DEFAULT false,
-  loggedin BOOLEAN,
   onboarded BOOLEAN DEFAULT false,
   noteonboarded BOOLEAN DEFAULT false,
   subscriptionstatus text NOT NULL DEFAULT 'inactive',
@@ -424,9 +423,8 @@ ALTER TABLE <table_name> ADD CONSTRAINT cascade_delete
 	FOREIGN KEY (<id>) REFERENCES <table_name> (<id>) ON DELETE CASCADE;
 
 -- Use SQL to create a policy.
-create policy "Public Access"
-  on storage.buckets for select
-  using ( bucket_id = 'goatnotes-files' );
+ALTER TABLE storage.buckets DISABLE ROW LEVEL SECURITY;
+ALTER TABLE storage.objects DISABLE ROW LEVEL SECURITY;
 
 create policy "Public Access"
   on storage.buckets for select;

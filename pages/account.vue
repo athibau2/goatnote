@@ -50,7 +50,7 @@
               <v-card-title class="name">Current Subscription</v-card-title>
               <v-card-text class="card-text">
                 {{ userData.subscriptionstatus == 'active' ?
-                  'Premium Membership &ndash; $3.99 / month' : 'Basic Plan &ndash; Free'
+                  'Premium Membership &ndash; '+ products[1].price : 'Basic Plan &ndash; '+ products[0].price
                 }}
                 <ul class="feature-list">
                   <li v-for="(feature, i) in userData.subscriptionstatus == 'inactive' ? products[0].features : products[1].features" :key="i">
@@ -116,14 +116,15 @@ export default {
       show2: false,
       portal: stripePortal,
       payLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
-      products: this.$store.state.users.products,
     }
   },
 
   methods: {
     updatePass () {
       if (this.currentPass === "" || this.newPass === "") alert('No field may be left empty')
-      else {
+      else if (this.newPass.length < 6) {
+        alert('Your password must be at least 6 characters')
+      } else {
         this.$store.dispatch('users/updatePass', {
           newPass: this.newPass,
           currentPass: this.currentPass
@@ -149,6 +150,10 @@ export default {
 
     userData () {
         return this.$store.state.users.userData
+    },
+
+    products () {
+      return this.$store.state.users.products
     },
 
     notifSettings: {

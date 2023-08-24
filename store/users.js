@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { supabase, supabaseStorage, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
+import { supabase, supabaseService, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
 import randomstring from "randomstring"
@@ -7,6 +7,7 @@ import randomstring from "randomstring"
 export const state = () => ({
     user: getJwtToken(),
     userData: [],
+    supabaseUser: null,
     orgs: [],
     allColls: [],
     collections: [],
@@ -60,7 +61,7 @@ export const state = () => ({
                 'Unlimited flashcards',
                 'Unlimited links',
                 'Unlimited whiteboards',
-                'Up to 3 file uploads per note',
+                'Up to 2 file uploads per note',
                 'Share notes and collections with up to 3 people',
             ]
         },
@@ -71,8 +72,8 @@ export const state = () => ({
             features: [
                 'Everything in Basic, plus...',
                 'Create flashcards with AI',
+                'Up to 5 file uploads per note',
                 'Unlimited notes and collections sharing',
-                'External notes sharing',
             ]
         },
     ],
@@ -123,6 +124,10 @@ export const mutations = {
 
     setUserData(state, data) {
         state.userData = data
+    },
+
+    setSupabaseUser(state, data) {
+        state.supabaseUser = data
     },
 
     setOrgs(state, data) {
@@ -338,22 +343,27 @@ export const actions = {
                     'code': code,
                     'codeexpiration': `${new Date(expiration).toDateString()} at ${new Date(expiration).toLocaleTimeString()}`
                 }
-                await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                        'Type': 'reset-pass'
-                    },
-                    body: JSON.stringify(params)
-                }).then(async function(response) {
-                    if (response) {
-                        alert(`Check your email and enter the code in the space below. The code will expire in 15 minutes.`)
-                        await commit('setResetCode', data[0])
-                    } else {
-                        console.log('Failed to send email');
-                    }
-                })
+                try {
+                    await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',
+                            'Type': 'reset-pass'
+                        },
+                        body: JSON.stringify(params)
+                    }).then(async function(response) {
+                        if (response) {
+                            alert(`Check your email and enter the code in the space below. The code will expire in 15 minutes.`)
+                            await commit('setResetCode', data[0])
+                        } else {
+                            console.log('Failed to send email');
+                        }
+                    })
+                } catch(err) {
+                    console.log(err)
+                    alert('Something went wrong, please try again.')
+                }
             } else if (error) {
                 console.log(error)
                 if (status === 409) {
@@ -1397,6 +1407,12 @@ export const actions = {
         }
     },
 
+    async updateSupabasePass({ commit, dispatch }, { newPass }) {
+        const { data, error } = await supabase.auth.updateUser({
+            password: newPass
+        })
+    },
+
     async updatePass({ dispatch, state }, { newPass, currentPass }) {
         // const response = await dispatch('getUser', { email: state.user.email })
         // if (response != null) {
@@ -1408,6 +1424,10 @@ export const actions = {
                     })
                     .eq('userid', state.user.user_id)
                 if (!error) {
+                    await dispatch('updateSupabasePass', {
+                        newPass: newPass
+                    })
+                    await dispatch('getSupabaseUser')
                     await dispatch('userData')
                     alert("Your password has been updated")
                 } else if (error) {
@@ -1439,7 +1459,7 @@ export const actions = {
     },
 
     async getFiles({ dispatch, commit, state }, { noteid }) {
-        const { data, error, status } = await supabaseStorage.storage.from(state.user.user_id)
+        const { data, error, status } = await supabaseService.storage.from(state.user.user_id)
             .list(`${noteid}/`)
         if (!error) {
             for (let i = 0; i < data.length; ++i) {
@@ -1452,7 +1472,7 @@ export const actions = {
     },
 
     async getFileURL({ state }, { file, noteid }) {
-        const { data, error } = supabaseStorage.storage.from(state.user.user_id)
+        const { data, error } = supabaseService.storage.from(state.user.user_id)
             .getPublicUrl(`${noteid}/${file.name}`);
         if (!error) {
             file.url = data.publicUrl
@@ -1466,7 +1486,7 @@ export const actions = {
         let fail = false
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            const { data, error, status } = await supabaseStorage.storage
+            const { data, error, status } = await supabaseService.storage
                 .from(userid)
                 .upload(`${noteid}/${file.name}`, file)
             if (error) fail = true
@@ -1475,8 +1495,27 @@ export const actions = {
         await dispatch('getFiles', { noteid: noteid })
     },
 
+    async deleteAllFiles({ state }, { noteid }) {
+        const { data, error } = await supabaseService.storage.from(state.user.user_id).remove([`${noteid}/`])
+    },
+
+    async deleteBucket({ state }) {
+        async function emptyIt() {
+            const { data, error } = await supabase
+                .storage
+                .emptyBucket(state.user.user_id)
+        }
+        async function deleteIt() {
+            const { data, error } = await supabase
+                .storage
+                .deleteBucket(state.user.user_id)
+        }
+        await emptyIt()
+        await deleteIt()
+    },
+
     async removeFile({ dispatch }, { noteid, filename, userid }) {
-        const { data, error } = await supabaseStorage.storage.from(userid)
+        const { data, error } = await supabaseService.storage.from(userid)
             .remove([`${noteid}/${filename}`])
         if (!error) {
             await dispatch('getFiles', { noteid: noteid })
@@ -1489,9 +1528,9 @@ export const actions = {
     async createBucket({ dispatch }, { email }) {
         const user = await dispatch('getUser', { email: email })
         if (user) {
-            const { data, error, status } = await supabaseStorage.storage.createBucket(`${user[0].userid}`, {
+            const { data, error, status } = await supabaseService.storage.createBucket(`${user[0].userid}`, {
                 public: true,
-                fileSizeLimit: 2048
+                fileSizeLimit: 1048576
             })
             if (!error) {
                 return true
@@ -1515,15 +1554,23 @@ export const actions = {
             password: await encryptPassword(password)
         })
         if (!error) {
-            await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Type': 'welcome-email'
-                },
-                body: JSON.stringify(body)
+            await dispatch('supabaseSignup', {
+                email: email,
+                password: password
             })
+            try {
+                await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        'Type': 'welcome-email'
+                    },
+                    body: JSON.stringify(body)
+                })
+            } catch (err) {
+                console.log(err)
+            }
             await dispatch('createBucket', { email: email })
             await dispatch('login', {
                 email: email,
@@ -1564,9 +1611,14 @@ export const actions = {
                     password: res[0].password
                 })
                 if (!error && data.token != null) {
+                    await dispatch('supabaseLogin', {
+                        email: email,
+                        password: password
+                    })
                     setJwtToken(data.token)
                     await commit('setUser', getUserIdFromToken(getJwtToken()))
                     await dispatch('userData')
+                    await dispatch('getSupabaseUser')
                     await dispatch('orgs')
                     await commit('toggleSignupDialog', false)
                     await commit('toggleLoginDialog', false)
@@ -1583,7 +1635,7 @@ export const actions = {
         }
     },
 
-    async logout({ commit }) {
+    async logout({ commit, dispatch }) {
         await commit('setCollections', [])
         await commit('setNotes', [])
         await commit('currentNote', {})
@@ -1596,6 +1648,7 @@ export const actions = {
         localStorage.removeItem('links')
         localStorage.removeItem('studyPlans')
         localStorage.removeItem('current_whiteboard')
+        await dispatch('supabaseLogout')
         deleteJwtToken()
         await commit('setUser', null)
         this.$router.push('/login')
@@ -1639,24 +1692,78 @@ export const actions = {
         }
     },
 
-    async deleteAccount({ state }) {
+    async googleSignin({ dispatch, commit }) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: 'https://atlantic-somehow-basket-listprice.trycloudflare.com/login'
+            }
+        })
+        console.log(data)
+    },
+
+    async supabaseSignup({ commit, dispatch }, { email, password }) {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password
+        })
+        if (!error) return true
+        else if (error) return false
+    },
+
+    async supabaseLogin({ commit }, { email, password }) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        })
+        if (!error) return true
+        else if (error) return false
+    },
+
+    async supabaseLogout( { commit }) {
+        const { error } = await supabase.auth.signOut()
+        if (!error) {
+            await commit('setSupabaseUser', null)
+        }
+    },
+
+    async getSupabaseUser({ commit }) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+            await commit('setSupabaseUser', user)
+        }
+    },
+
+    async deleteSupabaseUser({ commit, state }) {
+        const { data, error } = await supabaseService.auth.admin.deleteUser(
+            state.supabaseUser.id
+        )
+    },
+
+    async deleteAccount({ dispatch, state }) {
         const { data, error, status } = await supabase.from('user')
             .delete()
             .eq('userid', state.user.user_id)
         if (!error) {
+            await dispatch('deleteBucket')
+            await dispatch('deleteSupabaseUser')
             const body = {
                 name: state.userData.firstname,
                 email: state.user.email
             }
-            await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Type': 'delete-email'
-                },
-                body: JSON.stringify(body)
-            })
+            try {
+                await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        'Type': 'delete-email'
+                    },
+                    body: JSON.stringify(body)
+                })
+            } catch(err) {
+                console.log(err)
+            }
             deleteJwtToken()
             this.$router.push('/login')
             alert("Your account has been deleted")

@@ -42,6 +42,18 @@
                     </v-text-field>
                     <center>
                         <NuxtLink to="/forgot-password">Forgot Password</NuxtLink>
+                        <div>
+                            <v-btn class="flat-btn"
+                                elevation="1"
+                                style="margin-top: 20px; font-size: 14px !important;"
+                                @click="signInWithGoogle()"
+                                :disabled="loadingGoogle"
+                            >
+                                <img src="https://static-00.iconduck.com/assets.00/google-icon-2048x2048-czn3g8x8.png" height="25px" />
+                                &ensp;
+                                <Loading v-if="loadingGoogle" /> {{loadingGoogle ? null : 'Sign In With Google'}}
+                            </v-btn>
+                        </div>
                     </center>
                 </v-card-text>
                 <v-card-actions>
@@ -50,8 +62,9 @@
                     <v-btn nuxt
                         class="good-btn"
                         @click="login()"
+                        :disabled="loading"
                     >
-                        Sign In
+                        <Loading v-if="loading" /> {{loading ? null : 'Sign In'}}
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -60,8 +73,13 @@
 </template>
 
 <script>
+import Loading from '~/components/Loading.vue'
 export default {
     name: 'LoginDialog',
+
+    components: {
+        Loading,
+    },
 
     created() {
         window.addEventListener('resize', this.resizeHandler)
@@ -73,24 +91,34 @@ export default {
             email: "",
             password: "",
             show: false,
+            loading: false,
+            loadingGoogle: false,
             windowWidth: window.innerWidth,
         }
     },
 
     methods: {
-        login() {
+        async login() {
             if (this.email === "" || this.password === "") alert('No field may be left empty')
             else {
-                this.$store.dispatch('users/login', {
-                email: this.email,
-                password: this.password
+                this.loading = true
+                await this.$store.dispatch('users/login', {
+                    email: this.email,
+                    password: this.password
                 })
+                this.loading = false
             }
         },
 
         async switchToJoin() {
             await this.$store.commit('users/toggleLoginDialog', false)
             await this.$store.commit('users/toggleSignupDialog', true)
+        },
+
+        async signInWithGoogle() {
+            this.loadingGoogle = true
+            await this.$store.dispatch('users/googleSignin')
+            this.loadingGoogle = false
         },
 
         resizeHandler() {
