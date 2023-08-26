@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { stripePortal, getJwtToken, getUserIdFromToken } from "../store/auth"
+import { stripePortal } from "../store/auth"
 import StripeCard from '~/components/StripeCard.vue'
 
 export default {
@@ -106,12 +106,6 @@ export default {
         { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, account settings' }
       ]
     }
-  },
-
-  async mounted () {
-    await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
-    await this.$store.dispatch('users/userData')
-    await this.$store.dispatch('users/orgs')
   },
 
   components: {
@@ -154,10 +148,6 @@ export default {
   },
 
   computed: {
-    user () {
-      return this.$store.state.users.user
-    },
-
     userData () {
         return this.$store.state.users.userData
     },
@@ -177,7 +167,7 @@ export default {
     },
 
     encodedEmail () {
-      return encodeURIComponent(this.user.email)
+      return encodeURIComponent(this.userData.email)
     }
   }
 }

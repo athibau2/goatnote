@@ -153,6 +153,7 @@ export default {
   name: 'LoginPage',
   layout: 'noauth',
   mixins: [aosMixin],
+  middleware: "google",
 
   head() {
     return {
@@ -164,7 +165,7 @@ export default {
     }
   },
 
-  created() {
+  async created() {
     window.addEventListener('resize', this.resizeHandler)
   },
 
@@ -259,7 +260,15 @@ export default {
       set() {
         this.$store.commit('users/toggleSignupDialog', false)
       }
-    }
+    },
+
+    supabaseUser () {
+      return this.$store.state.users.supabaseUser
+    },
+
+    supabaseSession () {
+      return this.$store.state.users.supabaseSession
+    },
   },
 
 }

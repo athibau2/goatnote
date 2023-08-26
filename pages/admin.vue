@@ -293,7 +293,6 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
 export default {
   name: 'AdminPage',
   middleware: ["auth", "admin"],
@@ -305,7 +304,6 @@ export default {
   },
 
   async created () {
-    await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/adminLoadUsers')
     window.addEventListener('resize', () => {
       this.windowWidth = window.innerWidth
@@ -442,8 +440,8 @@ export default {
   },
 
   computed: {
-    user () {
-      return this.$store.state.users.user
+    userData () {
+      return this.$store.state.users.userData
     },
 
     adminUsers () {

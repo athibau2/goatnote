@@ -21,7 +21,7 @@
           @click="item.click"
           router
           exact
-          :disabled="item.title !== 'Admin' ? false : userData.isadmin ? false : true"
+          :disabled="item.title !== 'Admin' ? false : userData?.isadmin ? false : true"
         >
           <v-list-item-action>
             <v-icon>{{ item.icon }}</v-icon>
@@ -73,27 +73,22 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Shepherd from 'shepherd.js'
 import Footer from '~/components/Footer.vue'
 
 export default {
   name: 'DefaultLayout',
 
+  created () {
+    window.addEventListener('resize', this.resizeHandler)
+  },
+
   async mounted () {
-    await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
-    await this.$store.dispatch('users/userData')
-    await this.$store.dispatch('users/getSupabaseUser')
-    this.$store.dispatch('users/allColls')
     if (!this.userData.onboarded) {
       this.addSteps()
       this.tour.start()
       this.tour.on('complete', this.onboardingComplete)
     }
-  },
-
-  created () {
-    window.addEventListener('resize', this.resizeHandler)
   },
 
   components: {
@@ -103,7 +98,7 @@ export default {
   data () {
     return {
       fixed: false,
-      isadmin: this.$store.state.users.userData.isadmin,
+      isadmin: this.userData?.isadmin,
       items: [
         {
           icon: 'mdi-home',
@@ -130,7 +125,6 @@ export default {
           icon: 'mdi-account-cog',
           title: 'My Account',
           to: '/account',
-          click: this.loadUserData
         },
         {
           icon: 'mdi-account-key',
@@ -280,10 +274,6 @@ export default {
       this.$store.dispatch('users/logout')
     },
 
-    loadUserData () {
-        this.$store.dispatch('users/userData')
-    },
-
     loadOrgs () {
         this.$store.dispatch('users/orgs')
     },
@@ -296,14 +286,6 @@ export default {
 
     userData() {
       return this.$store.state.users.userData
-    },
-
-    orgs () {
-      return this.$store.state.users.orgs
-    },
-
-    allColls () {
-      return this.$store.state.users.allColls
     },
   }
 }

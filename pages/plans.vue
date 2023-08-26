@@ -72,7 +72,6 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Loading from '~/components/Loading.vue'
 export default {
   name: 'PlansPage',
@@ -89,7 +88,6 @@ export default {
   },
 
   mounted () {
-    this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     this.$store.dispatch('users/getAllPlans')
   },
 

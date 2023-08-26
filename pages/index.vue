@@ -41,7 +41,7 @@
       </v-tooltip>
     </span>
     <hr>
-    
+
     <!-- Creating a new org -->
     <v-col v-if="makingNewOrg" style="margin-top: 10px;">
       <v-row justify="center" align="center">
@@ -284,7 +284,6 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import ShareColl from "~/components/ShareColl.vue"
 import ShareNote from "~/components/ShareNote.vue"
 import Loading from '~/components/Loading.vue'
@@ -303,10 +302,8 @@ export default {
     }
   },
 
-  mounted() {
-    this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
-    this.$store.dispatch('users/orgs')
-    this.$store.dispatch('users/allColls')
+  async mounted() {
+    await this.$store.dispatch('users/orgs')
   },
 
   components: {
@@ -358,15 +355,9 @@ export default {
 
     newNote() {
       this.creating = true
-      if (this.allColls.length === 0) {
-        alert('You must first create a collection before you can create a note.')
-      }
-      else {
-        this.$store.commit('users/newOrg', false)
-        this.$store.commit('users/newCollection', false)
-        this.$store.commit('users/newNote', true)
-        this.$store.dispatch('users/allColls')
-      }
+      this.$store.commit('users/newOrg', false)
+      this.$store.commit('users/newCollection', false)
+      this.$store.commit('users/newNote', true)
     },
 
     async getSharedCollList (coll) {
@@ -507,8 +498,12 @@ export default {
   },
 
   computed: {
-    user () {
-      return this.$store.state.users.user
+    supabaseUser () {
+      return this.$store.state.users.supabaseUser
+    },
+
+    supabaseSession () {
+      return this.$store.state.users.supabaseSession
     },
 
     userData () {
@@ -517,10 +512,6 @@ export default {
 
     orgs () {
       return this.$store.state.users.orgs
-    },
-
-    allColls () {
-      return this.$store.state.users.allColls
     },
 
     collections () {

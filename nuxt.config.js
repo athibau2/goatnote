@@ -6,7 +6,7 @@ export default {
   server: {
     host: '0.0.0.0'
   },
-  middleware: ["auth", "admin"],
+  middleware: ["auth", "admin", "google"],
   ssr: false,
   
   head: {

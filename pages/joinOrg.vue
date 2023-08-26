@@ -65,7 +65,6 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
 export default {
   name: 'JoinOrgPage',
   middleware: "auth",
@@ -81,7 +80,6 @@ export default {
   },
 
   async mounted () {
-    await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/loadPublicOrgs')
   },
 

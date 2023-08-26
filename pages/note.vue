@@ -49,7 +49,7 @@
               </v-tooltip>
             </v-col>
 
-            <v-col :cols="windowWidth < 600 ? '12' : '7'" v-if="user.user_id == currentNote.userid">
+            <v-col :cols="windowWidth < 600 ? '12' : '7'" v-if="userData.userid == currentNote.userid">
                 <v-text-field v-if="editNote"
                   class="noteselector"
                   id="note-name"
@@ -165,7 +165,7 @@
             <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
               <Loading v-if="!showEditor" style="align-items: start;" />
               <Editor class="editor" v-if="showEditor"
-                :disabled="(user.user_id == currentNote.userid) ? false : true"
+                :disabled="(userData.userid == currentNote.userid) ? false : true"
                 v-model="noteText"
                 :api-key="tinyApi"
                 @onKeyDown.ctrl.space="quickWord"
@@ -188,7 +188,7 @@
             <div>
               <v-btn class="tool-btn" id="ai-btn"
                 @click="generateStudyTools()"
-                :disabled="(user.user_id == currentNote.userid ? false : true) || isGeneratingTools"
+                :disabled="(userData.userid == currentNote.userid ? false : true) || isGeneratingTools"
               >
                 <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : `&ensp;${generatingStatus}` }}
               </v-btn>
@@ -199,7 +199,7 @@
             <div id="note-step-2">
               <v-btn class="tool-btn" id="share-btn"
                 @click="getSharedNoteList(currentNote)"
-                :disabled="user.user_id == currentNote.userid ? false : true"
+                :disabled="userData.userid == currentNote.userid ? false : true"
               >
                 Share Note
               </v-btn>
@@ -258,7 +258,7 @@
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto" 
             @click="generateStudyTools()"
-            :disabled="(user.user_id == currentNote.userid ? false : true) || isGeneratingTools"
+            :disabled="(userData.userid == currentNote.userid ? false : true) || isGeneratingTools"
           >
             <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : null }}
           </v-btn>
@@ -273,7 +273,7 @@
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
             width="auto"
             @click="getSharedNoteList(currentNote)"
-            :disabled="user.user_id == currentNote.userid ? false : true"
+            :disabled="userData.userid == currentNote.userid ? false : true"
           >
             Share Note
           </v-btn>
@@ -361,7 +361,7 @@
           <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
             <Loading v-if="!showEditor" style="align-items: start;" />
             <Editor class="editor" v-if="showEditor"
-              :disabled="(user.user_id == currentNote.userid) ? false : true"
+              :disabled="(userData.userid == currentNote.userid) ? false : true"
               v-model="noteText"
               :api-key="tinyApi"
               @onKeyDown.ctrl.space="quickWord"
@@ -385,7 +385,6 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
 import Tools from '~/components/Tools.vue'
 import ShareNote from '~/components/ShareNote.vue'
 import QuickWord from '~/components/QuickWord.vue'
@@ -421,8 +420,6 @@ export default {
   },
 
   async mounted() {
-    await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
-    await this.$store.dispatch('users/userData')
     await this.$store.dispatch('users/orgs')
     await this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
     await this.$store.dispatch('users/notes', { collectionid: this.currentNote.collectionid })
@@ -872,10 +869,6 @@ export default {
       return this.$store.state.users.saving
     },
 
-    user () {
-      return this.$store.state.users.user
-    },
-
     userData () {
       return this.$store.state.users.userData
     },
@@ -901,7 +894,7 @@ export default {
     },
 
     encodedEmail () {
-      return encodeURIComponent(this.$store.state.users.user.email)
+      return encodeURIComponent(this.$store.state.users.userData.email)
     },
 
     whiteboards () {

@@ -1,13 +1,12 @@
-import { createClient } from "@supabase/supabase-js";
-import { supabase, supabaseService, deleteJwtToken, getJwtToken, getUserIdFromToken, setJwtToken } from "./auth";
+import { supabase, supabaseService } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
 import randomstring from "randomstring"
 
 export const state = () => ({
-    user: getJwtToken(),
-    userData: [],
+    userData: null,
     supabaseUser: null,
+    supabaseSession: null,
     orgs: [],
     allColls: [],
     collections: [],
@@ -118,16 +117,16 @@ export const mutations = {
         state.makingNewNote = data
     },
 
-    setUser(state, user) {
-        state.user = user
-    },
-
     setUserData(state, data) {
         state.userData = data
     },
 
     setSupabaseUser(state, data) {
         state.supabaseUser = data
+    },
+
+    setSupabaseSession(state, data) {
+        state.supabaseSession = data
     },
 
     setOrgs(state, data) {
@@ -595,10 +594,10 @@ export const actions = {
         }
     },
 
-    async userData({ commit, state }) {
+    async userData({ commit, state }, { email }) {
         const { data, error, status } = await supabase.from('see_personal_data')
             .select()
-            .eq('email', state.user.email)
+            .eq('email', email)
         if (!error) {
             await commit('setUserData', data[0])
         } else if (error) {
@@ -612,9 +611,9 @@ export const actions = {
             .update({
                 onboarded: true
             })
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
         if (!error) {
-            await dispatch('userData')
+            await dispatch('userData', { email: state.userData.email })
         } else if (error) {
             console.log(error)
             if (status === 404 || status === 400) {
@@ -628,9 +627,9 @@ export const actions = {
             .update({
                 noteonboarded: true
             })
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
         if (!error) {
-            await dispatch('userData')
+            await dispatch('userData', { email: state.userData.email })
         } else if (error) {
             console.log(error)
             if (status === 404 || status === 400) {
@@ -667,7 +666,7 @@ export const actions = {
     async joinOrg({ dispatch, state }, { orgid }) {
         const { data, error, status } = await supabase.from('part_of')
             .insert({
-                userid: state.user.user_id,
+                userid: state.userData.userid,
                 orgid: orgid
             })
         if (!error) {
@@ -738,7 +737,7 @@ export const actions = {
     async loadSharedColls({ commit, state }) {
         const { data, error, status } = await supabase.from('see_colls_shared_with_me')
             .select()
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
         if (!error) {
             await commit('collsSharedWithMe', data)
         } else if (error) {
@@ -750,7 +749,7 @@ export const actions = {
     async loadSharedNotes({ commit, state }) {
         const { data, error, status } = await supabase.from('see_notes_shared_with_me')
             .select()
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
         if (!error) {
             await commit('notesSharedWithMe', data)
         } else if (error) {
@@ -810,7 +809,7 @@ export const actions = {
             const { data, error, status } = await supabase.from('shared_collection')
                 .insert({
                     collectionid: collection.collectionid,
-                    ownerid: state.user.user_id,
+                    ownerid: state.userData.userid,
                     userid: users[i]
                 })
             if (!error) continue
@@ -833,7 +832,7 @@ export const actions = {
             const { data, error, status } = await supabase.from('shared_note')
                 .insert({
                     noteid: note.noteid,
-                    ownerid: state.user.user_id,
+                    ownerid: state.userData.userid,
                     userid: users[i]
                 })
             if (!error) continue
@@ -885,7 +884,7 @@ export const actions = {
             .insert({
                 collectionname: collectionname,
                 orgid: orgid,
-                userid: state.user.user_id
+                userid: state.userData.userid
             })
         if (!error) {
             await dispatch('collections', { orgid })
@@ -921,7 +920,7 @@ export const actions = {
         await commit('setNotes', [])
         const { data, error, status } = await supabase.from('see_orgs')
             .select()
-            .eq('email', state.user.email)
+            .eq('email', state.userData.email)
         if (!error) {
             await commit('setOrgs', data)
         } else if (error) {
@@ -933,7 +932,7 @@ export const actions = {
     async allColls({ commit, state }) {
         const { data, error, status } = await supabase.from('see_collections')
             .select()
-            .eq('email', state.user.email)
+            .eq('email', state.userData.email)
         if (!error) {
             await commit('allColls', data)
         } else if (error) {
@@ -947,7 +946,7 @@ export const actions = {
         await commit('setNotes', [])
         const { data, error, status } = await supabase.from('see_collections')
             .select()
-            .eq('email', state.user.email)
+            .eq('email', state.userData.email)
             .eq('orgid', orgid)
         if (!error) {
             await commit('setCollections', data)
@@ -999,7 +998,7 @@ export const actions = {
                 numaicalls: num,
                 lastaicall: date
             })
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
             .select()
         if (!error) {
             await commit('setUserData', data[0])
@@ -1034,7 +1033,7 @@ export const actions = {
             let temp = { ...data[0], 
                 "collectionname": state.currentNote.collectionname,
                 "orgid": state.currentNote.orgid,
-                "userid": state.user.user_id }
+                "userid": state.userData.userid }
             await commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
         } else if (error) {
@@ -1311,7 +1310,7 @@ export const actions = {
     async getAllPlans({ commit, state }) {
         const { data, error, status } = await supabase.from('see_all_plans')
             .select()
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
             .eq('studycompleted', false)
         if (!error) {
             for (let i = 0; i < data.length; ++i) {
@@ -1414,33 +1413,27 @@ export const actions = {
     },
 
     async updatePass({ dispatch, state }, { newPass, currentPass }) {
-        // const response = await dispatch('getUser', { email: state.user.email })
-        // if (response != null) {
-            // if (await matchPassword(currentPass, response[0].password)) {
-            if (await matchPassword(currentPass, state.userData.password)) {
-                const { data, error, status } = await supabase.from('user')
-                    .update({
-                        password: await encryptPassword(newPass)
-                    })
-                    .eq('userid', state.user.user_id)
-                if (!error) {
-                    await dispatch('updateSupabasePass', {
-                        newPass: newPass
-                    })
-                    await dispatch('getSupabaseUser')
-                    await dispatch('userData')
-                    alert("Your password has been updated")
-                } else if (error) {
-                    console.log(error)
-                    alert('Something went wrong, please try again.')
-                }
+        if (await matchPassword(currentPass, state.userData.password)) {
+            const { data, error, status } = await supabase.from('user')
+                .update({
+                    password: await encryptPassword(newPass)
+                })
+                .eq('userid', state.userData.userid)
+            if (!error) {
+                await dispatch('updateSupabasePass', {
+                    newPass: newPass
+                })
+                await dispatch('getSupabaseUser')
+                await dispatch('userData', { email: state.userData.email })
+                alert("Your password has been updated")
+            } else if (error) {
+                console.log(error)
+                alert('Something went wrong, please try again.')
             }
-            else {
-                alert("The current password you entered is incorrect")
-            }
-        // } else {
-        //     alert('Something went wrong, please try again.')
-        // }
+        }
+        else {
+            alert("The current password you entered is incorrect")
+        }
     },
 
     async updateNotifSettings({ commit, state }) {
@@ -1448,7 +1441,7 @@ export const actions = {
             .update({
                 notifsettings: !state.userData.notifsettings
             })
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
             .select()
         if (!error) {
             await commit('setUserData', data[0])
@@ -1459,7 +1452,7 @@ export const actions = {
     },
 
     async getFiles({ dispatch, commit, state }, { noteid }) {
-        const { data, error, status } = await supabaseService.storage.from(state.user.user_id)
+        const { data, error, status } = await supabaseService.storage.from(state.userData.userid)
             .list(`${noteid}/`)
         if (!error) {
             for (let i = 0; i < data.length; ++i) {
@@ -1472,7 +1465,7 @@ export const actions = {
     },
 
     async getFileURL({ state }, { file, noteid }) {
-        const { data, error } = supabaseService.storage.from(state.user.user_id)
+        const { data, error } = supabaseService.storage.from(state.userData.userid)
             .getPublicUrl(`${noteid}/${file.name}`);
         if (!error) {
             file.url = data.publicUrl
@@ -1496,19 +1489,19 @@ export const actions = {
     },
 
     async deleteAllFiles({ state }, { noteid }) {
-        const { data, error } = await supabaseService.storage.from(state.user.user_id).remove([`${noteid}/`])
+        const { data, error } = await supabaseService.storage.from(state.userData.userid).remove([`${noteid}/`])
     },
 
     async deleteBucket({ state }) {
         async function emptyIt() {
             const { data, error } = await supabase
                 .storage
-                .emptyBucket(state.user.user_id)
+                .emptyBucket(state.userData.userid)
         }
         async function deleteIt() {
             const { data, error } = await supabase
                 .storage
-                .deleteBucket(state.user.user_id)
+                .deleteBucket(state.userData.userid)
         }
         await emptyIt()
         await deleteIt()
@@ -1554,29 +1547,31 @@ export const actions = {
             password: await encryptPassword(password)
         })
         if (!error) {
-            await dispatch('supabaseSignup', {
+            const success = await dispatch('supabaseSignup', {
                 email: email,
                 password: password
             })
-            try {
-                await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                        'Type': 'welcome-email'
-                    },
-                    body: JSON.stringify(body)
+            if (success) {
+                try {
+                    await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',
+                            'Type': 'welcome-email'
+                        },
+                        body: JSON.stringify(body)
+                    })
+                } catch (err) {
+                    console.log(err)
+                }
+                await dispatch('createBucket', { email: email })
+                await dispatch('login', {
+                    email: email,
+                    password: password,
                 })
-            } catch (err) {
-                console.log(err)
+                return true
             }
-            await dispatch('createBucket', { email: email })
-            await dispatch('login', {
-                email: email,
-                password: password,
-            })
-            return true
         } else if (error) {
             if (status === 409) {
                 alert('An account already exists with that email.')
@@ -1606,26 +1601,16 @@ export const actions = {
         const res = await dispatch('getUser', { email: email })
         if (res != null && res.length != 0) {
             if (await matchPassword(password, res[0].password)) {
-                const { data, error, status } = await supabase.rpc('login', {
+                const success = await dispatch('supabaseLogin', {
                     email: email,
-                    password: res[0].password
+                    password: password
                 })
-                if (!error && data.token != null) {
-                    await dispatch('supabaseLogin', {
-                        email: email,
-                        password: password
-                    })
-                    setJwtToken(data.token)
-                    await commit('setUser', getUserIdFromToken(getJwtToken()))
-                    await dispatch('userData')
+                if (success) {
                     await dispatch('getSupabaseUser')
                     await dispatch('orgs')
                     await commit('toggleSignupDialog', false)
                     await commit('toggleLoginDialog', false)
                     this.$router.push('/')
-                } else if (error) {
-                    console.log(error)
-                    alert('Something went wrong, please try again.')
                 }
             } else {
                 alert('The password you entered was incorrect.')
@@ -1643,14 +1628,8 @@ export const actions = {
         await commit('newOrg', false)
         await commit('newCollection', false)
         await commit('newNote', false)
-        localStorage.removeItem('note')
-        localStorage.removeItem('collNotes')
-        localStorage.removeItem('links')
-        localStorage.removeItem('studyPlans')
-        localStorage.removeItem('current_whiteboard')
+        localStorage.clear()
         await dispatch('supabaseLogout')
-        deleteJwtToken()
-        await commit('setUser', null)
         this.$router.push('/login')
     },
 
@@ -1658,7 +1637,7 @@ export const actions = {
         const { data, error, status } = await supabase.from('part_of')
             .delete()
             .eq('orgid', orgid)
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
         if (!error) {
             await dispatch('orgs')
         } else if (error) {
@@ -1692,23 +1671,22 @@ export const actions = {
         }
     },
 
-    async googleSignin({ dispatch, commit }) {
+    async googleSignin({ dispatch }) {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: {
-                redirectTo: 'https://atlantic-somehow-basket-listprice.trycloudflare.com/login'
-            }
-        })
-        console.log(data)
+        });
     },
 
-    async supabaseSignup({ commit, dispatch }, { email, password }) {
+    async supabaseSignup({ commit }, { email, password }) {
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password
         })
         if (!error) return true
-        else if (error) return false
+        else if (error) {
+            console.log(error)
+            return false
+        }
     },
 
     async supabaseLogin({ commit }, { email, password }) {
@@ -1717,20 +1695,35 @@ export const actions = {
             password: password
         })
         if (!error) return true
-        else if (error) return false
+        else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+            return false
+        }
     },
 
     async supabaseLogout( { commit }) {
         const { error } = await supabase.auth.signOut()
         if (!error) {
             await commit('setSupabaseUser', null)
+            await commit('setSupabaseSession', null)
+            await commit('setUserData', null)
         }
     },
 
-    async getSupabaseUser({ commit }) {
+    async getSupabaseSession({ commit }) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+            await commit('setSupabaseSession', session)
+        }
+    },
+
+    async getSupabaseUser({ commit, dispatch }) {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
             await commit('setSupabaseUser', user)
+            await dispatch('getSupabaseSession')
+            await dispatch('userData', { email: user?.email })
         }
     },
 
@@ -1740,16 +1733,16 @@ export const actions = {
         )
     },
 
-    async deleteAccount({ dispatch, state }) {
+    async deleteAccount({ dispatch, commit, state }) {
         const { data, error, status } = await supabase.from('user')
             .delete()
-            .eq('userid', state.user.user_id)
+            .eq('userid', state.userData.userid)
         if (!error) {
             await dispatch('deleteBucket')
             await dispatch('deleteSupabaseUser')
             const body = {
                 name: state.userData.firstname,
-                email: state.user.email
+                email: state.userData.email
             }
             try {
                 await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
@@ -1764,7 +1757,10 @@ export const actions = {
             } catch(err) {
                 console.log(err)
             }
-            deleteJwtToken()
+            await commit('setSupabaseUser', null)
+            await commit('setSupabaseSession', null)
+            await commit('setUserData', null)
+            localStorage.clear()
             this.$router.push('/login')
             alert("Your account has been deleted")
         } else if (error) {
@@ -1774,20 +1770,8 @@ export const actions = {
     }
 }
 
-export const getters = {
-    isLoggedIn: state => {
-        return state.user
-    },
 
-    getOrgs: state => {
-        return state.orgs
-    },
-
-    getTypedNotes: state => {
-        return state.currentNote.typednotes
-    }
-}
-
+// External functions
 async function parseDate(date) {
     let prettyDate = ""
     const yearMonth = date.split('-')

@@ -93,7 +93,6 @@
 </template>
 
 <script>
-import { getJwtToken, getUserIdFromToken } from "../store/auth"
 export default {
   name: 'SharedPage',
   middleware: "auth",
@@ -109,7 +108,6 @@ export default {
   },
 
   async mounted () {
-    await this.$store.commit('users/setUser', getUserIdFromToken(getJwtToken()))
     await this.$store.dispatch('users/loadSharedWithMe')
   },
 
@@ -128,7 +126,7 @@ export default {
     async removeColl (coll) {
       await this.$store.dispatch('users/unshareColl', {
         collection: coll,
-        userid: this.user.user_id,
+        userid: this.userData.userid,
         type: "receiver"
       })
       this.selectedColl = null
@@ -137,7 +135,7 @@ export default {
     async removeNote (note) {
       this.$store.dispatch('users/unshareNote', {
         note: note,
-        userid: this.user.user_id,
+        userid: this.userData.userid,
         type: "receiver"
       })
     },
@@ -157,8 +155,8 @@ export default {
   },
 
   computed: {
-    user () {
-      return this.$store.state.users.user
+    userData () {
+      return this.$store.state.users.userData
     },
 
     collsSharedWithMe () {
