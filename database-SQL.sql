@@ -4,7 +4,6 @@ CREATE TABLE "user"
   firstname text NOT NULL,
   lastname text NOT NULL,
   email text NOT NULL,
-  password text NOT NULL,
   isadmin BOOLEAN DEFAULT false,
   onboarded BOOLEAN DEFAULT false,
   noteonboarded BOOLEAN DEFAULT false,
@@ -370,10 +369,10 @@ EXECUTE PROCEDURE trigger_set_last_modified_timestamp();
 
 
 CREATE OR REPLACE FUNCTION
-  public.signup(firstname text, lastname text, email text, "password" text) RETURNS VOID
+  public.signup(firstname text, lastname text, email text) RETURNS VOID
   AS $$
-    INSERT INTO "user" (firstname, lastname, email, "password") VALUES
-      (signup.firstname, signup.lastname, signup.email, signup.password);
+    INSERT INTO "user" (firstname, lastname, email) VALUES
+      (signup.firstname, signup.lastname, signup.email);
   $$ LANGUAGE sql SECURITY DEFINER;
 
 
@@ -416,7 +415,7 @@ GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO admins;
 
 GRANT EXECUTE ON FUNCTION
   public.login(text, text),
-  public.signup(text, text, text, text)
+  public.signup(text, text, text)
   TO anonymous;
 
 ALTER TABLE <table_name> ADD CONSTRAINT cascade_delete

@@ -7,9 +7,12 @@
                   {{userData.firstname}} {{userData.lastname}}
               </v-card-title>
               <v-card-subtitle class="subtitle">
-                  {{userData.email}}
+                {{userData.email}}
+                <p v-if="supabaseUser">
+                  Sign in provider:&ensp;{{providers?.join(', ')}}
+                </p>
               </v-card-subtitle>
-              <v-card-text>
+              <v-card-text v-if="providers?.includes('email')">
                 <v-text-field
                   class="selector"
                   dense
@@ -19,8 +22,8 @@
                   :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                   :type="show1 ? 'text' : 'password'"
                   @click:append="show1 = !show1"
-                  v-model="currentPass" 
-                  placeholder="Current Password"
+                  v-model="newPass" 
+                  placeholder="New Password"
                 >
                 </v-text-field>
                 <v-text-field
@@ -28,19 +31,20 @@
                   dense
                   solo
                   rounded
-                  background-color="light blue lighten-5"
+                  :background-color="passMatch ? 'light blue lighten-5' : 'light red lighten-3'"
                   :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                   :type="show2 ? 'text' : 'password'"
                   @click:append="show2 = !show2"
-                  v-model="newPass" 
-                  placeholder="New Password"
+                  @keypress.enter="updatePass()"
+                  v-model="confirmNewPass" 
+                  placeholder="Confirm New Password"
                 >
                 </v-text-field>
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
                 <v-btn text class="flat-btn" @click="deleteAccount()">Delete Account</v-btn>
-                <v-btn class="good-btn" @click="updatePass()">Update Password</v-btn>
+                <v-btn class="good-btn" v-if="providers?.includes('email')" @click="updatePass()">Update Password</v-btn>
               </v-card-actions>
             </v-card>
           </v-row>
@@ -114,7 +118,7 @@ export default {
 
   data () {
     return {
-      currentPass: "",
+      confirmNewPass: "",
       newPass: "",
       show1: false,
       show2: false,
@@ -125,15 +129,17 @@ export default {
 
   methods: {
     updatePass () {
-      if (this.currentPass === "" || this.newPass === "") alert('No field may be left empty')
-      else if (this.newPass.length < 6) {
+      if (!this.passMatch) {
+        alert('Passwords do not match.')
+      } else if (this.confirmNewPass === "" || this.newPass === "") {
+        alert('No field may be left empty')
+      } else if (this.newPass.length < 6) {
         alert('Your password must be at least 6 characters')
       } else {
         this.$store.dispatch('users/updatePass', {
           newPass: this.newPass,
-          currentPass: this.currentPass
         })
-        this.currentPass = ""
+        this.confirmNewPass = ""
         this.newPass = ""
       }
     },
@@ -152,8 +158,24 @@ export default {
         return this.$store.state.users.userData
     },
 
+    supabaseUser () {
+      return this.$store.state.users.supabaseUser
+    },
+
+    supabaseSession () {
+      return this.$store.state.users.supabaseSession
+    },
+
+    providers () {
+      return this.supabaseUser?.app_metadata?.providers
+    },
+
     products () {
       return this.$store.state.users.products
+    },
+
+    passMatch () {
+      return this.confirmNewPass == this.newPass
     },
 
     notifSettings: {

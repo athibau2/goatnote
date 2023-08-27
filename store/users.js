@@ -323,38 +323,32 @@ export const mutations = {
 }
 
 // actions should call mutations
-export const actions = {
-    async getPassResetCode({ commit, dispatch }, { email, code = randomstring.generate(6) }) {
+export const actions = {    
+    async sendMagicLink({ dispatch }, { email }) {
         const res = await dispatch('getUser', { email: email })
         if (res != null) {
-            const fifteenMin = 900000
-            const expiration = Date.now() + fifteenMin
-            const { data, error, status } = await supabase.from('reset_code')
-                .insert({
-                    code: code,
-                    codeemail: email,
-                    codeexpiration: expiration.toString()
-                }).select()
+            const { data, error } = await supabaseService.auth.admin.generateLink({
+                type: 'magiclink',
+                email: email
+            })
             if (!error) {
-                const params = {
-                    'name': res[0].firstname,
-                    'email': email,
-                    'code': code,
-                    'codeexpiration': `${new Date(expiration).toDateString()} at ${new Date(expiration).toLocaleTimeString()}`
-                }
                 try {
+                    const params = {
+                        'name': res[0].firstname,
+                        'email': email,
+                        'link': data.properties.action_link
+                    }
                     await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'Access-Control-Allow-Origin': '*',
-                            'Type': 'reset-pass'
+                            'Type': 'magic-link'
                         },
                         body: JSON.stringify(params)
                     }).then(async function(response) {
                         if (response) {
-                            alert(`Check your email and enter the code in the space below. The code will expire in 15 minutes.`)
-                            await commit('setResetCode', data[0])
+                            alert(`Follow the link sent to your email to recover your account. You can then reset your password in your account settings.`)
                         } else {
                             console.log('Failed to send email');
                         }
@@ -362,11 +356,6 @@ export const actions = {
                 } catch(err) {
                     console.log(err)
                     alert('Something went wrong, please try again.')
-                }
-            } else if (error) {
-                console.log(error)
-                if (status === 409) {
-                    await dispatch('getPassResetCode', { email: email })
                 }
             }
         } else if (res == null) {
@@ -1406,33 +1395,16 @@ export const actions = {
         }
     },
 
-    async updateSupabasePass({ commit, dispatch }, { newPass }) {
-        const { data, error } = await supabase.auth.updateUser({
+    async updatePass({ commit }, { newPass }) {
+        const { data: { user }, error } = await supabase.auth.updateUser({
             password: newPass
         })
-    },
-
-    async updatePass({ dispatch, state }, { newPass, currentPass }) {
-        if (await matchPassword(currentPass, state.userData.password)) {
-            const { data, error, status } = await supabase.from('user')
-                .update({
-                    password: await encryptPassword(newPass)
-                })
-                .eq('userid', state.userData.userid)
-            if (!error) {
-                await dispatch('updateSupabasePass', {
-                    newPass: newPass
-                })
-                await dispatch('getSupabaseUser')
-                await dispatch('userData', { email: state.userData.email })
-                alert("Your password has been updated")
-            } else if (error) {
-                console.log(error)
-                alert('Something went wrong, please try again.')
-            }
-        }
-        else {
-            alert("The current password you entered is incorrect")
+        if (!error) {
+            await commit('setSupabaseUser', user)
+            alert("Your password has been updated")
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
         }
     },
 
@@ -1534,6 +1506,39 @@ export const actions = {
         }
     },
 
+    async createUserFromGoogle({ dispatch, state }, { user }) {
+        let email = user.email
+        let firstname = user.user_metadata.full_name.split(' ')[0]
+        let lastname = user.user_metadata.full_name.split(' ')[1]
+
+        const body= {
+            'name': firstname,
+            'email': email
+        }
+        const { data, error, status } = await supabase.rpc('signup', {
+            firstname: firstname,
+            lastname: lastname,
+            email: email,
+        })
+
+        if (!error) {
+            try {
+                await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        'Type': 'welcome-email'
+                    },
+                    body: JSON.stringify(body)
+                })
+            } catch (err) {
+                console.log(err)
+            }
+            await dispatch('createBucket', { email: email })
+        }
+    },
+
     async signup({ dispatch }, { firstname, lastname, email, password }) {
         email = email.toLowerCase()
         const body= {
@@ -1544,7 +1549,6 @@ export const actions = {
             firstname: firstname,
             lastname: lastname,
             email: email,
-            password: await encryptPassword(password)
         })
         if (!error) {
             const success = await dispatch('supabaseSignup', {
@@ -1598,25 +1602,23 @@ export const actions = {
 
     async login({ dispatch, commit }, { email, password }) {
         email = email.toLowerCase()
-        const res = await dispatch('getUser', { email: email })
-        if (res != null && res.length != 0) {
-            if (await matchPassword(password, res[0].password)) {
-                const success = await dispatch('supabaseLogin', {
-                    email: email,
-                    password: password
-                })
-                if (success) {
-                    await dispatch('getSupabaseUser')
-                    await dispatch('orgs')
-                    await commit('toggleSignupDialog', false)
-                    await commit('toggleLoginDialog', false)
-                    this.$router.push('/')
-                }
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        })
+        if (!error) {
+            await dispatch('getSupabaseUser')
+            await dispatch('orgs')
+            await commit('toggleSignupDialog', false)
+            await commit('toggleLoginDialog', false)
+            this.$router.push('/')
+        } else if (error) {
+            console.log(error)
+            if (error.message == 'Invalid login credentials') {
+                alert('The provided email and/or password is invalid. Please check your details and try again.')
             } else {
-                alert('The password you entered was incorrect.')
+                alert('Something went wrong, please try again.')
             }
-        } else {
-            alert('No user found with that email.')
         }
     },
 
@@ -1685,19 +1687,6 @@ export const actions = {
         if (!error) return true
         else if (error) {
             console.log(error)
-            return false
-        }
-    },
-
-    async supabaseLogin({ commit }, { email, password }) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        })
-        if (!error) return true
-        else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
             return false
         }
     },

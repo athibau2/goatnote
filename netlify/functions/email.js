@@ -28,12 +28,12 @@ exports.handler = async function(event, context) {
         html: buildWelcomeEmail(payload.name),
       });
       break;
-    case 'reset-pass':
+    case 'magic-link':
       await resend.emails.send({
         from: 'GOAT Notes <management@deltaapps.dev>',
         to: payload.email,
-        subject: 'Password Reset',
-        html: buildResetEmail(payload.name, payload.code, payload.codeexpiration),
+        subject: 'Account Recovery',
+        html: buildRecoveryEmail(payload.name, payload.link),
       });
       break;
     case 'admin-email':
@@ -235,8 +235,8 @@ exports.handler = async function(event, context) {
     return emailTemplate;
   }
   
-  function buildResetEmail(name, code, codeExpiration) {
-    const resetMessage = `Dear ${name},<br><br>We have received a request to reset your password. Please use the following code: <strong>${code}</strong>.<br><br>This code will expire on ${codeExpiration}. If you did not request a password reset, please disregard this email.<br><br>Best regards,<br>Delta Apps, LLC`;
+  function buildRecoveryEmail(name, link) {
+    const recoveryMessage = `Dear ${name},<br><br>We have received a request to recover your account. Follow the link below to be logged back in to your account. If you did not submit this request, please disregard this email.<br><br>Best regards,<br>Delta Apps, LLC`;
     
     // Add HTML styling to the email template
     const emailTemplate = `
@@ -278,7 +278,6 @@ exports.handler = async function(event, context) {
       
             a {
               color: #007bff;
-              text-decoration: none;
             }
       
             span {
@@ -294,8 +293,11 @@ exports.handler = async function(event, context) {
           <div class="container">
             <center>
               <img class="logo" src="${process.env.NUXT_ENV_AWS_S3_BUCKET}/GN.png" />
-              <h1>Password Reset Request</h1>
-              <p>${resetMessage}</p>
+              <h1>Account Recovery Request</h1>
+              <p>${recoveryMessage}</p>
+              <a href="${link}">
+                Go to Account
+              </a>
             </center>
           </div>
         </body>

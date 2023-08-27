@@ -55,7 +55,7 @@
       </button>
       <v-spacer/>
 
-      <v-toolbar-title class="name-display" v-if="user !== null && user !== undefined">
+      <v-toolbar-title class="name-display" v-if="userData !== null && userData !== undefined">
         {{userData.firstname}} {{userData.lastname}}
       </v-toolbar-title>
       <v-btn to="/account" icon><v-icon size="30">mdi-account</v-icon></v-btn>
@@ -280,10 +280,6 @@ export default {
   },
 
   computed: {
-    user() {
-      return this.$store.state.users.user
-    },
-
     userData() {
       return this.$store.state.users.userData
     },
