@@ -252,7 +252,7 @@ export const mutations = {
     },
 
     googleSuccess(state, data) {
-        state.googleSuccess = date
+        state.googleSuccess = data
     },
 
     toggleSignUpWithGoogle(state) {
@@ -1516,7 +1516,7 @@ export const actions = {
         }
     },
 
-    async createUserFromGoogle({ dispatch, state }, { user }) {
+    async createUserFromGoogle({ commit, dispatch, state }, { user }) {
         let email = user.email
         let firstname = user.user_metadata.full_name.split(' ')[0]
         let lastname = user.user_metadata.full_name.split(' ')[1]
@@ -1619,7 +1619,6 @@ export const actions = {
         })
         if (!error) {
             await dispatch('getSupabaseUser')
-            await dispatch('orgs')
             await commit('toggleSignupDialog', false)
             await commit('toggleLoginDialog', false)
             this.$router.push('/')
@@ -1722,8 +1721,8 @@ export const actions = {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
             await commit('setSupabaseUser', user)
-            await dispatch('getSupabaseSession')
             await dispatch('userData', { email: user?.email })
+            await dispatch('getSupabaseSession')
         }
     },
 

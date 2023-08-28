@@ -78,13 +78,22 @@ import Footer from '~/components/Footer.vue'
 
 export default {
   name: 'DefaultLayout',
+  middleware: 'auth',
 
-  created () {
+  async created () {
+    await this.$store.dispatch('users/getSupabaseUser')
     window.addEventListener('resize', this.resizeHandler)
   },
 
   async mounted () {
-    if (!this.userData.onboarded) {
+    let link = JSON.parse(localStorage.getItem('purchase_link'))
+    if (this.googleSuccess && link != null) {
+      console.log()
+      window.location.href = `${link}?prefilled_email=${this.encodedEmail}`
+      await this.$store.commit('users/googleSuccess', false)
+      localStorage.removeItem('purchase_link')
+    }
+    if (!this.userData?.onboarded) {
       this.addSteps()
       this.tour.start()
       this.tour.on('complete', this.onboardingComplete)
@@ -275,7 +284,7 @@ export default {
     },
 
     loadOrgs () {
-        this.$store.dispatch('users/orgs')
+      this.$store.dispatch('users/orgs')
     },
   },
 
@@ -283,6 +292,16 @@ export default {
     userData() {
       return this.$store.state.users.userData
     },
+
+    googleSuccess () {
+      return this.$store.state.users.googleSuccess
+    },
+
+    encodedEmail () {
+      if (this.userData?.email) {
+        return encodeURIComponent(this.userData?.email)
+      }
+    }
   }
 }
 </script>

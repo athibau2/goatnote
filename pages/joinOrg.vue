@@ -67,7 +67,6 @@
 <script>
 export default {
   name: 'JoinOrgPage',
-  middleware: "auth",
 
   head() {
     return {

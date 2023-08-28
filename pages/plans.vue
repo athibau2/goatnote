@@ -75,7 +75,6 @@
 import Loading from '~/components/Loading.vue'
 export default {
   name: 'PlansPage',
-  middleware: "auth",
 
   head() {
     return {

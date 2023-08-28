@@ -167,7 +167,7 @@
 
     <!-- List of orgs -->
     <v-col v-if="level == 1">
-      <v-row>
+      <v-row v-if="orgs.length != 0">
         <v-card class="card" elevation="5" width="250" v-for="(org, i) in orgs" :key="i">
           <v-card-title class="card-title">
               {{org.orgname}}
@@ -290,7 +290,6 @@ import Loading from '~/components/Loading.vue'
 
 export default {
   name: 'IndexPage',
-  middleware: "auth",
 
   head() {
     return {
@@ -302,8 +301,10 @@ export default {
     }
   },
 
-  async mounted() {
-    await this.$store.dispatch('users/orgs')
+  async mounted () {
+    if (this.userData != null) {
+      await this.$store.dispatch('users/orgs')
+    }
   },
 
   components: {

@@ -295,7 +295,7 @@
 <script>
 export default {
   name: 'AdminPage',
-  middleware: ["auth", "admin"],
+  middleware: ["admin"],
 
   async updated () {
     if (this.$route.query.userid != undefined && this.$route.params.user != undefined) {

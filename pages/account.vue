@@ -43,7 +43,9 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
-                <v-btn text class="flat-btn" @click="deleteAccount()">Delete Account</v-btn>
+                <v-btn text class="flat-btn" :disabled="loading" @click="deleteAccount()">
+                  <Loading v-if="loading" /> {{loading ? null : 'Delete Account'}}
+                </v-btn>
                 <v-btn class="good-btn" v-if="providers?.includes('email')" @click="updatePass()">Update Password</v-btn>
               </v-card-actions>
             </v-card>
@@ -96,11 +98,10 @@
 
 <script>
 import { stripePortal } from "../store/auth"
-import StripeCard from '~/components/StripeCard.vue'
+import Loading from '~/components/Loading.vue'
 
 export default {
   name: 'AccountPage',
-  middleware: "auth",
 
   head() {
     return {
@@ -113,7 +114,7 @@ export default {
   },
 
   components: {
-    StripeCard
+    Loading
   },
 
   data () {
@@ -122,6 +123,7 @@ export default {
       newPass: "",
       show1: false,
       show2: false,
+      loading: false,
       portal: stripePortal,
       payLink: process.env.NUXT_ENV_STRIPE_PAYMENT_LINK,
     }
@@ -144,11 +146,13 @@ export default {
       }
     },
 
-    deleteAccount () {
+    async deleteAccount () {
       if (this.userData.subscriptionstatus == 'active') {
         alert('You cannot delete your account while subscribed to the Premium plan. Please first cancel your subscription, then delete your account.')
       } else if (confirm("Are you sure you want to delete your account?")) {
-        this.$store.dispatch('users/deleteAccount')
+        this.loading = true
+        await this.$store.dispatch('users/deleteAccount')
+        this.loading = false
       }
     }
   },

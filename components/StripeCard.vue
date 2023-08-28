@@ -56,34 +56,34 @@ export default {
         if (this.signUpWithGoogle) {
             this.selected = i
             this.loading = true
+            if (link != null) {
+                localStorage.setItem('purchase_link', JSON.stringify(link))
+            }
             await this.$store.dispatch('users/googleSignin')
             this.loading = false
-            link ? this.googleSuccess ? window.location.href = `${link}?prefilled_email=${this.encodedEmail}` : null : null
-        } else if (!this.signUpWithGoogle && (this.signupInfo.firstname === "" || this.signupInfo.lastname === ""
-            || this.signupInfo.email === "" || this.signupInfo.password === "")) {
-            alert('No field may be left empty')
-        } else if (this.signupInfo.password.length < 6) {
-            alert('Your password must be at least 6 characters')
         } else {
-            this.selected = i
-            this.loading = true
-            const success = await this.$store.dispatch('users/signup', {
-                firstname: this.signupInfo.firstname,
-                lastname: this.signupInfo.lastname,
-                email: this.signupInfo.email,
-                password: this.signupInfo.password
-            })
-            this.loading = false
-            link ? success ? window.location.href = `${link}?prefilled_email=${this.encodedEmail}` : null : null
+            if (this.signupInfo.firstname === "" || this.signupInfo.lastname === ""
+                || this.signupInfo.email === "" || this.signupInfo.password === "") {
+                alert('No field may be left empty')
+            } else if (this.signupInfo.password.length < 6) {
+                alert('Your password must be at least 6 characters')
+            } else {
+                this.selected = i
+                this.loading = true
+                const success = await this.$store.dispatch('users/signup', {
+                    firstname: this.signupInfo.firstname,
+                    lastname: this.signupInfo.lastname,
+                    email: this.signupInfo.email,
+                    password: this.signupInfo.password
+                })
+                this.loading = false
+                link ? success ? window.location.href = `${link}?prefilled_email=${this.encodedEmail}` : null : null
+            }
         }
     },
    },
 
-   computed: {
-    googleSuccess () {
-        return this.$store.state.users.googleSuccess
-    },
-    
+   computed: {    
     signUpWithGoogle: {
         get() {
             return this.$store.state.users.signUpWithGoogle

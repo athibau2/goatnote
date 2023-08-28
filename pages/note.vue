@@ -398,7 +398,6 @@ import Editor from '@tinymce/tinymce-vue'
 
 export default {
   name: 'NotePage',
-  middleware: "auth",
 
   head() {
     return {
@@ -420,7 +419,6 @@ export default {
   },
 
   async mounted() {
-    await this.$store.dispatch('users/orgs')
     await this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
     await this.$store.dispatch('users/notes', { collectionid: this.currentNote.collectionid })
     await this.$store.dispatch('users/getFiles', {

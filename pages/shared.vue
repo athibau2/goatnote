@@ -95,7 +95,6 @@
 <script>
 export default {
   name: 'SharedPage',
-  middleware: "auth",
 
   head() {
     return {

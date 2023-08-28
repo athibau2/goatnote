@@ -39,7 +39,7 @@ exports.handler = async function(event, context) {
     case 'admin-email':
       payload.emails.forEach(async element => {
         await resend.emails.send({
-          from: 'management@deltaapps.dev',
+          from: 'GOAT Notes <management@deltaapps.dev>',
           to: element,
           subject: payload.subject,
           html: buildAdminEmail(payload.body)
@@ -48,7 +48,7 @@ exports.handler = async function(event, context) {
       break;
     case 'delete-email':
       await resend.emails.send({
-        from: 'management@deltaapps.dev',
+        from: 'GOAT Notes <management@deltaapps.dev>',
         to: payload.email,
         subject: 'Account Deletion Confirmation',
         html: buildDeleteEmail(payload.name)
@@ -66,7 +66,7 @@ exports.handler = async function(event, context) {
             async function() {
               try {
                 const res = await resend.emails.send({
-                  from: 'management@deltaapps.dev',
+                  from: 'GOAT Notes <management@deltaapps.dev>',
                   to: element.email,
                   subject: payload.subject,
                   html: buildReminderEmail(element.firstname, element.notenames, element.times)
