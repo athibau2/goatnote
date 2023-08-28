@@ -1,6 +1,6 @@
 <template>
     <div class="stripe-wrapper">
-        <h3 class="text-center" style="font-size: 20px">Choose a Plan</h3>
+        <span class="basic-header" style="display: flex; justify-content: center;">Choose a Plan</span>
         <v-row class="products-row justify-center">
             <span v-for="(product, i) in products" :key="i">
                 <v-card class="payment-card text-center"
@@ -53,8 +53,14 @@ export default {
 
    methods: {
     async signup(link, i) {
-        if (this.signupInfo.firstname === "" || this.signupInfo.lastname === ""
-            || this.signupInfo.email === "" || this.signupInfo.password === "") {
+        if (this.signUpWithGoogle) {
+            this.selected = i
+            this.loading = true
+            await this.$store.dispatch('users/googleSignin')
+            this.loading = false
+            link ? this.googleSuccess ? window.location.href = `${link}?prefilled_email=${this.encodedEmail}` : null : null
+        } else if (!this.signUpWithGoogle && (this.signupInfo.firstname === "" || this.signupInfo.lastname === ""
+            || this.signupInfo.email === "" || this.signupInfo.password === "")) {
             alert('No field may be left empty')
         } else if (this.signupInfo.password.length < 6) {
             alert('Your password must be at least 6 characters')
@@ -74,6 +80,20 @@ export default {
    },
 
    computed: {
+    googleSuccess () {
+        return this.$store.state.users.googleSuccess
+    },
+    
+    signUpWithGoogle: {
+        get() {
+            return this.$store.state.users.signUpWithGoogle
+        },
+
+        async set() {
+            await this.$store.commit('users/toggleSignUpWithGoogle')
+        }
+    },
+
     consented () {
         return this.$store.state.users.consented
     },
@@ -87,7 +107,7 @@ export default {
     },
 
     encodedEmail () {
-      return encodeURIComponent(this.$store.state.users.user.email)
+      return encodeURIComponent(this.$store.state.users.userData.email)
     }
    }
 }
@@ -97,8 +117,7 @@ export default {
 
 .stripe-wrapper {
     padding: 20px 0;
-    max-height: 400px;
-    overflow-y: scroll;
+    height: auto;
 }
 
 .products-row {

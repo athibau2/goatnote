@@ -12,6 +12,7 @@
             v-model="firstname"
             placeholder="First name"
             @input="updateSignupInfo()"
+            :disabled="signUpWithGoogle"
         >
         </v-text-field>
         <v-text-field
@@ -23,6 +24,7 @@
             v-model="lastname"
             placeholder="Last name"
             @input="updateSignupInfo()"
+            :disabled="signUpWithGoogle"
         >
         </v-text-field>
         <v-text-field
@@ -35,6 +37,7 @@
             :append-icon="'mdi-email'"
             placeholder="Enter your email"
             @input="updateSignupInfo()"
+            :disabled="signUpWithGoogle"
         >
         </v-text-field>
         <v-text-field
@@ -49,26 +52,34 @@
             v-model="password"
             placeholder="Enter your password"
             @input="updateSignupInfo()"
+            :disabled="signUpWithGoogle"
         >
         </v-text-field>
-        <input type="checkbox" v-model="consented" />
-        <span>
-            I consent to the 
-            <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a>
-            and to the 
-            <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms.</a>
-        </span>
-        <br>
-        <input type="checkbox" v-model="verifiedAge" />
-        <span>I certify that I am at least 13 years of age.</span>
-        <br>
-        <!-- <v-btn nuxt
-            class="good-btn"
-            :disabled="(!consent || !verifyAge)"
-            @click="signup()"
-        >
-            Sign Up
-        </v-btn> -->
+        <div class="line-container">
+            <div class="line"></div>
+            <span class="label">OR</span>
+            <div class="line"></div>
+        </div>
+        <div class="line-container">
+            <v-btn @click="toggleSignUpWithGoogle()" icon>
+                <v-icon size="28" v-if="!signUpWithGoogle">mdi-checkbox-blank-outline</v-icon>
+                <img v-if="signUpWithGoogle" src="https://static-00.iconduck.com/assets.00/google-icon-2048x2048-czn3g8x8.png" height="25px" />
+            </v-btn>
+            <span class="basic-header" style="font-size: 20px;">&ensp;Sign Up With Google</span>
+        </div>
+        <div class="checks">
+            <input class="checkbox" type="checkbox" v-model="consented" />
+            <span>
+                I consent to the 
+                <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a>
+                and to the 
+                <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms.</a>
+            </span>
+        </div>
+        <div class="checks">
+            <input class="checkbox" type="checkbox" v-model="verifiedAge" />
+            <span>I certify that I am at least 13 years of age.</span>
+        </div>
     </div>
 </template>
 
@@ -94,17 +105,31 @@ export default {
                 email: this.email,
                 password: this.password
             })
-        }
+        },
+
+        async toggleSignUpWithGoogle() {
+            await this.$store.commit('users/toggleSignUpWithGoogle')
+        },
     },
 
     computed: {
+        signUpWithGoogle: {
+            get() {
+                return this.$store.state.users.signUpWithGoogle
+            },
+
+            async set() {
+                await this.$store.commit('users/toggleSignUpWithGoogle')
+            }
+        },
+
         consented: {
             get() {
                 return this.$store.state.users.consented
             },
 
-            set() {
-                this.$store.commit('users/toggleConsented')
+            async set() {
+                await this.$store.commit('users/toggleConsented')
             }
         },
 
@@ -113,8 +138,8 @@ export default {
                 return this.$store.state.users.verifiedAge
             },
 
-            set() {
-                this.$store.commit('users/toggleVerifiedAge')
+            async set() {
+                await this.$store.commit('users/toggleVerifiedAge')
             }
         },
     }
@@ -126,7 +151,8 @@ export default {
 
 .signup-wrapper {
     width: 70%;
-    padding: 20px 0;
+    padding: 30px 0;
+    height: auto;
     margin: auto;
 }
 
@@ -141,6 +167,38 @@ export default {
 .good-btn {
     float: right;
     margin-bottom: 30px;
+}
+
+.line-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px;
+}
+
+.line {
+  width: 30% !important;
+  height: 1px;
+  background-color: #000;
+  margin: 0 10px;
+}
+
+.label {
+  white-space: nowrap;
+}
+
+#google-checkbox {
+    height: 25px;
+    width: 25px;
+}
+
+.checkbox {
+    height: 15px;
+    width: 15px;
+}
+
+.checks {
+    margin: 5px;
 }
 
 </style>

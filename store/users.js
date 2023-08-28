@@ -42,6 +42,8 @@ export const state = () => ({
     foundOrg: null,
     showSignupDialog: false,
     showLoginDialog: false,
+    signUpWithGoogle: false,
+    googleSuccess: false,
     consented: false,
     verifiedAge: false,
     signupInfo: {
@@ -247,6 +249,14 @@ export const mutations = {
 
     toggleLoginDialog(state, data) {
         state.showLoginDialog = data
+    },
+
+    googleSuccess(state, data) {
+        state.googleSuccess = date
+    },
+
+    toggleSignUpWithGoogle(state) {
+        state.signUpWithGoogle = !state.signUpWithGoogle
     },
 
     toggleConsented(state) {
@@ -1536,6 +1546,7 @@ export const actions = {
                 console.log(err)
             }
             await dispatch('createBucket', { email: email })
+            await commit('googleSuccess', true)
         }
     },
 

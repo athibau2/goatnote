@@ -69,5 +69,4 @@ export default {
 @import '~/assets/styles.css';
 
 
-
 </style>
