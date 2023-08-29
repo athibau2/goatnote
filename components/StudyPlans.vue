@@ -210,12 +210,13 @@
                 this.showTime = false
                 let hour = this.time[0] + this.time[1]
                 let timeOfDay = " AM"
-                if (parseInt(hour) > 12) {
+                if (parseInt(hour) == 12) timeOfDay = " PM"
+                else if (parseInt(hour) > 12) {
                     timeOfDay = " PM"
                     hour -= 12
-                    hour.toString()
-                    this.time = hour + this.time[2] + this.time[3] + this.time[4] + timeOfDay
                 }
+                hour.toString()
+                this.time = hour + this.time[2] + this.time[3] + this.time[4] + timeOfDay
             },
 
             clearDate () {

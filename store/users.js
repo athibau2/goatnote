@@ -1341,6 +1341,7 @@ export const actions = {
                 let timeOfDay = " AM"
                 let time = data[i].time
                 time = time.split(':')
+                if (parseInt(time[0]) == 12) timeOfDay = " PM"
                 if (parseInt(time[0]) > 12) {
                     time[0] = parseInt(time[0]) - 12
                     timeOfDay = " PM"

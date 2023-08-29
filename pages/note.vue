@@ -183,14 +183,14 @@
           <!-- Buttons area large screen -->
           <v-col class="text-center" cols="3">
             <div>
-              <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 5</span>
+              <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 6</span>
             </div>
             <div>
               <v-btn class="tool-btn" id="ai-btn"
                 @click="generateStudyTools()"
                 :disabled="(userData.userid == currentNote.userid ? false : true) || isGeneratingTools"
               >
-                <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : `&ensp;${generatingStatus}` }}
+                <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Flashcards' : `&ensp;${generatingStatus}` }}
               </v-btn>
             </div>
             <div id="note-step-3">
@@ -252,7 +252,7 @@
         <!-- Buttons area small screen -->
         <v-col cols="12" v-else-if="windowWidth < 1200">
           <div>
-            <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 5</span>
+            <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 6</span>
           </div>
           <v-btn class="tool-btn" id="ai-btn"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
@@ -260,7 +260,7 @@
             @click="generateStudyTools()"
             :disabled="(userData.userid == currentNote.userid ? false : true) || isGeneratingTools"
           >
-            <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Study Tools' : null }}
+            <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Flashcards' : `&ensp;${generatingStatus}` }}
           </v-btn>
           <v-btn class="tool-btn" id="tools-btn"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
@@ -598,9 +598,11 @@ export default {
           if (confirm('This feature is only available for the Premium plan. Click \'OK\' to be redirected to upgrade your account.')) {
             window.location.href = `${this.premiumLink}?prefilled_email=${this.encodedEmail}`
           }
-        } else if (this.calledAiToday && this.userData.numaicalls == 5) {
+        } else if (this.calledAiToday && this.userData.numaicalls == 6) {
           alert('You have reached the maximum number of allowed AI parsing calls for today.')
-        } else if (confirm('Are you ready to generate study tools? This will automatically create flash cards for you from your Flashcard Queue. This may take a minute to complete. Please do not refresh your page.')) {
+        } else if (this.preparedWords.length < 10) {
+          alert('You need at least 10 words in the queue before you can generate flashcards.')
+        } else if (confirm('Are you ready to generate flashcards? This will take the first 20 entries from your Flashcard Queue and automatically create flash cards for you. This may take a minute to complete. Please do not refresh your page.')) {
           this.isGeneratingTools = true
           let words = []
 
@@ -616,59 +618,44 @@ export default {
             }
           }
 
-          if (words.length >= 10) {
-            this.generatingStatus = 'Waiting for AI'
-            const studyTools = await openaiGenerateStudyTools({
-              input: words,
-              notename: this.currentNote.notename
-            })
-            if (!studyTools) {
-              this.isGeneratingTools = false
-              this.generatingStatus = ''
-              this.wordsToRemove = []
-              alert('Something went wrong and no study tools were generated. Please try again.')
-            } else {
-              this.generatingStatus = 'Waiting for Database'
-              await this.$store.dispatch('users/updateAiCalls', {
-                date: this.getDate,
-                num: this.calledAiToday ? this.userData.numaicalls + 1 : 1
-              })
+          this.generatingStatus = 'Waiting for AI'
+          const studyTools = await openaiGenerateStudyTools({
+            input: words,
+            notename: this.currentNote.notename
+          })
 
-              let words = studyTools.words ?? []
-              let questions = studyTools.questions ?? []
-
-              for (let i = 0; i < words.length; ++i) {
-                await this.$store.dispatch('users/addFlashcard', {
-                  newPrompt: words[i].cardprompt,
-                  newAnswer: words[i].cardanswer,
-                  noteid: this.currentNote.noteid
-                })
-              }
-
-              for (let i = 0; i < questions.length; ++i) {
-                await this.$store.dispatch('users/addFlashcard', {
-                  newPrompt: questions[i].cardprompt,
-                  newAnswer: questions[i].cardanswer,
-                  noteid: this.currentNote.noteid
-                })
-              }
-
-              if (this.preparedWords.length <= 20) {
-                await this.clearPreparedWords()
-              } else {
-                for (let i = 0; i < this.wordsToRemove.length; ++i) {
-                  await this.removePreparedWord(this.wordsToRemove[i])
-                }
-                this.wordsToRemove = []
-              }
-
-              this.isGeneratingTools = false
-              this.generatingStatus = ''
-              alert(`Your study tools have been successfully generated. You can review them by clicking the \"Study Tools\" button.`)
-            }
-          } else {
+          if (studyTools.length == 0) {
+            this.isGeneratingTools = false
+            this.generatingStatus = ''
             this.wordsToRemove = []
-            alert('You need at least 10 words in the queue before you can generate study tools.')
+            alert('Something went wrong and no study tools were generated. Please try again.')
+          } else {
+            this.generatingStatus = 'Waiting for Database'
+            await this.$store.dispatch('users/updateAiCalls', {
+              date: this.getDate,
+              num: this.calledAiToday ? this.userData.numaicalls + 1 : 1
+            })
+
+            for (let i = 0; i < studyTools.length; ++i) {
+              await this.$store.dispatch('users/addFlashcard', {
+                newPrompt: studyTools[i].cardprompt,
+                newAnswer: studyTools[i].cardanswer,
+                noteid: this.currentNote.noteid
+              })
+            }
+
+            if (this.preparedWords.length <= 20) {
+              await this.clearPreparedWords()
+            } else {
+              for (let i = 0; i < this.wordsToRemove.length; ++i) {
+                await this.removePreparedWord(this.wordsToRemove[i])
+              }
+              this.wordsToRemove = []
+            }
+
+            this.isGeneratingTools = false
+            this.generatingStatus = ''
+            alert(`Your study tools have been successfully generated. You can review them by clicking the \"Study Tools\" button.`)
           }
         }
       },
@@ -729,7 +716,7 @@ export default {
           },
           {
             id: 'note-step-3',
-            text: 'This button will use AI to create flashcards for you from your Flashcard Queue, taking 20 entries at a time. As a subscriber to the Premium membership, you can use this button 5 times every day.',
+            text: 'This button will use AI to create flashcards for you from your Flashcard Queue, taking 20 entries at a time. As a subscriber to the Premium membership, you can use this button 6 times every day.',
             attachTo: {
               element: '#ai-btn',
               on: 'bottom'
@@ -771,7 +758,7 @@ export default {
           },
           {
             id: 'note-step-6',
-            text: 'As you take notes, add vocab words to the Flashcard Queue to prepare for AI flashcard generation. To do this, press \'Ctrl + Space\' while inside your text editor. When you click \'Generate Study Tools\', it will take the top 20 from here.',
+            text: 'As you take notes, add vocab words to the Flashcard Queue to prepare for AI flashcard generation. To do this, press \'Ctrl + Space\' while inside your text editor. When you click \'Generate Flashcards\', it will take the top 20 from here.',
             attachTo: {
               element: '#queue-area',
               on: 'bottom'
@@ -860,7 +847,7 @@ export default {
     },
 
     remainingAiCalls () {
-      return this.calledAiToday ? 5 - this.userData.numaicalls : 5
+      return this.calledAiToday ? 6 - this.userData.numaicalls : 6
     },
 
     saving () {

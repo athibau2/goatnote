@@ -17,6 +17,7 @@
             style="height: auto;"
             v-if="tab === 0"
           > <!--users-->
+          <Loading v-if="adminUsers.length == 0" />
           <table>
               <tr>
                 <th style="width: 25%">Name</th>
@@ -293,9 +294,20 @@
 </template>
 
 <script>
+import Loading from '~/components/Loading.vue'
 export default {
   name: 'AdminPage',
   middleware: ["admin"],
+
+  components: {
+    Loading
+  },
+
+  head() {
+    return {
+      title: 'Admin - GOAT Notes',
+    }
+  },
 
   async updated () {
     if (this.$route.query.userid != undefined && this.$route.params.user != undefined) {

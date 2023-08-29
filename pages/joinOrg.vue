@@ -1,7 +1,6 @@
 <template>
-    <v-app>
-
-        <span>
+  <v-app>
+      <span>
         <v-tabs background-color="transparent" left v-model="tab">
           <v-tabs-slider></v-tabs-slider>
             <v-tab v-for="item in items" :key="item.tab">
@@ -26,6 +25,7 @@
         <v-tab-item class="public-list" v-for="item in items" :key="item.tab">
           <!-- List of public orgs -->
           <v-col v-if="tab === 0">
+            <Loading v-if="publicOrgs.length == 0" />
             <v-row>
               <v-card class="card" elevation="5" width="250" v-for="(org, i) in publicOrgs" :key="i">
                 <v-card-title>
@@ -65,8 +65,13 @@
 </template>
 
 <script>
+import Loading from '~/components/Loading.vue'
 export default {
   name: 'JoinOrgPage',
+
+  components: {
+    Loading
+  },
 
   head() {
     return {

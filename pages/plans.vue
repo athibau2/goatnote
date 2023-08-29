@@ -1,9 +1,9 @@
 <template>
     <v-app>
-      
         <span v-if="allPlans.length === 0" class="notice text-center">
           You currently do not have any study plans set up for any of your notes.
         </span>
+        <Loading v-if="allPlans.length == 0" />
         <div v-else-if="allPlans.length > 0">
           <v-row justify="center" align="center">
             <span class="notice text-center">Uncompleted Study Plans</span>

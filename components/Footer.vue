@@ -10,7 +10,8 @@
         <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms and Conditions</a><br>
       </v-col>
       <v-col class="text-right" cols="4">
-        <a target="_blank" href="https://deltaapps.dev/contact">Contact Us</a>
+        <a target="_blank" href="https://deltaapps.dev/contact">Contact Us</a><br>
+        <a target="_blank" href="https://forms.gle/FeVtuMJvpX2zRH4u6">Submit Feedback</a>
       </v-col>
     </v-footer>
 </template>

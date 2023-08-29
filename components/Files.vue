@@ -18,7 +18,7 @@
             <v-card-text>
                 <v-file-input
                     class="file-upload"
-                    label="Upload File (pdf, docx)"
+                    label="Upload File (pdf, docx - 2 MB max)"
                     accept=".pdf, .docx"
                     multiple
                     chips

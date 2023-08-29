@@ -1,6 +1,5 @@
 <template>
     <v-app>
-      
       <span>
         <v-tabs background-color="transparent" left v-model="tab">
           <v-tabs-slider></v-tabs-slider>
@@ -13,6 +12,7 @@
         <v-tab-item class="shared-list" v-for="item in items" :key="item.tab">
           <!-- List of shared collections -->
           <v-col v-if="tab === 0">
+            <Loading v-if="collsSharedWithMe.length == 0" />
             <v-row v-if="selectedColl == null">
               <v-card class="card" elevation="5" width="250" v-for="(coll, i) in collsSharedWithMe" :key="i">
                 <v-card-title>
@@ -93,8 +93,13 @@
 </template>
 
 <script>
+import Loading from '~/components/Loading.vue'
 export default {
   name: 'SharedPage',
+
+  components: {
+    Loading
+  },
 
   head() {
     return {
