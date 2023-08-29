@@ -1,11 +1,9 @@
 <template>
   <v-app>
-    <!-- <!DOCTYPE html>
-    <html>
-      <head> -->
+      <head>
+        <meta name="google-site-verification" content="pXc6GYLJgyWUm6ZDAO0bdQzvYN_au1YC1OkWYbMXIqE" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-      <!-- </head>
-    </html> -->
+      </head>
 
     <span>
       <span class="basic-header">
