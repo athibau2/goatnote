@@ -24,6 +24,7 @@
     "compromise": "^14.10.0",
     "core-js": "^3.19.3",
     "cron": "^2.4.0",
+    "dotenv": "^16.3.1",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "natural": "^6.5.0",
