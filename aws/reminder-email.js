@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Resend } = require('resend');
 const { createClient } = require('@supabase/supabase-js');
 const resend = new Resend(process.env.NUXT_ENV_RESEND_API_KEY);
@@ -8,16 +9,17 @@ const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const cron = new CronJob(
-    `0 0 2 * * *`,
+   `0 0 2 * * *`,
     async function() {
         const { data, error, status } = await supabase.from('get_daily_plans')
             .select()
+	console.log(error, status)
         if (!error) {
             data.forEach(async element => {
                 const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
                 const sendMin = (parseInt(element.times[0].split(':')[1]))
                 const job = new CronJob(
-                    `30 ${sendMin} ${sendHour} * * *`,
+                   `30 ${sendMin} ${sendHour} * * *`,
                     async function() {
                         try {
                             const res = await resend.emails.send({
@@ -26,6 +28,7 @@ const cron = new CronJob(
                                 subject: 'Study Plan Reminder',
                                 html: buildReminderEmail(element.firstname, element.notenames, element.times)
                             });
+			    console.log(res)
                         } catch (err) {
                             console.log(err)
                         }
@@ -71,38 +74,38 @@ function buildReminderEmail(firstname, notenames, times) {
               margin: 0;
               padding: 0;
             }
-      
+
             .container {
               max-width: 600px;
               margin: 0 auto;
               padding: 20px;
             }
-      
+
             .logo {
               display: block;
               width: 150px;
               margin: 0 auto;
             }
-      
+
             h1 {
               text-align: center;
               color: #2F2B28;
               font-size: 24px;
               margin-top: 30px;
             }
-      
+
             p {
               color: #666666;
               font-size: 16px;
               line-height: 1.5;
               margin-bottom: 20px;
             }
-      
+
             a {
               color: #007bff;
               text-decoration: none;
             }
-      
+
             span {
               display: block;
               text-align: center;
@@ -127,6 +130,6 @@ function buildReminderEmail(firstname, notenames, times) {
         </body>
       </html>
     `;
-  
+
     return emailTemplate;
 }
