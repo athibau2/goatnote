@@ -179,13 +179,21 @@
                   <v-btn icon
                     v-bind="attrs" 
                     v-on="on"
+                    @click="codeCopied = false"
                   >
                     <v-icon>mdi-dots-vertical</v-icon>
                   </v-btn>
                 </template>
                 <v-list class="joincode-popup">
                   <span class="joincode-1">Join code:</span>
-                  <span class="joincode-2"> {{org.joincode}}</span>
+                  <span class="joincode-2">&ensp;{{org.joincode}}</span>
+                  <button @click="copyCode(org.joincode)">
+                    <v-icon size="20"
+                      :style="codeCopied ? {'color': '#7bbb93'} : null"
+                    >
+                      {{codeCopied ? 'mdi-check-bold' : 'mdi-content-copy'}}
+                    </v-icon>
+                  </button>
                 </v-list>
               </v-menu>
           </v-card-title>
@@ -312,6 +320,7 @@ export default {
 
   data () {
     return {
+      codeCopied: false,
       loadingNote: false,
       noteBeingOpened: null,
       newOrgName: "",
@@ -332,6 +341,13 @@ export default {
   },
 
   methods: {
+    copyCode(code) {
+      this.codeCopied = true
+      navigator.clipboard.writeText(code).catch(function(err) {
+        console.error('Unable to copy text to clipboard', err);
+      });
+    },
+
     newOrg () {
       this.creating = true
       this.$store.commit('users/newCollection', false)
@@ -558,17 +574,16 @@ export default {
 }
 
 .joincode-popup {
+  padding: 10px;
   background-color: #dddddd;
 }
 
 .joincode-1 {
-  padding-left: 10px;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   text-decoration: underline;
 }
 
 .joincode-2 {
-  padding-right: 10px;
   font-size: 13px;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
