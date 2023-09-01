@@ -55,7 +55,7 @@
             :disabled="signUpWithGoogle"
         >
         </v-text-field>
-        <div class="line-container">
+        <!-- <div class="line-container">
             <div class="line"></div>
             <span class="label">OR</span>
             <div class="line"></div>
@@ -66,7 +66,8 @@
                 <img v-if="signUpWithGoogle" src="https://static-00.iconduck.com/assets.00/google-icon-2048x2048-czn3g8x8.png" height="25px" />
             </v-btn>
             <span class="basic-header" style="font-size: 20px;">&ensp;Sign Up With Google</span>
-        </div>
+        </div> -->
+        <span class="basic-header" style="display: flex; justify-content: center; margin: 10px;">Google Sign-in Coming Soon</span>
         <div class="checks">
             <input class="checkbox" type="checkbox" v-model="consented" />
             <span>

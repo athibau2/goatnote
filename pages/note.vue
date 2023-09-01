@@ -822,6 +822,7 @@ export default {
       }, 2000),
 
       async switchNote(noteid) {
+        this.editorOrWhiteboard = 0
         await this.$store.dispatch('users/openNote', {
           noteid: noteid
         })

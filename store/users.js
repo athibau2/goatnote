@@ -79,6 +79,7 @@ export const state = () => ({
         },
     ],
     resetCode: null,
+    dataToExport: null,
     emailList: [],
     showFiles: false,
     showFlashcards: false,
@@ -117,6 +118,10 @@ export const mutations = {
 
     newNote(state, data) {
         state.makingNewNote = data
+    },
+
+    setExportData(state, data) {
+        state.dataToExport = data
     },
 
     setUserData(state, data) {
@@ -977,6 +982,7 @@ export const actions = {
             .eq('noteid', noteid)
         if (!error) {
             let prettyDate = await parseDate(data[0].notedate)
+            localStorage.removeItem('current_whiteboard')
             localStorage.setItem('prettyDate', prettyDate)
             await commit('currentNote', data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
@@ -1428,6 +1434,58 @@ export const actions = {
             .select()
         if (!error) {
             await commit('setUserData', data[0])
+        } else if (error) {
+            console.log(error)
+            alert('Something went wrong, please try again.')
+        }
+    },
+
+    async exportData({ commit, state }) {
+        const { data, error, status } = await supabase.from('export_data')
+            .select('*')
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            // also get files
+            const organizedData = {};
+            const addedWhiteboards = new Set();
+            const addedFlashcards = new Set();
+
+            data.forEach(row => {
+                const { orgid, orgname, collectionid, collectionname, noteid, notename, typednotes, boardid, data, cardid, cardprompt, cardanswer } = row;
+
+                // Ensure organization exists in the organized data
+                if (!organizedData[orgid]) {
+                    organizedData[orgid] = { orgname, collections: {} };
+                }
+
+                // Ensure collection exists within the organization
+                if (!organizedData[orgid].collections[collectionid]) {
+                    organizedData[orgid].collections[collectionid] = { collectionname, notes: {} };
+                }
+
+                // Ensure note exists within the collection
+                if (!organizedData[orgid].collections[collectionid].notes[noteid]) {
+                    organizedData[orgid].collections[collectionid].notes[noteid] = { 
+                        notename, 
+                        typednotes: typednotes || '', // Use an empty string if typednotes is null
+                        whiteboards: [], 
+                        flashcards: [] 
+                    };
+                }
+
+                // Add whiteboards to the note only if boardid and data are present and not added yet
+                if (boardid !== null && data !== null && !addedWhiteboards.has(boardid)) {
+                    organizedData[orgid].collections[collectionid].notes[noteid].whiteboards.push({ boardid, data });
+                    addedWhiteboards.add(boardid);
+                }
+
+                // Add flashcards to the note only if cardid, cardprompt, and cardanswer are present and not added yet
+                if (cardid !== null && cardprompt !== null && cardanswer !== null && !addedFlashcards.has(cardid)) {
+                    organizedData[orgid].collections[collectionid].notes[noteid].flashcards.push({ cardid, cardprompt, cardanswer });
+                    addedFlashcards.add(cardid);
+                }
+            });
+            await commit('setExportData', organizedData)
         } else if (error) {
             console.log(error)
             alert('Something went wrong, please try again.')
