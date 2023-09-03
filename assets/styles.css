@@ -16,6 +16,7 @@
 }
 
 .app-bar {
+    z-index: 9999 !important;
     background-image: linear-gradient(to top right, #f9f9f9, #B3E5FC);
 }
 

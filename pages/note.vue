@@ -1,7 +1,9 @@
 <template>
   <v-app>
-    <script src="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/js/shepherd.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css"/>
+    <head>
+      <script src="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/js/shepherd.min.js"></script>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css"/>
+    </head>
 
     <v-container>
         <v-row>
@@ -164,7 +166,7 @@
             </v-tooltip>
             <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
               <Loading v-if="!showEditor" style="align-items: start;" />
-              <Editor class="editor" v-if="showEditor"
+              <!-- <Editor class="editor" v-if="showEditor"
                 :disabled="(userData.userid == currentNote.userid) ? false : true"
                 v-model="noteText"
                 :api-key="tinyApi"
@@ -173,7 +175,17 @@
                   plugins: 'lists link image media table code help wordcount',
                   toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
                 }"
-              />
+              /> -->
+              <!-- <div class="editor"> -->
+                <!-- <ckeditor :editor="editor" :config="editorConfig" v-model="noteText"></ckeditor> -->
+                <!-- <div id="summernote" v-html="noteText"></div> -->
+                <textarea id="sunEditor"
+                  hidden
+                  v-if="editorOrWhiteboard == 0"
+                  v-model="noteText"
+                  :disabled="(userData.userid == currentNote.userid) ? false : true"
+                ></textarea>
+              <!-- </div> -->
             </div>
             <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
               <div id="painterro"></div>
@@ -360,7 +372,7 @@
           </v-tooltip>
           <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
             <Loading v-if="!showEditor" style="align-items: start;" />
-            <Editor class="editor" v-if="showEditor"
+            <!-- <Editor class="editor" v-if="showEditor"
               :disabled="(userData.userid == currentNote.userid) ? false : true"
               v-model="noteText"
               :api-key="tinyApi"
@@ -369,7 +381,13 @@
                 plugins: 'lists link image media table code help wordcount',
                 toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
               }"
-            />
+            /> -->
+            <textarea id="sunEditor"
+              hidden
+              v-if="editorOrWhiteboard == 0"
+              v-model="noteText"
+              :disabled="(userData.userid == currentNote.userid) ? false : true"
+            ></textarea>
           </div>
           <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
             <div id="painterro"></div>
@@ -395,6 +413,13 @@ import { debounce } from 'lodash'
 import Loading from '~/components/Loading.vue'
 import Painterro from 'painterro'
 import Editor from '@tinymce/tinymce-vue'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import CKEditor from "@ckeditor/ckeditor5-vue2"
+import suneditor from 'suneditor'
+import 'suneditor/dist/css/suneditor.min.css'
+import plugins from 'suneditor/src/plugins'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
 
 export default {
   name: 'NotePage',
@@ -415,7 +440,8 @@ export default {
       QuickWord,
       Editor,
       Loading,
-      Whiteboards
+      Whiteboards,
+      ckeditor: CKEditor.component,
   },
 
   async mounted() {
@@ -439,8 +465,25 @@ export default {
       this.noteTour.start()
       this.noteTour.on('complete', this.onboardingComplete)
     }
+    this.showEditor = true
     this.$nextTick(() => {
-      this.showEditor = true
+      this.createSunEditor()
+      
+      $('#summernote').summernote({
+        height: (window.innerHeight / 100) * 80,
+        toolbar: [
+          ['style', ['style']],
+          ['font', ['bold', 'italic', 'underline', 'clear']],
+          ['fontstyle', ['strikethrough', 'subscript', 'superscript']],
+          ['fontsize', ['fontsize']],
+          ['fontname', ['fontname']],
+          ['color', ['forecolor', 'backcolor']],
+          ['para', ['ul', 'ol', 'paragraph', 'height']],
+          ['table', ['table']],
+          ['insert', ['link', 'picture', 'video', 'hr']],
+          ['view', ['undo', 'redo', 'fullscreen']],
+        ],
+      });
     })
   },
 
@@ -469,17 +512,42 @@ export default {
           }
         }),
         ptro: null,
-        wordsToRemove: []
+        wordsToRemove: [],
+        editor: ClassicEditor,
+        editorConfig: {
+          toolbar: {
+            items: [
+              'undo', 'redo',
+              '|', 'heading',
+              '|', 'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
+              '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
+              '|', 'link', 'uploadImage', 'uploadMedia', 'blockQuote', 'codeBlock',
+              '|', 'bulletedList', 'numberedList', 'todoList', 'alignment', 'outdent', 'indent'
+            ],
+          }
+        },
+        sunEditor: null
     }
   },
 
   watch: {
     noteText(newValue) {
-      this.saveNotes(newValue)
+      this.saveNotes
+    },
+
+    async windowWidth(newValue, oldValue) {
+      if ((newValue < 1200 && oldValue >= 1200) ||
+      (newValue >= 1200 && oldValue < 1200)) {
+        if (this.editorOrWhiteboard == 0) {
+          await this.sunEditor.hide()
+          await this.sunEditor.show()
+        }
+      }
     },
 
     editorOrWhiteboard(newValue, oldValue) {
       if (newValue == 1) {
+        this.sunEditor.hide()
         this.$nextTick(() => {
           this.ptro = Painterro({
             id: 'painterro',
@@ -515,10 +583,10 @@ export default {
               this.ptro.show(this.whiteboards[this.whiteboards.length - 1].data)
             } else this.ptro.show()
           }
-
         });
       } else if (newValue == 0 && oldValue == 1) {
         this.ptro.close()
+        this.sunEditor.show()
       }
     }
   },
@@ -526,6 +594,38 @@ export default {
   methods: {
       back() {
         this.$router.go(-1)
+      },
+
+      async createSunEditor() {
+        this.sunEditor = suneditor.create('sunEditor', {
+          value: this.noteText,
+          plugins: plugins,
+          katex: katex,
+          width: '100%',
+          height: '80vh',
+          callBackSave: this.saveNotes,
+          buttonList: [
+              ['undo', 'redo'],
+              ['removeFormat'],
+              ['font', 'fontSize', 'formatBlock'],
+              ['paragraphStyle', 'blockquote'],
+              ['bold', 'underline', 'italic'],
+              ['strike', 'subscript', 'superscript'],
+              ['fontColor', 'hiliteColor', 'textStyle'],
+              ['outdent', 'indent'],
+              ['align', 'horizontalRule', 'list', 'lineHeight'],
+              ['table', 'link', 'image', 'video', 'audio', 'math'],
+              ['fullScreen', 'preview', 'print', 'save'],
+          ]
+        })
+        this.sunEditor.onChange = async (contents, core) => {
+          if (this.saving != 'Unsaved') await this.markUnsaved()
+          localStorage.setItem('note_text', JSON.stringify(contents))
+        }
+      },
+
+      async markUnsaved() {
+        await this.$store.commit('users/saving', "Unsaved")
       },
 
       newWhiteboard() {
@@ -810,16 +910,18 @@ export default {
         this.editNote = !this.editNote
       },
 
-      saveNotes: debounce(async function () {
+      saveNotes: debounce(async function() {
         this.$store.commit('users/saving', "Saving...")
         setTimeout(async () => {
+          let notes = JSON.parse(localStorage.getItem('note_text'))
           await this.$store.dispatch('users/saveNotes', {
-            noteText: this.noteText,
+            noteText: notes,
             noteid: this.currentNote.noteid
           })
+          localStorage.removeItem('note_text')
           this.$store.commit('users/saving', 'Saved')
         }, 500);
-      }, 2000),
+      }, 500),
 
       async switchNote(noteid) {
         this.editorOrWhiteboard = 0
@@ -827,6 +929,8 @@ export default {
           noteid: noteid
         })
         this.noteText = this.currentNote.typednotes
+        await this.sunEditor.destroy()
+        await this.createSunEditor()
       }
   },
 
@@ -898,11 +1002,12 @@ export default {
 }
 
 .editor-wrapper {
-  height: 80vh;
+  height: auto;
 }
 
-.editor {
-  height: 100%;
+#sunEditor {
+  height: 100% !important;
+  z-index: 1 !important;
 }
 
 .canvas-wrapper {
