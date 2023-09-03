@@ -117,11 +117,13 @@ export default {
 
 .stripe-wrapper {
     padding: 20px 0;
-    height: auto;
+    max-height: 400px;
+    overflow-y: scroll;
 }
 
 .products-row {
-  margin: 20px;
+    max-height: 100%;
+    margin: 20px;
 }
 
 .payment-card {

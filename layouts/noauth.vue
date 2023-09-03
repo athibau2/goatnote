@@ -1,6 +1,6 @@
 <template>
   <v-app dark>
-    <v-app-bar class="app-bar"
+    <v-app-bar class="app-bar-2"
       height="70px"
       :clipped-left="clipped"
       fixed

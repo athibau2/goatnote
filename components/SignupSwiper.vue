@@ -153,7 +153,6 @@ export default {
 .signup-wrapper {
     width: 70%;
     padding: 30px 0;
-    height: auto;
     margin: auto;
 }
 

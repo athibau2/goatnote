@@ -16,7 +16,11 @@
 }
 
 .app-bar {
-    z-index: 9999 !important;
+    z-index: 9998 !important;
+    background-image: linear-gradient(to top right, #f9f9f9, #B3E5FC);
+}
+
+.app-bar-2 {
     background-image: linear-gradient(to top right, #f9f9f9, #B3E5FC);
 }
 
