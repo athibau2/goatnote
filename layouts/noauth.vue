@@ -16,6 +16,11 @@
     <v-main class="main">
       <v-container class="main">
         <Nuxt class="main" />
+        <v-alert v-if="alert"
+          class="alert"
+          :color="alert.color"
+          :icon="alert.icon"
+        >{{alert.text}}</v-alert>
       </v-container>
     </v-main>
 
@@ -47,6 +52,16 @@ export default {
     }
   },
 
+  watch: {
+    async alert(newValue, oldValue) {
+      if (newValue != null && oldValue == null) {
+        setTimeout(async () => {
+          await this.$store.commit('users/setAlert', null)
+        }, 4000);
+      }
+    }
+  },
+
   methods: {
     toLogin() {
       this.$router.push('/login')
@@ -58,6 +73,12 @@ export default {
 
     resizeHandler() {
       this.windowWidth = window.innerWidth
+    }
+  },
+
+  computed: {
+    alert () {
+      return this.$store.state.users.alert
     }
   }
 }

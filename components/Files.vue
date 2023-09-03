@@ -134,7 +134,6 @@ export default {
         },
 
         isDoc() {
-            console.log(this.openedFile.name.includes('docx'))
             return this.openedFile.name.includes('docx')
         },
 

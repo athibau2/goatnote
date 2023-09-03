@@ -695,13 +695,23 @@ export default {
 
       async generateStudyTools() {
         if (this.userData.subscriptionstatus == 'inactive') {
-          if (confirm('This feature is only available for the Premium plan. Click \'OK\' to be redirected to upgrade your account.')) {
-            window.location.href = `${this.premiumLink}?prefilled_email=${this.encodedEmail}`
-          }
+          await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'This feature is only available for the Premium plan. Please upgrade your account to access this feature.'
+          })
         } else if (this.calledAiToday && this.userData.numaicalls == 6) {
-          alert('You have reached the maximum number of allowed AI parsing calls for today.')
+          await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'You have reached the maximum number of allowed AI parsing calls for today.'
+          })
         } else if (this.preparedWords.length < 10) {
-          alert('You need at least 10 words in the queue before you can generate flashcards.')
+          await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'You need at least 10 words in the queue before you can generate flashcards.'
+          })
         } else if (confirm('Are you ready to generate flashcards? This will take the first 20 entries from your Flashcard Queue and automatically create flash cards for you. This may take a minute to complete. Please do not refresh your page.')) {
           this.isGeneratingTools = true
           let words = []
@@ -728,7 +738,11 @@ export default {
             this.isGeneratingTools = false
             this.generatingStatus = ''
             this.wordsToRemove = []
-            alert('Something went wrong and no study tools were generated. Please try again.')
+            await this.$store.commit('users/setAlert', {
+              color: 'error',
+              icon: '$error',
+              text: 'Something went wrong and no study tools were generated. Please try again.'
+            })
           } else {
             this.generatingStatus = 'Waiting for Database'
             await this.$store.dispatch('users/updateAiCalls', {
@@ -755,7 +769,11 @@ export default {
 
             this.isGeneratingTools = false
             this.generatingStatus = ''
-            alert(`Your study tools have been successfully generated. You can review them by clicking the \"Study Tools\" button.`)
+            await this.$store.commit('users/setAlert', {
+              color: 'success',
+              icon: '$success',
+              text: 'Your study tools have been successfully generated. You can review them by clicking the \"Study Tools\" button.'
+            })
           }
         }
       },

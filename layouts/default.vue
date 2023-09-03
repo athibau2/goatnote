@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-app dark style="position: relative;">
     <script src="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/js/shepherd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css"/>
 
@@ -15,6 +15,7 @@
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
+          style="text-decoration: none;"
           :key="i"
           :id="'menu-step-'+i"
           :to="item.to"
@@ -64,6 +65,11 @@
     <v-main class="main">
       <v-container class="main" id="step-5">
         <Nuxt class="main" />
+        <v-alert v-if="alert"
+          class="alert"
+          :color="alert.color"
+          :icon="alert.icon"
+        >{{alert.text}}</v-alert>
       </v-container>
     </v-main>
 
@@ -88,7 +94,6 @@ export default {
   async mounted () {
     let link = JSON.parse(localStorage.getItem('purchase_link'))
     if (this.googleSuccess && link != null) {
-      console.log()
       window.location.href = `${link}?prefilled_email=${this.encodedEmail}`
       await this.$store.commit('users/googleSuccess', false)
       localStorage.removeItem('purchase_link')
@@ -162,6 +167,16 @@ export default {
           classes: 'shadow-md bg-purple-dark',
         }
       }),
+    }
+  },
+
+  watch: {
+    async alert(newValue, oldValue) {
+      if (newValue != null && oldValue == null) {
+        setTimeout(async () => {
+          await this.$store.commit('users/setAlert', null)
+        }, 4000);
+      }
     }
   },
 
@@ -301,6 +316,10 @@ export default {
       if (this.userData?.email) {
         return encodeURIComponent(this.userData?.email)
       }
+    },
+
+    alert () {
+      return this.$store.state.users.alert
     }
   }
 }

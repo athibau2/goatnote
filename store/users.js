@@ -1,12 +1,12 @@
 import { supabase, supabaseService } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
-import randomstring from "randomstring"
 
 export const state = () => ({
     userData: null,
     supabaseUser: null,
     supabaseSession: null,
+    alert: null,
     orgs: [],
     allColls: [],
     collections: [],
@@ -108,6 +108,11 @@ export const mutations = {
     saving(state, data) {
         state.saving = data
     },
+
+    setAlert(state, data) {
+        state.alert = data
+    },
+
     newOrg(state, data) {
         state.makingNewOrg = data
     },
@@ -339,7 +344,7 @@ export const mutations = {
 
 // actions should call mutations
 export const actions = {    
-    async sendMagicLink({ dispatch }, { email }) {
+    async sendMagicLink({ dispatch, commit }, { email }) {
         const res = await dispatch('getUser', { email: email })
         if (res != null) {
             const { data, error } = await supabaseService.auth.admin.generateLink({
@@ -363,42 +368,66 @@ export const actions = {
                         body: JSON.stringify(params)
                     }).then(async function(response) {
                         if (response) {
-                            alert(`Follow the link sent to your email to recover your account. You can then reset your password in your account settings.`)
+                            await commit('setAlert', {
+                                color: 'info',
+                                icon: '$info',
+                                text: `Follow the link sent to your email to recover your account. You can then reset your password in your account settings.`,
+                            })
                         } else {
-                            console.log('Failed to send email');
+                            console.error('Failed to send email');
                         }
                     })
                 } catch(err) {
-                    console.log(err)
-                    alert('Something went wrong, please try again.')
+                    console.error(err)
+                    await commit('setAlert', {
+                        color: 'error',
+                        icon: '$error',
+                        text: 'Something went wrong, please try again.'
+                    })
                 }
             }
         } else if (res == null) {
-            alert('No account found with that email.')
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'No account found with that email.'
+            })
         }
     },
 
-    async resetPass({}, { email, password }) {
+    async resetPass({ commit }, { email, password }) {
         const { data, error, status } = await supabase.from('user')
             .update({
                 password: await encryptPassword(password)
             })
             .eq('email', email)
         if (!error) {
-            alert('Password reset successful.')
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: 'Password reset successful.'
+            })
             await commit('setResetCode', null)
             this.$router.push('/login')
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404) {
-                alert('No user found with that email.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'No user found with that email.'
+                })
             } else {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
 
-    async toggleAdmin({ dispatch }, { userid, isadmin }) {
+    async toggleAdmin({ dispatch, commit }, { userid, isadmin }) {
         const { data, error, status } = await supabase.from('user')
             .update({
                 isadmin: isadmin
@@ -407,11 +436,19 @@ export const actions = {
         if (!error) {
             dispatch('adminLoadUsers')
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404) {
-                alert('User is not found.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'User is not found.'
+                })
             } else {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -428,7 +465,7 @@ export const actions = {
             if (!error) {
                 await commit('adminUsers', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminUsers', [])
             }
         }
@@ -439,7 +476,7 @@ export const actions = {
             if (!error) {
                 await commit('adminOrgs', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminOrgs', [])
             }
         }
@@ -450,7 +487,7 @@ export const actions = {
             if (!error) {
                 await commit('adminColls', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminColls', [])
             }
         }
@@ -461,7 +498,7 @@ export const actions = {
             if (!error) {
                 await commit('adminNotes', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminNotes', [])
             }
         }
@@ -480,7 +517,7 @@ export const actions = {
             if (!error) {
                 await commit('adminUserData', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminUserData', [])
             }
         }
@@ -492,7 +529,7 @@ export const actions = {
             if (!error) {
                 await commit('adminUserOrgs', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminUserOrgs', [])
             }
         }
@@ -504,7 +541,7 @@ export const actions = {
             if (!error) {
                 await commit('adminUserColls', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminUserColls', [])
             }
         }
@@ -516,13 +553,13 @@ export const actions = {
             if (!error) {
                 await commit('adminUserNotes', data)
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 await commit('adminUserNotes', [])
             }
         }
     },
 
-    async deleteUser({ dispatch }, { userid }) {
+    async deleteUser({ dispatch, commit }, { userid }) {
         const { data, error, status } = await supabase.from('user')
             .delete()
             .eq('userid', userid)
@@ -530,14 +567,18 @@ export const actions = {
             await dispatch('adminLoadUsers')
             this.$router.push('/admin')
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 400) {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
 
-    async deleteOrg({ dispatch }, { orgid }) {
+    async deleteOrg({ dispatch, commit }, { orgid }) {
         const { data, error, status } = await supabase.from('organization')
             .delete()
             .eq('orgid', orgid)
@@ -545,14 +586,18 @@ export const actions = {
             await dispatch('adminLoadUsers')
             this.$router.push('/admin')
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 400) {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
 
-    async removeFromOrg({ dispatch }, { userid, orgid }) {
+    async removeFromOrg({ dispatch, commit }, { userid, orgid }) {
         const { data, error, status } = await supabase.from('part_of')
             .delete()
             .eq('userid', userid)
@@ -561,8 +606,12 @@ export const actions = {
             await dispatch('loadOrgUsers', { orgid })
             await dispatch('adminLoadOneUser', { userid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -573,11 +622,15 @@ export const actions = {
         if (!error) {
             await commit('orgUsers', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404) {
                 await commit('orgUsers', [])
             } else {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -589,11 +642,15 @@ export const actions = {
         if (!error) {
             await commit('collNotes', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404) {
                 await commit('collNotes', [])
             } else {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -605,12 +662,16 @@ export const actions = {
         if (!error) {
             await commit('setUserData', data[0])
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async basicOnboardingComplete({ dispatch, state }) {
+    async basicOnboardingComplete({ dispatch, state, commit }) {
         const { data, error, status } = await supabase.from('user')
             .update({
                 onboarded: true
@@ -619,14 +680,18 @@ export const actions = {
         if (!error) {
             await dispatch('userData', { email: state.userData.email })
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404 || status === 400) {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
 
-    async noteOnboardingComplete({ dispatch, state }) {
+    async noteOnboardingComplete({ dispatch, state, commit }) {
         const { data, error, status } = await supabase.from('user')
             .update({
                 noteonboarded: true
@@ -635,9 +700,13 @@ export const actions = {
         if (!error) {
             await dispatch('userData', { email: state.userData.email })
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404 || status === 400) {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -649,7 +718,7 @@ export const actions = {
         if (!error) {
             await commit('publicOrgs', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('publicOrgs', [])
         }
     },
@@ -662,12 +731,12 @@ export const actions = {
             if (data.length == 0) await commit('foundOrg', null)
             else await commit('foundOrg', data[0])
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('foundOrg', null)
         }
     },
 
-    async joinOrg({ dispatch, state }, { orgid }) {
+    async joinOrg({ dispatch, state, commit }, { orgid }) {
         const { data, error, status } = await supabase.from('part_of')
             .insert({
                 userid: state.userData.userid,
@@ -675,18 +744,30 @@ export const actions = {
             })
         if (!error) {
             await dispatch('orgs')
-            alert('You have been successfully added to the organization.')
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: 'You have been successfully added to the organization.'
+            })
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 409) {
-                alert('You are already a member of this organization.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'You are already a member of this organization.'
+                })
             } else if (status === 400) {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
 
-    async toggleOrg({ dispatch }, { orgid, isPrivate }) {
+    async toggleOrg({ dispatch, commit }, { orgid, isPrivate }) {
         const { data, error, status } = await supabase.from('organization')
             .update({
                 isprivate: isPrivate
@@ -695,16 +776,24 @@ export const actions = {
         if (!error) {
             await dispatch('adminLoadUsers')
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404) {
-                alert('Organization not found.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Organization not found.'
+                })
             } else if (status === 400) {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
 
-    async createOrg({ dispatch }, { orgname, isPrivate }) {
+    async createOrg({ dispatch, commit }, { orgname, isPrivate }) {
         const { data, error, status } = await supabase.from('organization')
             .insert({
                 orgname: orgname,
@@ -715,14 +804,22 @@ export const actions = {
         if (!error) {
             await dispatch('joinOrg', { orgid: data[0].orgid })
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 409) {
-                alert('An organization with this name already exists.')
-            } else alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'An organization with this name already exists.'
+                })
+            } else await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async updateCollName({ dispatch }, { collectionid, newName, orgid }) {
+    async updateCollName({ dispatch, commit }, { collectionid, newName, orgid }) {
         const { data, error, status } = await supabase.from('collection')
             .update({
                 collectionname: newName
@@ -731,10 +828,18 @@ export const actions = {
         if (!error) {
             await dispatch('collections', { orgid })
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404) {
-                alert('Collection not found.')
-            } else alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Collection not found.'
+                })
+            } else await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -745,7 +850,7 @@ export const actions = {
         if (!error) {
             await commit('collsSharedWithMe', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('collsSharedWithMe', [])
         }
     },
@@ -757,7 +862,7 @@ export const actions = {
         if (!error) {
             await commit('notesSharedWithMe', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('notesSharedWithMe', [])
         }
     },
@@ -776,7 +881,7 @@ export const actions = {
         if (!error) {
             await commit('results', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('results', [])
         }
     },
@@ -789,7 +894,7 @@ export const actions = {
         if (!error) {
             await commit('sharedCollList', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('sharedCollList', [])
         }
     },
@@ -802,12 +907,12 @@ export const actions = {
         if (!error) {
             await commit('sharedNoteList', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('sharedNoteList', [])
         }
     },
 
-    async shareColl({ dispatch, state }, { collection, users }) {
+    async shareColl({ dispatch, state, commit }, { collection, users }) {
         let success = true
         for (let i = 0; i < users.length; ++i) {
             const { data, error, status } = await supabase.from('shared_collection')
@@ -818,19 +923,27 @@ export const actions = {
                 })
             if (!error) continue
             else if (error) {
-                console.log(error)
+                console.error(error)
                 success = false
             }
         }
         await dispatch('getSharedCollList', { collection })
         if (success) {
-            alert('Your collection has successfully been shared')
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: 'Your collection has successfully been shared'
+            })
         } else if (!success) {
-            alert('Sharing has completed, but an error has occurred.')
+            await commit('setAlert', {
+                color: 'warning',
+                icon: '$warning',
+                text: 'Sharing has completed, but an error has occurred.'
+            })
         }
     },
 
-    async shareNote({ dispatch, state }, { note, users }) {
+    async shareNote({ dispatch, state, commit }, { note, users }) {
         let success = true
         for (let i = 0; i < users.length; ++i) {
             const { data, error, status } = await supabase.from('shared_note')
@@ -841,19 +954,27 @@ export const actions = {
                 })
             if (!error) continue
             else if (error) {
-                console.log(error)
+                console.error(error)
                 success = false
             }
         }
         await dispatch('getSharedNoteList', { note })
         if (success) {
-            alert('Your note has successfully been shared')
+            await commit('setAlert', {
+                color: 'success',
+                icon: 'success',
+                text: 'Your note has successfully been shared'
+            })
         } else if (!success) {
-            alert('Sharing has completed, but an error has occurred.')
+            await commit('setAlert', {
+                color: 'warning',
+                icon: '$warning',
+                text: 'Sharing has completed, but an error has occurred.'
+            })
         }
     },
 
-    async unshareColl({ dispatch }, { collection, userid, type }) {
+    async unshareColl({ dispatch, commit }, { collection, userid, type }) {
         const { data, error, status } = await supabase.from('shared_collection')
             .delete()
             .eq('collectionid', collection.collectionid)
@@ -863,12 +984,16 @@ export const actions = {
                 ? await dispatch('getSharedCollList', { collection })
                 : await dispatch('loadSharedWithMe')
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async unshareNote({ dispatch }, { note, userid, type }) {
+    async unshareNote({ dispatch, commit }, { note, userid, type }) {
         const { data, error, status } = await supabase.from('shared_note')
             .delete()
             .eq('noteid', note.noteid)
@@ -878,12 +1003,16 @@ export const actions = {
                 ? await dispatch('getSharedNoteList', { note })
                 : await dispatch('loadSharedWithMe')
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again'
+            })
         }
     },
 
-    async createCollection({ dispatch, state }, { collectionname, orgid }) {
+    async createCollection({ dispatch, state, commit }, { collectionname, orgid }) {
         const { data, error, status } = await supabase.from('collection')
             .insert({
                 collectionname: collectionname,
@@ -894,16 +1023,24 @@ export const actions = {
             await dispatch('collections', { orgid })
             await dispatch('allColls')
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (status === 404) {
-                alert('Organization or user not found, unable to create collection.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Organization or user not found, unable to create collection.'
+                })
             } else {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
 
-    async createNote({ dispatch }, { notename, collectionid, orgid }) {
+    async createNote({ dispatch, commit }, { notename, collectionid, orgid }) {
         const { data, error, status } = await supabase.from('note')
             .insert({
                 notename: notename,
@@ -914,8 +1051,12 @@ export const actions = {
             await dispatch('collections', { orgid })
             await dispatch('notes', { collectionid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -928,7 +1069,7 @@ export const actions = {
         if (!error) {
             await commit('setOrgs', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('setOrgs', [])
         }
     },
@@ -940,7 +1081,7 @@ export const actions = {
         if (!error) {
             await commit('allColls', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('allColls', [])
         }
     },
@@ -955,7 +1096,7 @@ export const actions = {
         if (!error) {
             await commit('setCollections', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('setCollections', [])
         }
     },
@@ -969,7 +1110,7 @@ export const actions = {
             await commit('setNotes', data)
             localStorage.setItem('collNotes', JSON.stringify(data))
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('setNotes', [])
         }
     },
@@ -992,8 +1133,12 @@ export const actions = {
             await dispatch('getWhiteboards', { noteid: noteid })
             this.$router.push('/note')
         } else if (error) {
-            console.log(error)
-            alert('An error occurred opening the note, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1008,7 +1153,7 @@ export const actions = {
         if (!error) {
             await commit('setUserData', data[0])
         } else if (error) {
-            console.log(error)
+            console.error(error)
         }
     },
 
@@ -1024,7 +1169,7 @@ export const actions = {
             await commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
         } else if (error) {
-            console.log(error)
+            console.error(error)
         }
     },
 
@@ -1042,8 +1187,12 @@ export const actions = {
             await commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
         } else if (error) {
-            console.log(error)
-            alert('An error occurred updating the note name, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1055,12 +1204,12 @@ export const actions = {
             await commit('links', data)
             localStorage.setItem('links', JSON.stringify(state.links))
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('links', [])
         }
     },
 
-    async addLink({ dispatch }, { url, noteid }) {
+    async addLink({ dispatch, commit }, { url, noteid }) {
         const { data, error, status } = await supabase.from('links')
             .insert({
                 url: url,
@@ -1069,12 +1218,16 @@ export const actions = {
         if (!error) {
             await dispatch('getLinks', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async updateLink({ dispatch }, { linkid, editLink, noteid }) {
+    async updateLink({ dispatch, commit }, { linkid, editLink, noteid }) {
         const { data, error, status } = await supabase.from('links')
             .update({
                 url: editLink
@@ -1083,24 +1236,28 @@ export const actions = {
         if (!error) {
             await dispatch('getLinks', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            if (status === 404) {
-                alert('Link not found.')
-            } else {
-                alert('Something went wrong, please try again.')
-            }
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async deleteLink({ dispatch }, { linkid, noteid }) {
+    async deleteLink({ dispatch, commit }, { linkid, noteid }) {
         const { data, error, status } = await supabase.from('links')
             .delete()
             .eq('linkid', linkid)
         if (!error) {
             await dispatch('getLinks', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1111,12 +1268,12 @@ export const actions = {
         if (!error) {
             await commit('setPreparedWords', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('setPreparedWords', [])
         }
     },
 
-    async addPreparedWord({ dispatch }, { word, noteid }) {
+    async addPreparedWord({ dispatch, commit }, { word, noteid }) {
         const { data, error, status } = await supabase.from('prepared_words')
             .insert({
                 word: word,
@@ -1125,20 +1282,28 @@ export const actions = {
         if (!error) {
             await dispatch('getPreparedWords', { noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async removePreparedWord({ dispatch }, { wordid, noteid }) {
+    async removePreparedWord({ dispatch, commit }, { wordid, noteid }) {
         const { data, error, status } = await supabase.from('prepared_words')
             .delete()
             .eq('wordid', wordid)
         if (!error) {
             await dispatch('getPreparedWords', { noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1149,8 +1314,12 @@ export const actions = {
         if (!error) {
             await commit('setPreparedWords', [])
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1161,12 +1330,12 @@ export const actions = {
         if (!error) {
             await commit('setWhiteboards', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('setWhiteboards', [])
         }
     },
 
-    async addWhiteboard({ dispatch }, { dataURL, noteid }) {
+    async addWhiteboard({ dispatch, commit }, { dataURL, noteid }) {
         let currentWhiteboard = localStorage.getItem('current_whiteboard')
         if (currentWhiteboard != null && currentWhiteboard != undefined && 
         currentWhiteboard != 'null' && currentWhiteboard != 'undefined') {
@@ -1185,8 +1354,12 @@ export const actions = {
                 localStorage.setItem('current_whiteboard', JSON.stringify(data[0]))
                 await dispatch('getWhiteboards', { noteid: noteid })
             } else if (error) {
-                console.log(error)
-                alert('Something went wrong, please try again.')
+                console.error(error)
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -1202,19 +1375,23 @@ export const actions = {
             await commit('updateCurrentWhiteboard', data[0])
             localStorage.setItem('current_whiteboard', JSON.stringify(data[0]))
         } else if (error) {
-            console.log(error)
+            console.error(error)
         }
     },
 
-    async deleteWhiteboard({ dispatch }, { boardid, noteid }) {
+    async deleteWhiteboard({ dispatch, commit }, { boardid, noteid }) {
         const { data, error, status } = await supabase.from('whiteboards')
             .delete()
             .eq('boardid', boardid)
         if (!error) {
             await dispatch('getWhiteboards', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1226,12 +1403,12 @@ export const actions = {
             await commit('flashcards', data)
             localStorage.setItem('flashcards', JSON.stringify(state.flashcards))
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('flashcards', [])
         }
     },
 
-    async addFlashcard({ dispatch }, { newPrompt, newAnswer, noteid }) {
+    async addFlashcard({ dispatch, commit }, { newPrompt, newAnswer, noteid }) {
         const { data, error, status } = await supabase.from('flashcards')
             .insert({
                 cardprompt: newPrompt,
@@ -1241,12 +1418,16 @@ export const actions = {
         if (!error) {
             await dispatch('getFlashcards', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async updateFlashcard({ dispatch }, { cardid, editPrompt, editAnswer, noteid }) {
+    async updateFlashcard({ dispatch, commit }, { cardid, editPrompt, editAnswer, noteid }) {
         const { data, error, status } = await supabase.from('flashcards')
             .update({
                 cardprompt: editPrompt,
@@ -1256,28 +1437,32 @@ export const actions = {
         if (!error) {
             await dispatch('getFlashcards', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            if (status === 404) {
-                alert('Flashcard not found')
-            } else {
-                alert('Something went wrong, please try again.')
-            }
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async deleteFlashcard({ dispatch }, { cardid, noteid }) {
+    async deleteFlashcard({ dispatch, commit }, { cardid, noteid }) {
         const { data, error, status } = await supabase.from('flashcards')
             .delete()
             .eq('cardid', cardid)
         if (!error) {
             await dispatch('getFlashcards', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async addPlan({ dispatch }, { date, time, amount, priority, noteid}) {
+    async addPlan({ dispatch, commit }, { date, time, amount, priority, noteid}) {
         const { data, error, status } = await supabase.from('study_plan')
             .insert({
                 studydate: date + 'T00:00:00.000Z',
@@ -1289,12 +1474,16 @@ export const actions = {
         if (!error) {
             await dispatch('getStudyPlans', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async updatePlan({ dispatch }, { planid, completed, noteid }) {
+    async updatePlan({ dispatch, commit }, { planid, completed, noteid }) {
         const { data, error, status } = await supabase.from('study_plan')
             .update({
                 studycompleted: completed
@@ -1303,12 +1492,12 @@ export const actions = {
         if (!error) {
             await dispatch('getStudyPlans', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            if (status === 404) {
-                alert('Plan not found.')
-            } else {
-                alert('Something went wrong, please try again.')
-            }
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1333,7 +1522,7 @@ export const actions = {
             }
             await commit('allPlans', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('allPlans', [])
         }
     },
@@ -1360,13 +1549,13 @@ export const actions = {
             localStorage.setItem('studyPlans', JSON.stringify(data))
             await commit('studyPlans', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
             await commit('studyPlans', [])
             localStorage.setItem('studyPlans', JSON.stringify([]))
         }
     },
 
-    async deletePlan({ dispatch }, { planid, noteid }) {
+    async deletePlan({ dispatch, commit }, { planid, noteid }) {
         const { data, error, status } = await supabase.from('study_plan')
             .delete()
             .eq('planid', planid)
@@ -1374,8 +1563,12 @@ export const actions = {
             if (noteid === null) await dispatch('getAllPlans')
             else await dispatch('getStudyPlans', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1386,8 +1579,12 @@ export const actions = {
             if (!error) {
                 await commit('setEmailList', data)
             } else {
-                console.log(error)
-                alert('Something went wrong, please try again.')
+                console.error(error)
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         } else if (group == 'Paid Users') {
             const { data, error, status } = await supabase.from('user')
@@ -1396,8 +1593,12 @@ export const actions = {
             if (!error) {
                 await commit('setEmailList', data)
             } else {
-                console.log(error)
-                alert('Something went wrong, please try again.')
+                console.error(error)
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         } else if (group == 'Free Users') {
             const { data, error, status } = await supabase.from('user')
@@ -1406,8 +1607,12 @@ export const actions = {
             if (!error) {
                 await commit('setEmailList', data)
             } else {
-                console.log(error)
-                alert('Something went wrong, please try again.')
+                console.error(error)
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -1418,10 +1623,18 @@ export const actions = {
         })
         if (!error) {
             await commit('setSupabaseUser', user)
-            alert("Your password has been updated")
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: "Your password has been updated"
+            })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1435,8 +1648,12 @@ export const actions = {
         if (!error) {
             await commit('setUserData', data[0])
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1487,8 +1704,12 @@ export const actions = {
             });
             await commit('setExportData', organizedData)
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1501,7 +1722,7 @@ export const actions = {
             }
             await commit('setFiles', data)
         } else if (error) {
-            console.log(error)
+            console.error(error)
         }
     },
 
@@ -1512,11 +1733,11 @@ export const actions = {
             file.url = data.publicUrl
             return file
         } else if (error) {
-            console.log(error)
+            console.error(error)
         }
     },
 
-    async uploadFiles({ dispatch }, { files, noteid, userid }) {
+    async uploadFiles({ dispatch, commit }, { files, noteid, userid }) {
         let fail = false
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -1525,7 +1746,11 @@ export const actions = {
                 .upload(`${noteid}/${file.name}`, file)
             if (error) fail = true
         }
-        if (fail) alert('One or more files failed to upload.')
+        if (fail) await commit('setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'One or more files failed to upload.'
+        })
         await dispatch('getFiles', { noteid: noteid })
     },
 
@@ -1548,14 +1773,18 @@ export const actions = {
         await deleteIt()
     },
 
-    async removeFile({ dispatch }, { noteid, filename, userid }) {
+    async removeFile({ dispatch, commit }, { noteid, filename, userid }) {
         const { data, error } = await supabaseService.storage.from(userid)
             .remove([`${noteid}/${filename}`])
         if (!error) {
             await dispatch('getFiles', { noteid: noteid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1569,7 +1798,7 @@ export const actions = {
             if (!error) {
                 return true
             } else if (error) {
-                console.log(error)
+                console.error(error)
                 return false
             }
         }
@@ -1602,14 +1831,14 @@ export const actions = {
                     body: JSON.stringify(body)
                 })
             } catch (err) {
-                console.log(err)
+                console.error(err)
             }
             await dispatch('createBucket', { email: email })
             await commit('googleSuccess', true)
         }
     },
 
-    async signup({ dispatch }, { firstname, lastname, email, password }) {
+    async signup({ dispatch, commit }, { firstname, lastname, email, password }) {
         email = email.toLowerCase()
         const body= {
             'name': firstname,
@@ -1637,7 +1866,7 @@ export const actions = {
                         body: JSON.stringify(body)
                     })
                 } catch (err) {
-                    console.log(err)
+                    console.error(err)
                 }
                 await dispatch('createBucket', { email: email })
                 await dispatch('login', {
@@ -1648,9 +1877,17 @@ export const actions = {
             }
         } else if (error) {
             if (status === 409) {
-                alert('An account already exists with that email.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'An account already exists with that email.'
+                })
             } else {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -1682,11 +1919,19 @@ export const actions = {
             await commit('toggleLoginDialog', false)
             this.$router.push('/')
         } else if (error) {
-            console.log(error)
+            console.error(error)
             if (error.message == 'Invalid login credentials') {
-                alert('The provided email and/or password is invalid. Please check your details and try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'The provided email and/or password is invalid. Please check your details and try again.'
+                })
             } else {
-                alert('Something went wrong, please try again.')
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
             }
         }
     },
@@ -1704,7 +1949,7 @@ export const actions = {
         this.$router.push('/login')
     },
 
-    async leaveOrg({ dispatch, state }, { orgid }) {
+    async leaveOrg({ dispatch, state, commit }, { orgid }) {
         const { data, error, status } = await supabase.from('part_of')
             .delete()
             .eq('orgid', orgid)
@@ -1712,24 +1957,32 @@ export const actions = {
         if (!error) {
             await dispatch('orgs')
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async deleteCollection({ dispatch }, { collectionid, orgid }) {
+    async deleteCollection({ dispatch, commit }, { collectionid, orgid }) {
         const { data, error, status } = await supabase.from('collection')
             .delete()
             .eq('collectionid', collectionid)
         if (!error) {
             await dispatch('collections', { orgid: orgid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async deleteNote({ dispatch }, { noteid, collectionid }) {
+    async deleteNote({ dispatch, commit }, { noteid, collectionid }) {
         const { data, error, status } = await supabase.from('note')
             .delete()
             .eq('noteid', noteid)
@@ -1737,8 +1990,12 @@ export const actions = {
             if (collectionid === undefined) await dispatch('adminLoadUsers')
             else await dispatch('notes', { collectionid: collectionid })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
@@ -1755,7 +2012,7 @@ export const actions = {
         })
         if (!error) return true
         else if (error) {
-            console.log(error)
+            console.error(error)
             return false
         }
     },
@@ -1813,17 +2070,25 @@ export const actions = {
                     body: JSON.stringify(body)
                 })
             } catch(err) {
-                console.log(err)
+                console.error(err)
             }
             await commit('setSupabaseUser', null)
             await commit('setSupabaseSession', null)
             await commit('setUserData', null)
             localStorage.clear()
             this.$router.push('/login')
-            alert("Your account has been deleted")
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: "Your account has been deleted"
+            })
         } else if (error) {
-            console.log(error)
-            alert('Something went wrong, please try again.')
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     }
 }

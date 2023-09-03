@@ -101,7 +101,13 @@ export default {
 
     methods: {
         async login() {
-            if (this.email === "" || this.password === "") alert('No field may be left empty')
+            if (this.email === "" || this.password === "") {
+                await this.$store.commit('users/setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'No field may be left empty'
+                })
+            }
             else {
                 this.loading = true
                 await this.$store.dispatch('users/login', {

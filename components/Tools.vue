@@ -82,12 +82,11 @@ export default {
     methods: {
         async toggleStudy () {
             await this.$store.commit('users/study', !this.studyMode)
-                if (!this.studyMode) {
-                alert('Study mode has been turned off.')
-            }
-            else {
-                alert('Study mode has been turned on.')
-            }
+            await this.$store.commit('users/setAlert', {
+                color: 'info',
+                icon: '$info',
+                text: `Study mode has been turned ${this.studyMode ? 'on' : 'off'}.`
+            })
         },
     },
 

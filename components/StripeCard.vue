@@ -64,9 +64,17 @@ export default {
         } else {
             if (this.signupInfo.firstname === "" || this.signupInfo.lastname === ""
                 || this.signupInfo.email === "" || this.signupInfo.password === "") {
-                alert('No field may be left empty')
+                await this.$store.commit('users/setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: `No field may be left empty`
+            })
             } else if (this.signupInfo.password.length < 6) {
-                alert('Your password must be at least 6 characters')
+                await this.$store.commit('users/setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: `Your password must be at least 6 characters`
+                })
             } else {
                 this.selected = i
                 this.loading = true

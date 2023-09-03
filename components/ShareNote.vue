@@ -81,20 +81,26 @@ export default {
       }
     },
 
-    pushToList (r) {
+    async pushToList (r) {
         let counter1 = 0
         let counter2 = 0
 
         if ((this.sharedNoteList.length + this.newShareList.length == 3) && this.userData.subscriptionstatus == 'inactive') {
-          if (confirm('The maximum sharing limit for this note on your current plan has been reached. Click \'OK\' to be redirected to upgrade your account.')) {
-            window.location.href = `${this.premiumLink}?prefilled_email=${this.encodedEmail}`
-          }
+          await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'The maximum sharing limit for this note on your current plan has been reached. Please upgrade your account to receive unlimited sharing.'
+          })
           return
         }
 
         for (let i = 0; i < this.sharedNoteList.length; ++i) {
           if (this.sharedNoteList[i].userid === r.userid) {
-            alert(`${r.email} has already been added`)
+            await this.$store.commit('users/setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: `${r.email} has already been added`
+            })
             break
           }
           else counter1++
@@ -103,7 +109,11 @@ export default {
         if (counter1 === this.sharedNoteList.length) {
           for (let i = 0; i < this.newShareList.length; ++i) {
             if (this.newShareList[i].userid === r.userid) {
-              alert(`${r.email} has already been added`)
+              await this.$store.commit('users/setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: `${r.email} has already been added`
+            })
               break
             }
             else counter2++

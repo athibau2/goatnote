@@ -1,5 +1,9 @@
 <template>
     <v-app>
+        <head>
+          <script src='https://cdn.jsdelivr.net/npm/pdfmake@latest/build/pdfmake.min.js'></script>
+          <script src='https://cdn.jsdelivr.net/npm/pdfmake@latest/build/vfs_fonts.min.js'></script>
+        </head>
         <v-col v-if="(userData !== null && userData !== undefined)">
           <v-row justify="center" align="center">
             <v-card class="account-card" elevation="1" outlined width="500">
@@ -43,9 +47,6 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
-                <v-btn text class="flat-btn" :disabled="loading" @click="deleteAccount()">
-                  <Loading v-if="loading" /> {{loading ? null : 'Delete Account'}}
-                </v-btn>
                 <v-btn class="good-btn" v-if="providers?.includes('email')" @click="updatePass()">Update Password</v-btn>
               </v-card-actions>
             </v-card>
@@ -92,6 +93,35 @@
               </v-card-text>
             </v-card>
           </v-row>
+
+          <!-- <v-row justify="center" align="center">
+            <v-card class="account-card" elevation="1" outlined width="500">
+              <v-card-title class="name">Export Data</v-card-title>
+              <v-card-text class="card-text">
+                Performing this function will download all of your data. This includes your notes, flashcards, whiteboards, and files. They will be grouped by your organizations and collections.
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text class="flat-btn" :disabled="exporting" @click="exportData()">
+                  <Loading v-if="exporting" /> {{exporting ? null : 'Export Data'}}
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-row> -->
+
+          <v-divider style="margin: 45px auto 20px auto; width: 500px;" />
+
+          <v-row justify="center" align="center">
+            <v-card class="account-card" elevation="1" outlined width="500">
+              <v-card-title class="name" style="color: #E57373;">Danger</v-card-title>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text class="flat-btn" :disabled="loading" @click="deleteAccount()">
+                  <Loading v-if="loading" /> {{loading ? null : 'Delete Account'}}
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-row>
         </v-col>
     </v-app>
 </template>
@@ -99,6 +129,12 @@
 <script>
 import { stripePortal } from "../store/auth"
 import Loading from '~/components/Loading.vue'
+import html2pdf from 'html2pdf.js';
+import JSZip from 'jszip';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+const htmlToPdfmake = require("html-to-pdfmake");
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 export default {
   name: 'AccountPage',
@@ -119,6 +155,7 @@ export default {
 
   data () {
     return {
+      exporting: false,
       confirmNewPass: "",
       newPass: "",
       show1: false,
@@ -130,13 +167,25 @@ export default {
   },
 
   methods: {
-    updatePass () {
+    async updatePass () {
       if (!this.passMatch) {
-        alert('Passwords do not match.')
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'Passwords do not match.'
+        })
       } else if (this.confirmNewPass === "" || this.newPass === "") {
-        alert('No field may be left empty')
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'No field may be left empty.'
+        })
       } else if (this.newPass.length < 6) {
-        alert('Your password must be at least 6 characters')
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'Your password must be at least 6 characters.'
+        })
       } else {
         this.$store.dispatch('users/updatePass', {
           newPass: this.newPass,
@@ -148,12 +197,122 @@ export default {
 
     async deleteAccount () {
       if (this.userData.subscriptionstatus == 'active') {
-        alert('You cannot delete your account while subscribed to the Premium plan. Please first cancel your subscription, then delete your account.')
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'You cannot delete your account while subscribed to the Premium plan. Please first cancel your subscription, then delete your account.'
+        })
       } else if (confirm("Are you sure you want to delete your account?")) {
         this.loading = true
         await this.$store.dispatch('users/deleteAccount')
         this.loading = false
       }
+    },
+
+    async exportData() {
+      this.exporting = true
+      await this.$store.dispatch('users/exportData')
+      const zipBlob = await this.createZip(this.organizedData)
+      this.downloadZip(zipBlob);
+      this.exporting = false
+    },
+
+    async createZip(organizedData) {
+      const zip = new JSZip();
+
+      for (const orgId in organizedData) {
+        const org = organizedData[orgId];
+        const orgFolder = zip.folder(org.orgname);
+
+        for (const collectionId in org.collections) {
+          const collection = org.collections[collectionId];
+          const collectionFolder = orgFolder.folder(collection.collectionname);
+
+          for (const noteId in collection.notes) {
+            const note = collection.notes[noteId];
+            const pdf = await this.noteToPdf(note);
+            const blob = pdf;
+            const fileName = note.notename.split(' ').join('-').split('/').join('-').split('\\').join('-').split(',').join('-') // remove spaces, commas, and slashes
+            collectionFolder.file(`${fileName}.pdf`, blob);
+          }
+        }
+      }
+      return zip.generateAsync({ type: 'blob' });
+    },
+
+    async noteToPdf(note) {
+      // const el = document.createElement('div');
+      // el.innerHTML = note.typednotes;
+      let notesHtml = `
+        <div>
+          ${note.typednotes}
+        </div>
+      `
+
+      let flashcardsHtml = ``
+      note.flashcards.forEach(card => {
+        let cardHtml = `<p><b>${card.cardprompt}:</b>&ensp;${card.cardanswer}</p>`
+        flashcardsHtml += cardHtml
+      })
+
+      let whiteboardsHtml = ``
+      note.whiteboards.forEach(board => {
+        let boardHtml = `<img src="${board.data}" /><br>`
+        whiteboardsHtml += boardHtml
+      })
+
+      let html = htmlToPdfmake(`
+        <div>
+          ${notesHtml}
+          <div>
+            <h1>Flashcards</h1>
+            ${flashcardsHtml}
+          </div>
+          <div>
+            <h1>Whiteboards</h1>
+            ${whiteboardsHtml}
+          </div>
+        </div>
+      `);
+
+      const dd = {content: html};
+      const pdfBlob = await new Promise((resolve, reject) => {
+        const pdfDoc = pdfMake.createPdf(dd);
+
+        pdfDoc.getBuffer(buffer => {
+          const blob = new Blob([buffer], { type: 'application/pdf' });
+          resolve(blob);
+        });
+      });
+
+      // // Add the flashcards
+      // const flashcardList = document.createElement('ul');
+      // note.flashcards.forEach(card => {
+      //   const li = document.createElement('li');
+      //   li.innerText = `Prompt: ${card.cardprompt}, Answer: ${card.cardanswer}`;
+      //   flashcardList.appendChild(li);
+      // });
+      // el.appendChild(flashcardList);
+
+
+      // const whiteboardList = document.createElement('ul');
+      // note.whiteboards.forEach(board => {
+      //   const img = document.createElement('img');
+      //   img.src = board.data;
+      //   whiteboardList.appendChild(img);
+      // });
+      // el.appendChild(whiteboardList);
+
+      // Convert the element to a PDF
+      // const pdf = await html2pdf().from(el).outputPdf();
+      return pdfBlob;
+    },
+
+    async downloadZip(zipBlob) {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(zipBlob);
+      link.download = "exported_data.zip";
+      link.click();
     }
   },
 
@@ -168,6 +327,10 @@ export default {
 
     supabaseSession () {
       return this.$store.state.users.supabaseSession
+    },
+
+    organizedData () {
+      return this.$store.state.users.dataToExport
     },
 
     providers () {

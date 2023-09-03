@@ -355,10 +355,14 @@ export default {
       this.$store.commit('users/newOrg', true)
     },
 
-    newCollection () {
+    async newCollection () {
       this.creating = true
       if (this.orgs.length === 0) {
-        alert('You must first create an organization before you can create a collection.')
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'You must first create an organization before you can create a collection.'
+        })
       }
       else {
         this.$store.commit('users/newNote', false)
@@ -431,9 +435,14 @@ export default {
       })
     },
 
-    createOrg () {
-      if (this.newOrgName === "") alert('No field may be left empty')
-      else {
+    async createOrg () {
+      if (this.newOrgName === "") {
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'No field may be left empty'
+        })
+      } else {
         this.$store.dispatch('users/createOrg', {
           orgname: this.newOrgName,
           isPrivate: this.isPrivate
@@ -443,7 +452,13 @@ export default {
     },
 
     async createCollection () {
-      if (this.newCollName === "") alert('No field may be left empty')
+      if (this.newCollName === "") {
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'No field may be left empty.'
+        })
+      }
       else {
         await this.$store.dispatch('users/createCollection', {
           collectionname: this.newCollName,
@@ -453,8 +468,14 @@ export default {
       }
     },
 
-    createNote () {
-      if (this.newNoteName === "") alert('No field may be left empty')
+    async createNote () {
+      if (this.newNoteName === "") {
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'No field may be left empty.'
+        })
+      }
       else {
         this.$store.dispatch('users/createNote', {
           notename: this.newNoteName,

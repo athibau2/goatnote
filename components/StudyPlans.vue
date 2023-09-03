@@ -177,7 +177,11 @@
 
             async addPlan () {
                 if (this.studyPlans.length === 3) {
-                    alert('You can only have up to 3 study plans for each note. Please delete an old plan and try again')
+                    await this.$store.commit('users/setAlert', {
+                        color: 'error',
+                        icon: '$error',
+                        text: 'You can only have up to 3 study plans for each note. Please delete an old plan and try again'
+                    })
                     this.showAddPlan = false
                 } else {
                     await this.$store.dispatch('users/addPlan', {
