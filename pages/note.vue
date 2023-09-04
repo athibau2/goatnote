@@ -419,7 +419,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import CKEditor from "@ckeditor/ckeditor5-vue2"
 import suneditor from 'suneditor'
 // import 'suneditor/dist/css/suneditor.min.css'
-import plugins from 'suneditor/src/plugins'
+import plugins from '~/node_modules/suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 
