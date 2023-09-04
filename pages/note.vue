@@ -3,6 +3,8 @@
     <head>
       <script src="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/js/shepherd.min.js"></script>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css"/>
+      <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
     </head>
 
     <v-container>
@@ -416,7 +418,7 @@ import Editor from '@tinymce/tinymce-vue'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import CKEditor from "@ckeditor/ckeditor5-vue2"
 import suneditor from 'suneditor'
-import 'suneditor/dist/css/suneditor.min.css'
+// import 'suneditor/dist/css/suneditor.min.css'
 import plugins from 'suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
