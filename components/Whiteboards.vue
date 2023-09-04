@@ -5,16 +5,12 @@
     >
         <v-card class="dialog-card" elevation="5">
             <v-card-title class="basic-header justify-center">My Whiteboards</v-card-title>
-            <v-card-subtitle class="text-center">
-              Click the whiteboard you want to switch to, then click 'Replace All'.
-              Or, to combine whiteboards, select one of the other options.
-            </v-card-subtitle>
             <v-divider style="margin-bottom: 10px;" />
             <v-card-text>
                 <div class="whiteboard-grid">
                     <div class="whiteboard-wrapper" v-for="(board, i) in whiteboards" :key="i">
                         <button class="whiteboard-btn" @click="openWhiteboard(board)">
-                            <img class="whiteboard" :src="board.data" />
+                          <span>{{board.name}}</span>
                         </button>
                         <v-btn class="overlay-btn" @click="deleteWhiteboard(board)" small icon>
                             <v-icon>mdi-close</v-icon>
@@ -35,7 +31,7 @@
 export default {
   name: 'WhiteboardsComponent',
 
-  created () {
+  async created () {
     window.addEventListener('resize', this.resizeHandler)
   },
 
@@ -104,19 +100,10 @@ export default {
 }
 
 .whiteboard-wrapper {
-    position: relative;
-}
-
-.overlay-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
-.whiteboard {
     border: solid 1px;
-    max-height: 100px;
-    margin: 3px;
+    border-radius: 10px;
+    padding: 6px;
+    margin: 4px;
 }
 
 .whiteboard:hover {

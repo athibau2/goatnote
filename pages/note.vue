@@ -5,6 +5,7 @@
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css"/>
       <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
       <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
+      <script src="https://www.whiteboard.team/dist/api.js"></script>
     </head>
 
     <v-container>
@@ -143,7 +144,7 @@
             <v-tooltip top v-if="editorOrWhiteboard == 1">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon
-                  @click="newWhiteboard()"
+                  @click="newWhiteboard(true)"
                   v-on="on"
                   v-bind="attrs"
                 >
@@ -190,7 +191,8 @@
               <!-- </div> -->
             </div>
             <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
-              <div id="painterro"></div>
+              <!-- <div id="painterro"></div> -->
+              <div style="width: 100%; height: 100%;" id="wt-container"></div>
             </div>
           </v-col>
 
@@ -349,7 +351,7 @@
           <v-tooltip right v-if="editorOrWhiteboard == 1">
             <template v-slot:activator="{ on, attrs }">
               <v-btn icon
-                @click="newWhiteboard()"
+                @click="newWhiteboard(true)"
                 v-on="on"
                 v-bind="attrs"
               >
@@ -392,7 +394,8 @@
             ></textarea>
           </div>
           <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
-            <div id="painterro"></div>
+            <!-- <div id="painterro"></div> -->
+            <div style="width: 100%; height: 100%;" id="wt-container"></div>
           </div>
         </v-col>
 
@@ -418,10 +421,11 @@ import Editor from '@tinymce/tinymce-vue'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import CKEditor from "@ckeditor/ckeditor5-vue2"
 import suneditor from 'suneditor'
-// import 'suneditor/dist/css/suneditor.min.css'
+import 'suneditor/dist/css/suneditor.min.css'
 import plugins from '~/node_modules/suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
+import randomstring from 'randomstring'
 
 export default {
   name: 'NotePage',
@@ -514,6 +518,7 @@ export default {
           }
         }),
         ptro: null,
+        whiteboard: null,
         wordsToRemove: [],
         editor: ClassicEditor,
         editorConfig: {
@@ -547,47 +552,37 @@ export default {
       }
     },
 
-    editorOrWhiteboard(newValue, oldValue) {
+    async editorOrWhiteboard(newValue, oldValue) {
       if (newValue == 1) {
         this.sunEditor.hide()
-        this.$nextTick(() => {
-          this.ptro = Painterro({
-            id: 'painterro',
-            defaultTool: 'brush',
-            defaultTextStrokeAndShadow: false,
-            activeColor: '#000000',
-            defaultLineWidth: '3',
-            defaultEraserWidth: '20',
-            hiddenTools: ['close', 'resize', 'pixelize', 'settings'],
-            toolbarPosition: 'top',
-            saveHandler: async (image, done) => {
-              this.blobToDataURL(image.asBlob(), async (dataURL) => {
-                await this.$store.dispatch('users/addWhiteboard', { 
-                  dataURL: dataURL,
-                  noteid: this.currentNote.noteid
-                });
-                done(false);
-              });
-            },
-            onChange: async () => {
-              this.ptro.save()
-            }
-          })
+        this.$nextTick(async () => {
+          this.getCurrentWhiteboard()
 
-          let currentWhiteboard = localStorage.getItem('current_whiteboard')
-          if (currentWhiteboard != null && currentWhiteboard != undefined && 
-          currentWhiteboard != 'null' && currentWhiteboard != 'undefined') {
-            let whiteboardObj = JSON.parse(currentWhiteboard)
-            this.ptro.show(whiteboardObj.data)
-          } else {
-            if (this.whiteboards.length > 0) {
-              localStorage.setItem('current_whiteboard', JSON.stringify(this.whiteboards[this.whiteboards.length - 1]))
-              this.ptro.show(this.whiteboards[this.whiteboards.length - 1].data)
-            } else this.ptro.show()
-          }
+          // this.ptro = Painterro({
+          //   id: 'painterro',
+          //   defaultTool: 'brush',
+          //   defaultTextStrokeAndShadow: false,
+          //   activeColor: '#000000',
+          //   defaultLineWidth: '3',
+          //   defaultEraserWidth: '20',
+          //   hiddenTools: ['close', 'resize', 'pixelize', 'settings'],
+          //   toolbarPosition: 'top',
+          //   saveHandler: async (image, done) => {
+          //     this.blobToDataURL(image.asBlob(), async (dataURL) => {
+          //       await this.$store.dispatch('users/addWhiteboard', { 
+          //         dataURL: dataURL,
+          //         noteid: this.currentNote.noteid
+          //       });
+          //       done(false);
+          //     });
+          //   },
+          //   onChange: async () => {
+          //     this.ptro.save()
+          //   }
+          // })
         });
       } else if (newValue == 0 && oldValue == 1) {
-        this.ptro.close()
+        // this.ptro.close()
         this.sunEditor.show()
       }
     }
@@ -630,14 +625,51 @@ export default {
         await this.$store.commit('users/saving', "Unsaved")
       },
 
-      newWhiteboard() {
-        localStorage.removeItem('current_whiteboard')
-        this.ptro.show()
+      async getCurrentWhiteboard() {
+        let boardCode = ''
+        let currentWhiteboard = localStorage.getItem('current_whiteboard')
+        if (currentWhiteboard != null && currentWhiteboard != undefined && 
+        currentWhiteboard != 'null' && currentWhiteboard != 'undefined') {
+          let whiteboardObj = JSON.parse(currentWhiteboard)
+          boardCode = whiteboardObj.uid
+          await this.initWhiteboard(boardCode)
+        } else {
+          if (this.whiteboards.length > 0) {
+            localStorage.setItem('current_whiteboard', JSON.stringify(this.whiteboards[this.whiteboards.length - 1]))
+            boardCode = this.whiteboards[this.whiteboards.length - 1].uid
+            await this.initWhiteboard(boardCode)
+          } else await this.newWhiteboard(false)
+        }
       },
 
-      openBoard() {
+      async initWhiteboard(code) {
+        this.whiteboard = await new api.WhiteboardTeam('#wt-container', {
+          clientId: process.env.NUXT_ENV_WHITEBOARD_CLIENT_ID,
+          boardCode: code,
+          board: {
+            tool: 'pen',
+          },
+          participant: {
+            name: this.userData.firstname,
+            permissions : ["view_templates", "view_chat"]
+          }
+        })
+      },
+
+      async newWhiteboard(shouldDestroy) {
+        const code = await this.$store.dispatch('users/addWhiteboard', {
+          noteid: this.currentNote.noteid
+        })
+        if (shouldDestroy) this.whiteboard.destroy()
+        await this.initWhiteboard(code)
+        // this.ptro.show()
+      },
+
+      async openBoard() {
+        this.whiteboard.destroy()
         let whiteboard = JSON.parse(localStorage.getItem('current_whiteboard'))
-        this.ptro.show(whiteboard.data)
+        await this.initWhiteboard(whiteboard.uid)
+        // this.ptro.show(whiteboard.data)
       },
 
       blobToDataURL(blob, callback) {

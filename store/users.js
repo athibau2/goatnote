@@ -1,6 +1,7 @@
 import { supabase, supabaseService } from "./auth";
 const short = require('short-uuid');
 const bcrypt = require('bcryptjs')
+const randomstring = require('randomstring')
 
 export const state = () => ({
     userData: null,
@@ -332,14 +333,6 @@ export const mutations = {
     setWhiteboards(state, data) {
         state.whiteboards = data
     },
-
-    updateCurrentWhiteboard(state, data) {
-        state.whiteboards.forEach(element => {
-            if (element.boardid == data.boardid) {
-                element.data = data.data
-            }
-        });
-    }
 }
 
 // actions should call mutations
@@ -1323,59 +1316,56 @@ export const actions = {
         }
     },
 
-    async getWhiteboards({ commit }, { noteid }) {
+    async fetchBoards({ commit }, { boards }) {
+        boards.forEach(async board => {
+          await fetch(`${process.env.NUXT_ENV_WHITEBOARD_ENDPOINT}/${board.uid}`, {
+            method: 'GET',
+            headers: {
+                'Api-Key': process.env.NUXT_ENV_WHITEBOARD_CLIENT_SECRET
+            }
+          }).then(async function(response) {
+            const data = await response.json()
+            board.name = data.name
+          })
+        });
+        await commit('setWhiteboards', boards)
+    },
+
+    async getWhiteboards({ commit, dispatch }, { noteid }) {
         const { data, error, status } = await supabase.from('whiteboards')
             .select()
             .eq('noteid', noteid)
         if (!error) {
             await commit('setWhiteboards', data)
+            await dispatch('fetchBoards', { boards: data })
         } else if (error) {
             console.error(error)
             await commit('setWhiteboards', [])
         }
     },
 
-    async addWhiteboard({ dispatch, commit }, { dataURL, noteid }) {
-        let currentWhiteboard = localStorage.getItem('current_whiteboard')
-        if (currentWhiteboard != null && currentWhiteboard != undefined && 
-        currentWhiteboard != 'null' && currentWhiteboard != 'undefined') {
-            let whiteboardObj = JSON.parse(currentWhiteboard)
-            await dispatch('updateWhiteboard', {
-                boardid: whiteboardObj.boardid,
-                dataURL: dataURL
-            })
-        } else {
-            const { data, error, status } = await supabase.from('whiteboards')
-                .insert({
-                    data: dataURL,
-                    noteid: noteid
-                }).select()
-            if (!error) {
-                localStorage.setItem('current_whiteboard', JSON.stringify(data[0]))
-                await dispatch('getWhiteboards', { noteid: noteid })
-            } else if (error) {
-                console.error(error)
+    async addWhiteboard({ dispatch, commit }, { noteid }) {
+        const uid = randomstring.generate(18)
+        const { data, error, status } = await supabase.from('whiteboards')
+            .insert({
+                uid: uid,
+                noteid: noteid
+            }).select()
+        if (!error) {
+            localStorage.setItem('current_whiteboard', JSON.stringify(data[0]))
+            await dispatch('getWhiteboards', { noteid: noteid })
+            return data[0].uid
+        } else if (error) {
+            console.error(error)
+            if (status == 409) {
+                await dispatch('addWhiteboard', { noteid: noteid })
+            } else {
                 await commit('setAlert', {
                     color: 'error',
                     icon: '$error',
                     text: 'Something went wrong, please try again.'
                 })
             }
-        }
-    },
-
-    async updateWhiteboard({ commit }, { boardid, dataURL }) {
-        const { data, error, status } = await supabase.from('whiteboards')
-            .update({
-                data: dataURL
-            })
-            .eq('boardid', boardid)
-            .select()
-        if (!error) {
-            await commit('updateCurrentWhiteboard', data[0])
-            localStorage.setItem('current_whiteboard', JSON.stringify(data[0]))
-        } else if (error) {
-            console.error(error)
         }
     },
 
