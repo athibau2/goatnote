@@ -207,16 +207,16 @@ export default {
       ],
       introCards: [
         {
-          img: 'note.png',
-          description: 'Create collections to organize your notes. In your notes, you have a dedicated space for flashcards, whiteboard drawings, files, helpful links, and study plans!',
+          img: 'text-draw.gif',
+          description: 'In your notes, you have the best of both worlds. Take notes with our text editor, or draw your notes with our advanced whiteboard!',
         },
         {
-          img: 'goatnotes-ai.gif',
-          description: 'AI is your study buddy. You can utilize our AI tools to generate flashcards based off your notes!',
+          img: 'ai-flashcards.gif',
+          description: 'AI is your study buddy. You can utilize our AI tools to quickly generate helpful flashcards from your Flashcard Queue!',
         },
         {
-          img: 'goatnotes-study.gif',
-          description: 'When it\'s time to study, the study mode button changes the layout of your Study Tools to help you study your flashcards!',
+          img: 'study-mode.gif',
+          description: 'When it\'s time to study, the study mode button changes the layout of your Study Tools so you can study more effectively without leaving the page!',
         },
       ],
       faqs: [

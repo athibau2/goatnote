@@ -90,7 +90,7 @@ CREATE TABLE prepared_words
 CREATE TABLE whiteboards
 (
   boardid SERIAL NOT NULL,
-  data TEXT NOT NULL,
+  uid VARCHAR(20) NOT NULL,
   noteid SERIAL NOT NULL,
   PRIMARY KEY (boardid),
   FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
@@ -162,6 +162,31 @@ CREATE OR REPLACE VIEW get_daily_plans AS
 			s.studydate
 	ORDER BY
 			u.userid;
+
+CREATE VIEW export_data AS
+  SELECT 
+    u.userid, o.orgid, o.orgname, 
+    c.collectionid, c.collectionname, 
+    n.noteid, n.notename, n.typednotes, 
+    w.boardid, w.uid, 
+    f.cardid, f.cardprompt, f.cardanswer
+  FROM 
+      "user" u
+  INNER JOIN 
+      part_of p ON u.userid = p.userid
+  INNER JOIN 
+      organization o ON p.orgid = o.orgid
+  INNER JOIN 
+      collection c ON u.userid = c.userid AND o.orgid = c.orgid
+  LEFT JOIN 
+      note n ON c.collectionid = n.collectionid
+  LEFT JOIN 
+      whiteboards w ON n.noteid = w.noteid
+  LEFT JOIN 
+      flashcards f ON n.noteid = f.noteid
+  ORDER BY 
+      o.orgid, c.collectionid, n.noteid, w.boardid, f.cardid;
+  --this will be filtered later
 
 create or replace view see_orgs as
   select o.orgname, u.email, o.orgid, o.joincode

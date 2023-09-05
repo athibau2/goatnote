@@ -10,7 +10,7 @@ export async function openaiGenerateStudyTools({ input, notename }) {
 
     const completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
-        messages: [{role: "user", content: `You are a student study aid. Here is the context for your task: ${notename}. Your task is to create flashcards that are a mix of definitions and quiz questions, for each entry in this list: ${input}. Return the flashcards in the following structure: [{cardprompt: 'flashcard prompt', cardanswer: 'flashcard answer'},...]`}],
+        messages: [{role: "user", content: `You are a student study aid. Here is the context for your task: ${notename}. Your task is to create brief flashcards that are a mix of definitions and quiz questions, for each entry in this list: ${input}. Return the flashcards in the following structure: [{"cardprompt": "flashcard prompt", "cardanswer": "flashcard answer"},...]`}],
     });
     let resText = completion.data.choices[0].message.content
     if (resText[resText.length - 1] != ']') {
