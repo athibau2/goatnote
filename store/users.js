@@ -1082,6 +1082,24 @@ export const actions = {
         }
     },
 
+    async updateCollColor({ dispatch }, { collectionid, color, orgid }) {
+        const { data, error, status } = await supabase.from('collection')
+            .update({
+                color: color
+            })
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await dispatch('collections', { orgid: orgid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
     async allColls({ commit, state }) {
         const { data, error, status } = await supabase.from('see_collections')
             .select()

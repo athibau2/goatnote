@@ -209,20 +209,47 @@
     <!-- List of collections -->
     <v-col v-if="level == 2">
       <v-row>
-        <v-card class="card" elevation="5" width="250" v-for="(coll, i) in collections" :key="i">
-          <v-card-title class="card-title"
-            v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)"
-          >
-              {{coll.collectionname}}
-              <v-spacer />
-              <v-btn 
-                :disabled="(editingColl && coll.collectionid !== collBeingEdited) ? true : false" 
-                icon @click="setEditColl(coll)"
+        <v-card class="coll-card"
+          elevation="5"
+          width="250"
+          v-for="(coll, i) in collections"
+          :key="i"
+          :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${coll.color})`}"
+        >
+          <v-tooltip top v-if="!editingColl || (editingColl && coll.collectionid !== collBeingEdited)">
+            <template v-slot:activator="{ on, attrs }">
+              <span class="coll-card-title">
+                <button @click="setEditColl(coll)"
+                  :disabled="(editingColl && coll.collectionid !== collBeingEdited) ? true : false"
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  {{coll.collectionname}}
+                </button>
+              </span>
+            </template>
+            <span>Edit Name</span>
+          </v-tooltip>
+          <v-menu top offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn icon class="color-picker-btn"
+                v-on="on"
+                v-bind="attrs"
+                @click="setChooseColor(coll)"
               >
-                <v-icon>mdi-pencil</v-icon>
+                <v-icon>mdi-palette</v-icon>
               </v-btn>
-          </v-card-title>
-          <v-card-title v-else>
+            </template>
+            <div class="color-picker">
+              <button class="color-choice"
+                v-for="(color, i) in colors"
+                :key="i"
+                @click="updateColor(color, coll)"
+                :style="{'background-color': color}"
+              ></button>
+            </div>
+          </v-menu>
+          <v-card-title v-if="editingColl && coll.collectionid == collBeingEdited">
             <v-text-field
               :value="coll.collectionname"
               append-icon="mdi-pencil"
@@ -232,22 +259,33 @@
             >
             </v-text-field>
           </v-card-title>
-          <v-card-actions>
+          <v-card-actions style="margin-top: 20px;">
             <v-spacer />
             <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn icon
-                    v-bind="attrs"
-                    v-on="on"
-                    @click="getSharedCollList(coll)"
-                  >
-                    <v-icon>mdi-share-variant</v-icon>
-                  </v-btn>
-                </template>
-                <span>Share</span>
-              </v-tooltip>
-            <v-btn text class="flat-btn" @click="deleteCollection(coll.collectionid, coll.orgid)">Delete</v-btn>
-            <v-btn class="good-btn" @click="loadNotes(coll)">Open</v-btn>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="getSharedCollList(coll)"
+                >
+                  <v-icon>mdi-share-variant</v-icon>
+                </v-btn>
+              </template>
+              <span>Share</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="deleteCollection(coll.collectionid, coll.orgid)"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </template>
+              <span>Delete</span>
+            </v-tooltip>
+            <v-btn text class="flat-btn" @click="loadNotes(coll)">Open</v-btn>
           </v-card-actions>
         </v-card>
       </v-row>
@@ -256,7 +294,13 @@
     <!-- List of notes -->
     <v-col v-if="level == 3">
       <v-row>
-        <v-card class="card" elevation="5" width="300" v-for="(note, i) in notes" :key="i">
+        <v-card class="note-card"
+          elevation="5"
+          width="300"
+          v-for="(note, i) in notes"
+          :key="i"
+          :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${selectedColl.color})`}"
+        >
           <v-card-title class="card-title">
               {{note.notename}}
           </v-card-title>
@@ -274,8 +318,19 @@
               </template>
               <span>Share</span>
             </v-tooltip>
-            <v-btn text class="flat-btn" @click="deleteNote(note.noteid, note.collectionid)">Delete</v-btn>
-            <v-btn class="good-btn" @click="openNote(note.noteid)" :disabled="loadingNote">
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="deleteNote(note.noteid, note.collectionid)"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </template>
+              <span>Delete</span>
+            </v-tooltip>
+            <v-btn text class="flat-btn" @click="openNote(note.noteid)" :disabled="loadingNote">
               <Loading v-if="loadingNote && noteBeingOpened == note.noteid" />
               {{loadingNote && noteBeingOpened == note.noteid ? null : 'Open'}}
             </v-btn>
@@ -328,7 +383,7 @@ export default {
       newNoteName: "",
       collBeingEdited: null,
       editingColl: false,
-      newName: "",
+      newName: null,
       showShareColl: false,
       showShareNote: false,
       isPrivate: false,
@@ -337,6 +392,20 @@ export default {
       level: 1,
       creating: false,
       windowWidth: window.innerWidth,
+      colors: [
+        '#FFC4CB',
+        '#FAC3E0',
+        '#FFDAB3',
+        '#FFF9C0',
+        '#FFD700',
+        '#C0FBCF',
+        '#85C59D',
+        '#B3E5FC',
+        '#AFEEEE',
+        '#B5A1E2',
+        '#E6E6FA',
+        '#D3D3D3',
+      ]
     }
   },
 
@@ -396,19 +465,36 @@ export default {
       this.newName = event
     },
 
+    async updateColor(color, coll) {
+      await this.$store.dispatch('users/updateCollColor', {
+        collectionid: coll.collectionid,
+        color: color,
+        orgid: coll.orgid
+      })
+      this.collBeingEdited = null
+    },
+
     setEditColl (coll) {
       this.editingColl = !this.editingColl
       if (this.editingColl) this.collBeingEdited = coll.collectionid
       else this.collBeingEdited = null
     },
 
+    setChooseColor(coll) {
+      this.collBeingEdited = coll.collectionid
+    },
+
     async updateColl (coll) {
-      await this.$store.dispatch('users/updateCollName', {
-        collectionid: coll.collectionid,
-        newName: this.newName,
-        orgid: coll.orgid
-      })
-      this.setEditColl()
+      if (!this.newName) {
+        this.setEditColl()
+      } else {
+        await this.$store.dispatch('users/updateCollName', {
+          collectionid: coll.collectionid,
+          newName: this.newName,
+          orgid: coll.orgid
+        })
+        this.setEditColl()
+      }
     },
 
     loadCollections (org) {
@@ -592,6 +678,51 @@ export default {
 
 .card-title {
   word-break: break-all;
+}
+
+.coll-card {
+  position: relative;
+  padding-top: 15px;
+  margin: 10px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.note-card {
+  margin: 10px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.coll-card-title {
+  word-break: break-all;
+  margin: 15px;
+  font-size: 18px;
+}
+
+.color-picker-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.color-picker {
+  background-color: #eeeeee;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 20px);
+  grid-gap: 3px;
+  height: 100px;
+  width: 80px;
+}
+
+.color-choice {
+  height: 20px;
+  width: 20px;
+  border: solid 1px #bbbbbb;
+  border-radius: 4px;
+}
+
+.color-choice:hover {
+  opacity: 0.6;
 }
 
 .joincode-popup {

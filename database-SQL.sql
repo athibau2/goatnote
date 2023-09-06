@@ -39,6 +39,7 @@ CREATE TABLE collection
   collectionid SERIAL NOT NULL,
   userid SERIAL NOT NULL,
   orgid SERIAL,
+  color TEXT NOT NULL DEFAULT '#D3D3D3',
   PRIMARY KEY (collectionid),
   FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE,
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE,
@@ -207,7 +208,7 @@ create or replace view see_orgs as
   --this will be filtered later
 
 create or replace view see_collections as
-  select c.collectionname, o.orgid, u.userid, u.email, c.collectionid
+  select c.collectionname, o.orgid, u.userid, u.email, c.collectionid, c.color
   from collection c inner join organization o
   on c.orgid = o.orgid inner join "user" u
   on c.userid = u.userid
@@ -220,7 +221,7 @@ create or replace view see_todo_list as
   -- this will be filtered later
 
 create or replace view see_notes as
-	select n.noteid, n.notename, c.collectionid, u.email, c.orgid, c.collectionname
+	select n.noteid, n.notename, c.collectionid, u.email, c.orgid, c.collectionname, c.color
 	from note n inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on c.userid = u.userid
 	order by n.noteid asc;
@@ -357,14 +358,14 @@ create or replace view see_shared_notes as
 	--this will be filtered later
 
 create or replace view see_colls_shared_with_me as
-	select s.collectionid, s.userid, s.ownerid, c.collectionname, c.orgid, u.firstname, u.lastname
+	select s.collectionid, s.userid, s.ownerid, c.collectionname, c.orgid, u.firstname, u.lastname, c.color
 	from shared_collection s inner join collection c on s.collectionid = c.collectionid
 	inner join "user" u on u.userid = c.userid
 	order by c.collectionname asc;
 	--this will be filtered later
 
 create or replace view see_notes_shared_with_me as
-	select s.noteid, s.userid, s.ownerid, n.notename, c.collectionname, c.orgid, u.firstname, u.lastname
+	select s.noteid, s.userid, s.ownerid, n.notename, c.collectionname, c.orgid, u.firstname, u.lastname, c.color
 	from shared_note s inner join note n on s.noteid = n.noteid
 	inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on u.userid = c.userid

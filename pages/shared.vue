@@ -14,7 +14,13 @@
           <v-col v-if="tab === 0">
             <Loading v-if="collsSharedWithMe.length == 0" />
             <v-row v-if="selectedColl == null">
-              <v-card class="card" elevation="5" width="250" v-for="(coll, i) in collsSharedWithMe" :key="i">
+              <v-card class="shared-card"
+                elevation="5"
+                width="250"
+                v-for="(coll, i) in collsSharedWithMe"
+                :key="i"
+                :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${coll.color})`}"
+              >
                 <v-card-title>
                   {{coll.collectionname}}
                 </v-card-title>
@@ -54,7 +60,13 @@
 
             <!-- List of notes in collection -->
             <v-row v-if="selectedColl != null">
-              <v-card class="card" elevation="5" width="300" v-for="(note, i) in collNotes" :key="i">
+              <v-card class="shared-card"
+                elevation="5"
+                width="300"
+                v-for="(note, i) in collNotes"
+                :key="i"
+                :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${note.color})`}"
+              >
                 <v-card-title>
                     {{note.notename}}
                 </v-card-title>
@@ -72,7 +84,13 @@
           <!-- List of notes -->
           <v-col v-else-if="tab === 1">
             <v-row>
-              <v-card class="card" elevation="5" width="300" v-for="(note, i) in notesSharedWithMe" :key="i">
+              <v-card class="shared-card"
+                elevation="5"
+                width="300"
+                v-for="(note, i) in notesSharedWithMe"
+                :key="i"
+                :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${note.color})`}"
+              >
                 <v-card-title>
                     {{note.notename}}
                 </v-card-title>
@@ -184,6 +202,11 @@ export default {
 .shared-list {
   background-color: #f9f9f9;
   padding-bottom: 10px;
+}
+
+.shared-card {
+  margin: 10px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 </style>
