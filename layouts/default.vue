@@ -69,7 +69,7 @@
         transition="slide-y-transition"
       >
         <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-on="on" v-bind="attrs">
+          <v-btn id="step-2" icon v-on="on" v-bind="attrs">
             <v-icon>mdi-checkbox-outline</v-icon>
           </v-btn>
         </template>
@@ -339,6 +339,20 @@ export default {
           attachTo: {
             element: '#step-5',
             on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Next',
+              action: this.tour.next
+            }
+          ]
+        },
+        {
+          id: 'step-2',
+          text: 'Here you can keep track of all your tasks, including homework assignments, projects, exams, etc.',
+          attachTo: {
+            element: '#step-2',
+            on: 'bottom'
           },
           buttons: [
             {
