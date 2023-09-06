@@ -1140,15 +1140,15 @@ export const actions = {
         }
     },
 
-    async updateTodo({ dispatch, state }, { text, task, deadline, collectionid }) {
+    async updateTodo({ dispatch, state }, { text, completed, todoid, deadline, collectionid }) {
         let body = {}
         if (text) {
             body = {
                 todotext: text
             }
-        } else if (task) {
+        } else if (completed != null) {
             body = {
-                completed: !task.completed
+                completed: completed
             }
         } else if (deadline) {
             body = {
@@ -1157,7 +1157,7 @@ export const actions = {
         }
         const { data, error, status } = await supabase.from('todo')
             .update(body)
-            .eq('todoid', task.todoid)
+            .eq('todoid', todoid)
             .select()
         if (!error) {
             await dispatch('loadTodoList', { collectionid: collectionid })

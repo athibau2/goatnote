@@ -74,7 +74,7 @@
           </v-btn>
         </template>
         <div
-          style="width: 500px; background-color: #f9f9f9; padding: 15px;"
+          style="width: 500px; background-color: #f9f9f9; padding: 15px; z-index: 0 !important;"
         >
           <v-menu
             bottom
@@ -135,11 +135,45 @@
             <div v-for="(task, i) in todoList" :key="i">
               <v-list-item dense style="height: 20px">
                 <v-col cols="7">
-                  <span :style="task.completed ? {'text-decoration': 'line-through'} : null">{{task.todotext}}</span>
+                  <v-text-field v-if="editText && task.todoid == taskBeingEdited.todoid"
+                    :value="task.todotext"
+                    @input="textChanged($event)"
+                    @keydown.enter="updateTaskText()"
+                  ></v-text-field>
+                  <v-tooltip v-if="!editText || task.todoid != taskBeingEdited?.todoid" top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <button @click="setEditText(task)"
+                        :disabled="editDeadline || (editText && task.todoid != taskBeingEdited.todoid)"
+                        v-on="on"
+                        v-bind="attrs"
+                      >
+                        <span :style="task.completed ? {'text-decoration': 'line-through'} : null">{{task.todotext}}</span>
+                      </button>
+                    </template>
+                    <span>Edit Task</span>
+                  </v-tooltip>
                 </v-col>
                 <v-spacer />
                 <v-col cols="5" style="text-align: right;">
-                  <span>{{prettyDate(task.deadline)}}</span>
+                  <input v-if="editDeadline && task.todoid == taskBeingEdited.todoid"
+                    type="date"
+                    name="deadline"
+                    v-model="newDeadline"
+                    style="margin-right: 10px;"
+                    required
+                  />
+                  <v-tooltip v-if="!editDeadline || task.todoid != taskBeingEdited?.todoid" top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <button @click="setEditDeadline(task)"
+                        :disabled="editText || (editDeadline && task.todoid != taskBeingEdited.todoid)"
+                        v-on="on"
+                        v-bind="attrs"
+                      >
+                        {{prettyDate(task.deadline)}}
+                      </button>
+                    </template>
+                    <span>Edit Deadline</span>
+                  </v-tooltip>
                   <br>
                   <v-tooltip bottom>
                     <template v-slot:activator="{ on, attrs }">
@@ -151,9 +185,6 @@
                     </template>
                     <span>Completed</span>
                   </v-tooltip>
-                  <v-btn small icon>
-                    <v-icon size="25">mdi-pencil</v-icon>
-                  </v-btn>
                   <v-btn @click="deleteTodo(task)" small icon>
                     <v-icon size="25">mdi-delete</v-icon>
                   </v-btn>
@@ -163,6 +194,11 @@
             </div>
           </v-list>
           <div v-if="todoColl">
+            <v-alert v-if="alert"
+              class="alert"
+              :color="alert.color"
+              :icon="alert.icon"
+            >{{alert.text}}</v-alert>
             <v-text-field
               v-model="taskText"
               dense
@@ -172,7 +208,7 @@
               <label for="deadline">Deadline</label>
               <input type="date" name="deadline" v-model="deadline" style="margin-right: 10px;" required />
               <v-btn class="good-btn" @click="createTodo()">
-                <Loading v-if="creatingTodo" /> {{creatingTodo ? null : 'Submit'}}
+                <Loading v-if="creatingTodo" /> {{creatingTodo ? null : 'Add'}}
               </v-btn>
             </center>
           </div>
@@ -238,6 +274,11 @@ export default {
       creatingTodo: false,
       taskText: '',
       deadline: null,
+      newDeadline: null,
+      newTaskText: '',
+      editDeadline: false,
+      editText: false,
+      taskBeingEdited: null,
       isadmin: this.userData?.isadmin,
       items: [
         {
@@ -302,6 +343,12 @@ export default {
         setTimeout(async () => {
           await this.$store.commit('users/setAlert', null)
         }, 4000);
+      }
+    },
+
+    newDeadline(newValue, oldValue) {
+      if (newValue != null && oldValue == null) {
+        this.updateDeadline()
       }
     }
   },
@@ -455,25 +502,72 @@ export default {
       this.loadingTodo = false
     },
 
+    textChanged(event) {
+      this.newTaskText = event
+    },
+
+    setEditDeadline(task) {
+      this.taskBeingEdited = task
+      this.editDeadline = true
+    },
+
+    setEditText(task) {
+      this.taskBeingEdited = task
+      this.editText = true
+    },
+
     async createTodo() {
-      this.creatingTodo = true
-      await this.$store.dispatch('users/createTodo', {
-        text: this.taskText,
-        deadline: this.deadline,
-        collectionid: this.todoColl.collectionid
-      })
-      this.creatingTodo = false
-      this.taskText = '',
-      this.deadline = null
+      if (this.taskText == '' || this.deadline == null) {
+        await this.$store.commit('users/setAlert', {
+          color: 'error',
+          icon: '$error',
+          text: 'No field may be left empty'
+        })
+      } else {
+        this.creatingTodo = true
+        await this.$store.dispatch('users/createTodo', {
+          text: this.taskText,
+          deadline: this.deadline,
+          collectionid: this.todoColl.collectionid
+        })
+        this.creatingTodo = false
+        this.taskText = '',
+        this.deadline = null
+      }
     },
 
     async toggleComplete(task) {
       await this.$store.dispatch('users/updateTodo', {
         text: null,
-        task: task,
+        completed: !task.completed,
+        todoid: task.todoid,
         deadline: null,
         collectionid: this.todoColl.collectionid
       })
+    },
+
+    async updateDeadline() {
+      await this.$store.dispatch('users/updateTodo', {
+        text: null,
+        completed: null,
+        todoid: this.taskBeingEdited.todoid,
+        deadline: this.newDeadline,
+        collectionid: this.todoColl.collectionid
+      })
+      this.taskBeingEdited = null
+      this.editDeadline = false
+    },
+
+    async updateTaskText() {
+      await this.$store.dispatch('users/updateTodo', {
+        text: this.newTaskText,
+        completed: null,
+        todoid: this.taskBeingEdited.todoid,
+        deadline: null,
+        collectionid: this.todoColl.collectionid
+      })
+      this.taskBeingEdited = null
+      this.editText = false
     },
 
     async deleteTodo(task) {
