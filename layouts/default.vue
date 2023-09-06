@@ -37,6 +37,7 @@
     <v-app-bar
       class="app-bar"
       :clipped-left="true"
+      :clipped-right="true"
       fixed
       app
       color="light grey lighten-2"
@@ -60,6 +61,123 @@
         {{userData.firstname}} {{userData.lastname}}
       </v-toolbar-title>
       <v-btn to="/account" icon><v-icon size="30">mdi-account</v-icon></v-btn>
+
+      <v-menu bottom
+        offset-y
+        :close-on-click="false"
+        :close-on-content-click="false"
+        transition="slide-y-transition"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon v-on="on" v-bind="attrs">
+            <v-icon>mdi-checkbox-outline</v-icon>
+          </v-btn>
+        </template>
+        <div
+          style="width: 500px; background-color: #f9f9f9; padding: 15px;"
+        >
+          <v-menu
+            bottom
+            offset-y
+            transition="slide-y-transition"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <span
+                class="basic-header"
+                style="font-size: 20px; margin-right: 20px;"
+                v-on="on"
+                v-bind="attrs"
+              >
+                {{todoOrg ? todoOrg.orgname : 'Select Organization'}}
+                <v-icon>mdi-chevron-down</v-icon>
+              </span>
+            </template>
+            <v-list>
+              <v-list-item v-for="(org, i) in orgs"
+                :key="i"
+                @click="loadColls(org)"
+                link
+              >
+                <span>{{org.orgname}}</span>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-menu v-if="collections.length != 0"
+            bottom
+            offset-y
+            close-on-content-click
+            transition="slide-y-transition"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <span
+                class="basic-header"
+                style="font-size: 20px;"
+                v-on="on"
+                v-bind="attrs"
+              >
+                {{todoColl ? todoColl.collectionname : 'Select Collection'}}
+                <v-icon>mdi-chevron-down</v-icon>
+              </span>
+            </template>
+            <v-list>
+              <v-list-item v-for="(coll, i) in collections"
+                :key="i"
+                @click="loadCollToDo(coll)"
+                link
+              >
+                <span>{{coll.collectionname}}</span>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-divider style="background-color: #f9f9f9;" />
+          <Loading v-if="loadingTodo" />
+          <v-list class="task-list">
+            <div v-for="(task, i) in todoList" :key="i">
+              <v-list-item dense style="height: 20px">
+                <v-col cols="7">
+                  <span>{{task.todotext}}</span>
+                </v-col>
+                <v-spacer />
+                <v-col cols="5" style="text-align: right;">
+                  <span>{{prettyDate(task.deadline)}}</span>
+                  <br>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn @click="toggleComplete(task)" v-on="on" v-bind="attrs" small icon>
+                        <v-icon size="25">
+                          {{task.completed ? 'mdi-checkbox-marked-outline' : 'mdi-checkbox-blank-outline'}}
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Completed</span>
+                  </v-tooltip>
+                  <v-btn small icon>
+                    <v-icon size="25">mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn @click="deleteTodo(task)" small icon>
+                    <v-icon size="25">mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-list-item>
+              <hr />
+            </div>
+          </v-list>
+        </div>
+        <div v-if="todoColl" style="padding: 0 15px; background-color: #f9f9f9;">
+          <v-text-field
+            v-model="taskText"
+            dense
+            placeholder="Enter Task Details"
+          ></v-text-field>
+          <center style="margin-bottom: 10px;">
+            <label for="deadline">Deadline</label>
+            <input type="date" name="deadline" v-model="deadline" style="margin-right: 10px;" required />
+            <v-btn class="good-btn" @click="createTodo()">
+              <Loading v-if="creatingTodo" /> {{creatingTodo ? null : 'Submit'}}
+            </v-btn>
+          </center>
+        </div>
+      </v-menu>
     </v-app-bar>
 
     <v-main class="main">
@@ -81,6 +199,7 @@
 <script>
 import Shepherd from 'shepherd.js'
 import Footer from '~/components/Footer.vue'
+import Loading from '~/components/Loading.vue'
 
 export default {
   name: 'DefaultLayout',
@@ -89,6 +208,7 @@ export default {
   async created () {
     await this.$store.dispatch('users/getSupabaseUser')
     window.addEventListener('resize', this.resizeHandler)
+    await this.$store.dispatch('users/orgs')
   },
 
   async mounted () {
@@ -107,11 +227,17 @@ export default {
 
   components: {
     Footer,
+    Loading
   },
 
   data () {
     return {
       fixed: false,
+      showToDo: false,
+      loadingTodo: false,
+      creatingTodo: false,
+      taskText: '',
+      deadline: null,
       isadmin: this.userData?.isadmin,
       items: [
         {
@@ -298,6 +424,55 @@ export default {
       this.$store.dispatch('users/logout')
     },
 
+    async loadColls(org) {
+      await this.$store.commit('users/setTodoOrg', org)
+      await this.$store.dispatch('users/collections', {
+        orgid: org.orgid
+      })
+    },
+
+    async loadCollToDo(coll) {
+      await this.$store.commit('users/setTodoColl', coll)
+      this.loadingTodo = true
+      await this.$store.dispatch('users/loadTodoList', {
+        collectionid: coll.collectionid
+      })
+      this.loadingTodo = false
+    },
+
+    async createTodo() {
+      this.creatingTodo = true
+      await this.$store.dispatch('users/createTodo', {
+        text: this.taskText,
+        deadline: this.deadline,
+        collectionid: this.todoColl.collectionid
+      })
+      this.creatingTodo = false
+      this.taskText = '',
+      this.deadline = null
+    },
+
+    async toggleComplete(task) {
+      await this.$store.dispatch('users/updateTodo', {
+        text: null,
+        task: task,
+        deadline: null,
+        collectionid: this.todoColl.collectionid
+      })
+    },
+
+    async deleteTodo(task) {
+      await this.$store.dispatch('users/deleteTodo', {
+        todoid: task.todoid,
+        collectionid: this.todoColl.collectionid
+      })
+    },
+
+    prettyDate(deadline) {
+      let date = deadline.toString().split('-')
+      return `${date[1]} / ${date[2]} / ${date[0]}`
+    },
+
     loadOrgs () {
       this.$store.dispatch('users/orgs')
     },
@@ -306,6 +481,26 @@ export default {
   computed: {
     userData() {
       return this.$store.state.users.userData
+    },
+
+    orgs () {
+      return this.$store.state.users.orgs
+    },
+
+    collections () {
+      return this.$store.state.users.collections
+    },
+
+    todoOrg () {
+      return this.$store.state.users.todoOrg
+    },
+    
+    todoColl () {
+      return this.$store.state.users.todoColl
+    },
+
+    todoList () {
+      return this.$store.state.users.todoList
     },
 
     googleSuccess () {
@@ -349,6 +544,12 @@ export default {
 .logo {
   margin: 2px 6px 2px 6px;
   vertical-align: middle;
+}
+
+.task-list {
+  height: 50vh;
+  overflow-y: scroll;
+  background-color: #f9f9f9;
 }
 
 </style>

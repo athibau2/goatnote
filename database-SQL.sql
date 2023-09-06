@@ -44,6 +44,17 @@ CREATE TABLE collection
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE,
 );
 
+CREATE TABLE todo
+(
+  todoid SERIAL NOT NULL,
+  todotext TEXT NOT NULL,
+  deadline DATE NOT NULL,
+  completed BOOLEAN NOT NULL default false,
+  collectionid SERIAL NOT NULL,
+  PRIMARY KEY (todoid),
+  FOREIGN KEY (collectionid) REFERENCES "collection"(collectionid) ON DELETE CASCADE
+);
+
 CREATE TABLE note
 (
   noteid SERIAL NOT NULL,
@@ -202,6 +213,11 @@ create or replace view see_collections as
   on c.userid = u.userid
   order by c.collectionid asc;
   --this will be filtered later
+
+create or replace view see_todo_list as
+  select * from todo
+  order by deadline asc;
+  -- this will be filtered later
 
 create or replace view see_notes as
 	select n.noteid, n.notename, c.collectionid, u.email, c.orgid, c.collectionname

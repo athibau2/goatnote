@@ -11,6 +11,9 @@ export const state = () => ({
     orgs: [],
     allColls: [],
     collections: [],
+    todoList: [],
+    todoOrg: null,
+    todoColl: null,
     notes: [],
     currentNote: {},
     flashcards: [],
@@ -152,6 +155,18 @@ export const mutations = {
 
     setCollections(state, data) {
         state.collections = data
+    },
+
+    setTodoList(state, data) {
+        state.todoList = data
+    },
+
+    setTodoOrg(state, data) {
+        state.todoOrg = data
+    },
+
+    setTodoColl(state, data) {
+        state.todoColl = data
     },
 
     setNotes(state, data) {
@@ -1079,7 +1094,7 @@ export const actions = {
         }
     },
 
-    async collections ({ commit, state }, { orgid }) {
+    async collections({ commit, state }, { orgid }) {
         await commit('setCollections', [])
         await commit('setNotes', [])
         const { data, error, status } = await supabase.from('see_collections')
@@ -1091,6 +1106,79 @@ export const actions = {
         } else if (error) {
             console.error(error)
             await commit('setCollections', [])
+        }
+    },
+
+    async loadTodoList({ commit }, { collectionid }) {
+        const { data, error, status } = await supabase.from('see_todo_list')
+            .select()
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await commit('setTodoList', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setTodoList', [])
+        }
+    },
+
+    async createTodo({ dispatch, commit }, { text, deadline, collectionid }) {
+        const { data, error, status } = await supabase.from('todo')
+            .insert({
+                todotext: text,
+                deadline: deadline,
+                collectionid: collectionid
+            })
+        if (!error) {
+            await dispatch('loadTodoList', { collectionid: collectionid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async updateTodo({ dispatch, state }, { text, task, deadline, collectionid }) {
+        let body = {}
+        if (text) {
+            body = {
+                todotext: text
+            }
+        } else if (task) {
+            body = {
+                completed: !task.completed
+            }
+        } else if (deadline) {
+            body = {
+                deadline: deadline
+            }
+        }
+        const { data, error, status } = await supabase.from('todo')
+            .update(body)
+            .eq('todoid', task.todoid)
+            .select()
+        if (!error) {
+            await dispatch('loadTodoList', { collectionid: collectionid })
+        } else if (error) {
+            console.error(error)
+        }
+    },
+
+    async deleteTodo({ dispatch, commit }, { todoid, collectionid }) {
+        const { data, error, status } = await supabase.from('todo')
+            .delete()
+            .eq('todoid', todoid)
+        if (!error) {
+            await dispatch('loadTodoList', { collectionid: collectionid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
