@@ -43,7 +43,7 @@
                     <center>
                         <NuxtLink to="/forgot-password">Forgot Password</NuxtLink>
                         <div>
-                            <!-- <v-btn class="flat-btn"
+                            <v-btn class="flat-btn"
                                 elevation="1"
                                 style="margin-top: 20px; font-size: 14px !important;"
                                 @click="signInWithGoogle()"
@@ -52,9 +52,9 @@
                                 <img src="https://static-00.iconduck.com/assets.00/google-icon-2048x2048-czn3g8x8.png" height="25px" />
                                 &ensp;
                                 <Loading v-if="loadingGoogle" /> {{loadingGoogle ? null : 'Sign In With Google'}}
-                            </v-btn> -->
+                            </v-btn>
                             <br>
-                            <span class="basic-header" style="padding: 10px;">Google Sign-in Coming Soon</span>
+                            <!-- <span class="basic-header" style="padding: 10px;">Google Sign-in Coming Soon</span> -->
                         </div>
                     </center>
                 </v-card-text>

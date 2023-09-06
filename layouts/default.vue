@@ -102,7 +102,7 @@
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-menu v-if="collections.length != 0"
+          <v-menu v-if="todoOrg"
             bottom
             offset-y
             close-on-content-click
@@ -119,7 +119,7 @@
                 <v-icon>mdi-chevron-down</v-icon>
               </span>
             </template>
-            <v-list>
+            <v-list style="max-height: 300px;">
               <v-list-item v-for="(coll, i) in collections"
                 :key="i"
                 @click="loadCollToDo(coll)"
@@ -135,7 +135,7 @@
             <div v-for="(task, i) in todoList" :key="i">
               <v-list-item dense style="height: 20px">
                 <v-col cols="7">
-                  <span>{{task.todotext}}</span>
+                  <span :style="task.completed ? {'text-decoration': 'line-through'} : null">{{task.todotext}}</span>
                 </v-col>
                 <v-spacer />
                 <v-col cols="5" style="text-align: right;">
@@ -162,20 +162,20 @@
               <hr />
             </div>
           </v-list>
-        </div>
-        <div v-if="todoColl" style="padding: 0 15px; background-color: #f9f9f9;">
-          <v-text-field
-            v-model="taskText"
-            dense
-            placeholder="Enter Task Details"
-          ></v-text-field>
-          <center style="margin-bottom: 10px;">
-            <label for="deadline">Deadline</label>
-            <input type="date" name="deadline" v-model="deadline" style="margin-right: 10px;" required />
-            <v-btn class="good-btn" @click="createTodo()">
-              <Loading v-if="creatingTodo" /> {{creatingTodo ? null : 'Submit'}}
-            </v-btn>
-          </center>
+          <div v-if="todoColl">
+            <v-text-field
+              v-model="taskText"
+              dense
+              placeholder="Enter Task Details"
+            ></v-text-field>
+            <center style="margin-bottom: 10px;">
+              <label for="deadline">Deadline</label>
+              <input type="date" name="deadline" v-model="deadline" style="margin-right: 10px;" required />
+              <v-btn class="good-btn" @click="createTodo()">
+                <Loading v-if="creatingTodo" /> {{creatingTodo ? null : 'Submit'}}
+              </v-btn>
+            </center>
+          </div>
         </div>
       </v-menu>
     </v-app-bar>
@@ -425,6 +425,7 @@ export default {
     },
 
     async loadColls(org) {
+      await this.$store.commit('users/setTodoColl', null)
       await this.$store.commit('users/setTodoOrg', org)
       await this.$store.dispatch('users/collections', {
         orgid: org.orgid

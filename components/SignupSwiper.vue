@@ -55,19 +55,18 @@
             :disabled="signUpWithGoogle"
         >
         </v-text-field>
-        <!-- <div class="line-container">
-            <div class="line"></div>
-            <span class="label">OR</span>
-            <div class="line"></div>
-        </div>
         <div class="line-container">
+            <v-divider />
+            <span class="line-label">OR</span>
+            <v-divider />
+        </div>
+        <div class="line-container" style="margin-bottom: 10px;">
             <v-btn @click="toggleSignUpWithGoogle()" icon>
                 <v-icon size="28" v-if="!signUpWithGoogle">mdi-checkbox-blank-outline</v-icon>
-                <img v-if="signUpWithGoogle" src="https://static-00.iconduck.com/assets.00/google-icon-2048x2048-czn3g8x8.png" height="25px" />
+                <img v-if="signUpWithGoogle" src="google-icon.png" height="25px" />
             </v-btn>
             <span class="basic-header" style="font-size: 20px;">&ensp;Sign Up With Google</span>
-        </div> -->
-        <span class="basic-header" style="display: flex; justify-content: center; margin: 10px;">Google Sign-in Coming Soon</span>
+        </div>
         <div class="checks">
             <input class="checkbox" type="checkbox" v-model="consented" />
             <span>
@@ -173,18 +172,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 15px;
+  /* margin: 15px; */
 }
 
-.line {
-  width: 30% !important;
-  height: 1px;
-  background-color: #000;
-  margin: 0 10px;
-}
-
-.label {
-  white-space: nowrap;
+.line-label {
+  margin: 0 5px;
 }
 
 #google-checkbox {
@@ -195,10 +187,12 @@ export default {
 .checkbox {
     height: 15px;
     width: 15px;
+    margin-right: 5px;
 }
 
 .checks {
     margin: 5px;
+    display: flex;
 }
 
 </style>
