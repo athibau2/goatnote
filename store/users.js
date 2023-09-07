@@ -11,6 +11,7 @@ export const state = () => ({
     orgs: [],
     allColls: [],
     collections: [],
+    folders: [],
     todoList: [],
     todoOrg: null,
     todoColl: null,
@@ -21,6 +22,7 @@ export const state = () => ({
     studyPlans: [],
     allPlans: [],
     makingNewOrg: false,
+    makingNewFolder: false,
     makingNewCollection: false,
     makingNewNote: false,
     saving: "Saved",
@@ -121,6 +123,10 @@ export const mutations = {
         state.makingNewOrg = data
     },
 
+    newFolder(state, data) {
+        state.makingNewFolder = data
+    },
+
     newCollection(state, data) {
         state.makingNewCollection = data
     },
@@ -155,6 +161,10 @@ export const mutations = {
 
     setCollections(state, data) {
         state.collections = data
+    },
+
+    setFolders(state, data) {
+        state.folders = data
     },
 
     setTodoList(state, data) {
@@ -820,6 +830,80 @@ export const actions = {
                     text: 'An organization with this name already exists.'
                 })
             } else await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async getFolders({ commit }, { orgid }) {
+        const { data, error, status } = await supabase.from('see_folders')
+            .select()
+            .eq('orgid', orgid)
+        if (!error) {
+            await commit('setFolders', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setFolders', [])
+        }
+    },
+
+    async createFolder({ dispatch }, { foldername, orgid }) {
+        const { data, error, status } = await supabase.from('folder')
+            .insert({
+                foldername: foldername,
+                orgid: orgid
+            })
+        if (!error) {
+            await dispatch('getFolders', { orgid: orgid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async updateFolder({ dispatch }, { foldername, folderid, orgid }) {
+        const { data, error, status } = await supabase.from('folder')
+            .update({
+                foldername: foldername
+            })
+            .eq('folderid', folderid)
+        if (!error) {
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: 'Your folder has successfully been updated.'
+            })
+            await dispatch('getFolders', { orgid: orgid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async deleteFolder({ dispatch }, { folderid, orgid }) {
+        const { data, error, status } = await supabase.from('folder')
+            .delete()
+            .eq('folderid', folderid)
+        if (!error) {
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: 'Your folder has successfully been deleted.'
+            })
+            await dispatch('getFolders', { orgid: orgid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
                 color: 'error',
                 icon: '$error',
                 text: 'Something went wrong, please try again.'
@@ -1889,7 +1973,7 @@ export const actions = {
         if (user) {
             const { data, error, status } = await supabaseService.storage.createBucket(`${user[0].userid}`, {
                 public: true,
-                fileSizeLimit: 1048576
+                fileSizeLimit: 2097152
             })
             if (!error) {
                 return true
@@ -2038,6 +2122,7 @@ export const actions = {
         await commit('currentNote', {})
         await commit('studyPlans', [])
         await commit('newOrg', false)
+        await commit('newFolder', false)
         await commit('newCollection', false)
         await commit('newNote', false)
         localStorage.clear()
