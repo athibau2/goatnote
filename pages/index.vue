@@ -271,7 +271,7 @@
         <button @click="loadFolderColls(folder)" v-for="(folder, i) in folders" :key="i">
           <div class="folder-card">
             <v-icon>mdi-folder</v-icon>&ensp;
-            <span class="basic-header" style="font-size: 20px;">{{folder.foldername}}</span>
+            <span class="basic-header" style="font-size: 20px;">{{parseFolderName(folder.foldername)}}</span>
           </div>
         </button>
       </v-row>
@@ -351,14 +351,17 @@
                   <span>Move</span>
                 </v-tooltip>
               </template>
-              <v-list>
-                <v-list-item link @click="moveToFolder(coll, null)">
+              <v-list style="max-height: 150px;">
+                <v-list-item link
+                  @click="moveToFolder(coll, null)"
+                >
                   <span>None</span>
                 </v-list-item>
                 <v-list-item link
                   v-for="(folder, i) in folders"
                   :key="i"
                   @click="moveToFolder(coll, folder.folderid)"
+                  style="background-color: #f9f9f9;"
                 >
                   <span>{{folder.foldername}}</span>
                 </v-list-item>
@@ -468,7 +471,7 @@
                   <span>Move</span>
                 </v-tooltip>
               </template>
-              <v-list>
+              <v-list style="max-height: 150px;">
                 <v-list-item link @click="moveToFolder(coll, null)">
                   <span>None</span>
                 </v-list-item>
@@ -476,6 +479,7 @@
                   v-for="(folder, i) in folders"
                   :key="i"
                   @click="moveToFolder(coll, folder.folderid)"
+                  style="background-color: #f9f9f9;"
                 >
                   <span>{{folder.foldername}}</span>
                 </v-list-item>
@@ -667,6 +671,13 @@ export default {
     parseOrgName(name) {
       if (name.length >= 16) {
         let short = name.substring(0, 16) + '...'
+        return short
+      } else return name
+    },
+    
+    parseFolderName(name) {
+      if (name.length >= 14) {
+        let short = name.substring(0, 14) + '...'
         return short
       } else return name
     },

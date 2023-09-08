@@ -76,6 +76,7 @@
         <div
           style="width: 500px; background-color: #f9f9f9; padding: 15px; z-index: 0 !important;"
         >
+          <!-- Level 0 -->
           <v-menu
             bottom
             offset-y
@@ -84,24 +85,27 @@
             <template v-slot:activator="{ on, attrs }">
               <span
                 class="basic-header"
-                style="font-size: 20px; margin-right: 20px;"
+                style="font-size: 18px; margin-right: 10px;"
                 v-on="on"
                 v-bind="attrs"
               >
-                {{todoOrg ? todoOrg.orgname : 'Select Organization'}}
+                {{todoOrg ? parseMenuName(todoOrg.orgname) : 'Select'}}
                 <v-icon>mdi-chevron-down</v-icon>
               </span>
             </template>
-            <v-list>
+            <v-list style="max-height: 250px;">
               <v-list-item v-for="(org, i) in orgs"
                 :key="i"
-                @click="loadColls(org)"
+                @click="loadFoldersAndColls(org)"
                 link
+                style="background-color: #f9f9f9;"
               >
                 <span>{{org.orgname}}</span>
               </v-list-item>
             </v-list>
           </v-menu>
+
+          <!-- Level 1 -->
           <v-menu v-if="todoOrg"
             bottom
             offset-y
@@ -111,19 +115,59 @@
             <template v-slot:activator="{ on, attrs }">
               <span
                 class="basic-header"
-                style="font-size: 20px;"
+                style="font-size: 18px; margin-right: 10px;"
                 v-on="on"
                 v-bind="attrs"
               >
-                {{todoColl ? todoColl.collectionname : 'Select Collection'}}
+                {{todoFolder ? parseMenuName(todoFolder.foldername) : todoColl ? parseMenuName(todoColl.collectionname) : 'Select'}}
                 <v-icon>mdi-chevron-down</v-icon>
               </span>
             </template>
-            <v-list style="max-height: 300px;">
-              <v-list-item v-for="(coll, i) in collections"
+            <v-list style="max-height: 250px;">
+              <v-list-item v-for="(folder, i) in taskFolders"
+                :key="i"
+                @click="loadFolderColls(folder)"
+                link
+                style="background-color: #f9f9f9;"
+              >
+                <span>{{folder.foldername}}</span>
+              </v-list-item>
+              <v-divider />
+              <v-list-item v-for="(coll, i) in taskColls"
                 :key="i"
                 @click="loadCollToDo(coll)"
                 link
+                style="background-color: #f9f9f9;"
+              >
+                <span>{{coll.collectionname}}</span>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
+          <!-- Level 3 -->
+          <v-menu v-if="todoFolder"
+            bottom
+            offset-y
+            close-on-content-click
+            transition="slide-y-transition"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <span
+                class="basic-header"
+                style="font-size: 18px;"
+                v-on="on"
+                v-bind="attrs"
+              >
+                {{todoColl ? parseMenuName(todoColl.collectionname) : 'Select'}}
+                <v-icon>mdi-chevron-down</v-icon>
+              </span>
+            </template>
+            <v-list style="max-height: 250px;">
+              <v-list-item v-for="(coll, i) in taskFolderColls"
+                :key="i"
+                @click="loadCollToDo(coll)"
+                link
+                style="background-color: #f9f9f9;"
               >
                 <span>{{coll.collectionname}}</span>
               </v-list-item>
@@ -273,6 +317,7 @@ export default {
       loadingTodo: false,
       creatingTodo: false,
       taskText: '',
+      level: 0,
       deadline: null,
       newDeadline: null,
       newTaskText: '',
@@ -342,13 +387,19 @@ export default {
       if (newValue != null && oldValue == null) {
         setTimeout(async () => {
           await this.$store.commit('users/setAlert', null)
-        }, 4000);
+        }, 5000);
       }
     },
 
     newDeadline(newValue, oldValue) {
       if (newValue != null && oldValue == null) {
         this.updateDeadline()
+      }
+    },
+
+    async level(newValue) {
+      if (newValue == 1 || newValue == 3) {
+        await this.$store.commit('users/setTodoList', [])
       }
     }
   },
@@ -463,14 +514,21 @@ export default {
       ]);
     },
 
+    parseMenuName(name) {
+      if (name.length >= 14) {
+        let short = name.substring(0, 14) + '...'
+        return short
+      } else return name
+    },
+
     runTutorial() {
       this.toHome()
       this.addSteps()
       this.tour.start()
     },
 
-    onboardingComplete () {
-      this.$store.dispatch('users/basicOnboardingComplete')
+    async onboardingComplete () {
+      await this.$store.dispatch('users/basicOnboardingComplete')
     },
 
     resizeHandler() {
@@ -485,15 +543,28 @@ export default {
       this.$store.dispatch('users/logout')
     },
 
-    async loadColls(org) {
+    async loadFoldersAndColls(org) {
+      this.level = 1
+      await this.$store.commit('users/setTodoFolder', null)
       await this.$store.commit('users/setTodoColl', null)
       await this.$store.commit('users/setTodoOrg', org)
-      await this.$store.dispatch('users/collections', {
+      await this.$store.dispatch('users/getTaskFolders', {
         orgid: org.orgid
       })
     },
 
+    async loadFolderColls(folder) {
+      this.level = 3
+      await this.$store.commit('users/setTodoColl', null)
+      await this.$store.commit('users/setTodoFolder', folder)
+      await this.$store.dispatch('users/getTaskFolderColls', {
+        folderid: folder.folderid
+      })
+    },
+
     async loadCollToDo(coll) {
+      this.level == 1 ? this.level = 2 : this.level = 4
+      if (this.level == 2) await this.$store.commit('users/setTodoFolder', null)
       await this.$store.commit('users/setTodoColl', coll)
       this.loadingTodo = true
       await this.$store.dispatch('users/loadTodoList', {
@@ -603,6 +674,10 @@ export default {
     todoOrg () {
       return this.$store.state.users.todoOrg
     },
+
+    todoFolder () {
+      return this.$store.state.users.todoFolder
+    },
     
     todoColl () {
       return this.$store.state.users.todoColl
@@ -610,6 +685,18 @@ export default {
 
     todoList () {
       return this.$store.state.users.todoList
+    },
+
+    taskFolders () {
+      return this.$store.state.users.taskFolders
+    },
+
+    taskColls () {
+      return this.$store.state.users.taskColls
+    },
+
+    taskFolderColls () {
+      return this.$store.state.users.taskFolderColls
     },
 
     googleSuccess () {

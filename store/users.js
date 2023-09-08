@@ -14,7 +14,11 @@ export const state = () => ({
     folderColls: [],
     folders: [],
     todoList: [],
+    taskFolders: [],
+    taskColls: [],
+    taskFolderColls: [],
     todoOrg: null,
+    todoFolder: null,
     todoColl: null,
     notes: [],
     currentNote: {},
@@ -164,6 +168,18 @@ export const mutations = {
         state.collections = data
     },
 
+    setTaskFolders(state, data) {
+        state.taskFolders = data
+    },
+
+    setTaskColls(state, data) {
+        state.taskColls = data
+    },
+
+    setTaskFolderColls(state, data) {
+        state.taskFolderColls = data
+    },
+
     setFolderColls(state, data) {
         state.folderColls = data
     },
@@ -178,6 +194,10 @@ export const mutations = {
 
     setTodoOrg(state, data) {
         state.todoOrg = data
+    },
+
+    setTodoFolder(state, data) {
+        state.todoFolder = data
     },
 
     setTodoColl(state, data) {
@@ -1252,6 +1272,47 @@ export const actions = {
         } else if (error) {
             console.error(error)
             await commit('setCollections', [])
+        }
+    },
+
+    async getTaskFolders({ commit, dispatch, state }, { orgid }) {
+        const { data, error, status } = await supabase.from('see_task_folders')
+            .select()
+            .eq('orgid', orgid)
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            await commit('setTaskFolders', data)
+            await dispatch('getTaskColls', { orgid: orgid })
+        } else if (error) {
+            console.error(error)
+            await commit('setTaskFolders', [])
+            await dispatch('getTaskColls', { orgid: orgid })
+        }
+    },
+    
+    async getTaskColls({ commit, state }, { orgid }) {
+        const { data, error, status } = await supabase.from('see_task_colls')
+            .select()
+            .eq('orgid', orgid)
+            .eq('userid', state.userData.userid)
+            .is('folderid', null)
+        if (!error) {
+            await commit('setTaskColls', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setTaskColls', [])
+        }
+    },
+    
+    async getTaskFolderColls({ commit, state }, { folderid }) {
+        const { data, error, status } = await supabase.from('see_task_folder_colls')
+            .select()
+            .eq('folderid', folderid)
+        if (!error) {
+            await commit('setTaskFolderColls', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setTaskFolderColls', [])
         }
     },
 
