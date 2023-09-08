@@ -58,7 +58,7 @@
       <v-spacer/>
 
       <v-toolbar-title class="name-display" v-if="userData !== null && userData !== undefined">
-        {{userData.firstname}} {{userData.lastname}}
+        {{userData.firstname}}
       </v-toolbar-title>
       <v-btn to="/account" icon><v-icon size="30">mdi-account</v-icon></v-btn>
 
@@ -70,113 +70,133 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-btn id="step-2" icon v-on="on" v-bind="attrs">
-            <v-icon>mdi-checkbox-outline</v-icon>
+            <v-icon size="30">mdi-checkbox-outline</v-icon>
           </v-btn>
         </template>
         <div
           style="width: 500px; background-color: #f9f9f9; padding: 15px; z-index: 0 !important;"
         >
-          <!-- Level 0 -->
-          <v-menu
-            bottom
-            offset-y
-            transition="slide-y-transition"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <span
-                class="basic-header"
-                style="font-size: 18px; margin-right: 10px;"
-                v-on="on"
-                v-bind="attrs"
-              >
-                {{todoOrg ? parseMenuName(todoOrg.orgname) : 'Select'}}
-                <v-icon>mdi-chevron-down</v-icon>
-              </span>
-            </template>
-            <v-list style="max-height: 250px;">
-              <v-list-item v-for="(org, i) in orgs"
-                :key="i"
-                @click="loadFoldersAndColls(org)"
-                link
-                style="background-color: #f9f9f9;"
-              >
-                <span>{{org.orgname}}</span>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+          <div v-if="!seeTasksDueToday">
+            <!-- Level 0 -->
+            <v-menu
+              bottom
+              offset-y
+              transition="slide-y-transition"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <span
+                  class="basic-header"
+                  style="font-size: 18px; margin-right: 10px;"
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  {{todoOrg ? parseMenuName(todoOrg.orgname) : 'Select'}}
+                  <v-icon>mdi-chevron-down</v-icon>
+                </span>
+              </template>
+              <v-list style="max-height: 250px;">
+                <v-list-item v-for="(org, i) in orgs"
+                  :key="i"
+                  @click="loadFoldersAndColls(org)"
+                  link
+                  style="background-color: #f9f9f9;"
+                >
+                  <span>{{org.orgname}}</span>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
-          <!-- Level 1 -->
-          <v-menu v-if="todoOrg"
-            bottom
-            offset-y
-            close-on-content-click
-            transition="slide-y-transition"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <span
-                class="basic-header"
-                style="font-size: 18px; margin-right: 10px;"
-                v-on="on"
-                v-bind="attrs"
-              >
-                {{todoFolder ? parseMenuName(todoFolder.foldername) : todoColl ? parseMenuName(todoColl.collectionname) : 'Select'}}
-                <v-icon>mdi-chevron-down</v-icon>
-              </span>
-            </template>
-            <v-list style="max-height: 250px;">
-              <v-list-item v-for="(folder, i) in taskFolders"
-                :key="i"
-                @click="loadFolderColls(folder)"
-                link
-                style="background-color: #f9f9f9;"
-              >
-                <span>{{folder.foldername}}</span>
-              </v-list-item>
-              <v-divider />
-              <v-list-item v-for="(coll, i) in taskColls"
-                :key="i"
-                @click="loadCollToDo(coll)"
-                link
-                style="background-color: #f9f9f9;"
-              >
-                <span>{{coll.collectionname}}</span>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+            <!-- Level 1 -->
+            <v-menu v-if="todoOrg"
+              bottom
+              offset-y
+              close-on-content-click
+              transition="slide-y-transition"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <span
+                  class="basic-header"
+                  style="font-size: 18px; margin-right: 10px;"
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  {{todoFolder ? parseMenuName(todoFolder.foldername) : todoColl ? parseMenuName(todoColl.collectionname) : 'Select'}}
+                  <v-icon>mdi-chevron-down</v-icon>
+                </span>
+              </template>
+              <v-list style="max-height: 250px;">
+                <v-list-item v-for="(folder, i) in taskFolders"
+                  :key="i"
+                  @click="loadFolderColls(folder)"
+                  link
+                  style="background-color: #f9f9f9;"
+                >
+                  <span>{{folder.foldername}}</span>
+                </v-list-item>
+                <v-divider />
+                <v-list-item v-for="(coll, i) in taskColls"
+                  :key="i"
+                  @click="loadCollToDo(coll)"
+                  link
+                  style="background-color: #f9f9f9;"
+                >
+                  <span>{{coll.collectionname}}</span>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
-          <!-- Level 3 -->
-          <v-menu v-if="todoFolder"
-            bottom
-            offset-y
-            close-on-content-click
-            transition="slide-y-transition"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <span
-                class="basic-header"
-                style="font-size: 18px;"
-                v-on="on"
-                v-bind="attrs"
-              >
-                {{todoColl ? parseMenuName(todoColl.collectionname) : 'Select'}}
-                <v-icon>mdi-chevron-down</v-icon>
-              </span>
-            </template>
-            <v-list style="max-height: 250px;">
-              <v-list-item v-for="(coll, i) in taskFolderColls"
-                :key="i"
-                @click="loadCollToDo(coll)"
-                link
-                style="background-color: #f9f9f9;"
-              >
-                <span>{{coll.collectionname}}</span>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+            <!-- Level 3 -->
+            <v-menu v-if="todoFolder"
+              bottom
+              offset-y
+              close-on-content-click
+              transition="slide-y-transition"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <span
+                  class="basic-header"
+                  style="font-size: 18px;"
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  {{todoColl ? parseMenuName(todoColl.collectionname) : 'Select'}}
+                  <v-icon>mdi-chevron-down</v-icon>
+                </span>
+              </template>
+              <v-list style="max-height: 250px;">
+                <v-list-item v-for="(coll, i) in taskFolderColls"
+                  :key="i"
+                  @click="loadCollToDo(coll)"
+                  link
+                  style="background-color: #f9f9f9;"
+                >
+                  <span>{{coll.collectionname}}</span>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </div>
+          <v-row style="margin: 0 0 5px 0;">
+            <v-switch hide-details
+              color="#85c59d"
+              v-model="seeTasksDueToday"
+              label="See All Due Today"
+              style="max-height: 12px; max-width: 45%; margin-right: 30px;"
+            ></v-switch>
+            <v-switch hide-details
+              v-if="!seeTasksDueToday"
+              color="#85c59d"
+              v-model="hideCompleted"
+              label="Hide Completed"
+              style="max-height: 12px; max-width: 45%;"
+            ></v-switch>
+          </v-row>
           <v-divider style="background-color: #f9f9f9;" />
           <Loading v-if="loadingTodo" />
           <v-list class="task-list">
-            <div v-for="(task, i) in todoList" :key="i">
+            <div class="task-item"
+              v-for="(task, i) in seeTasksDueToday ? tasksDueToday : hideCompleted ? filteredTodoList(todoList) : todoList"
+              :key="i"
+            >
               <v-list-item dense style="height: 20px">
                 <v-col cols="7">
                   <v-text-field v-if="editText && task.todoid == taskBeingEdited.todoid"
@@ -191,7 +211,8 @@
                         v-on="on"
                         v-bind="attrs"
                       >
-                        <span :style="task.completed ? {'text-decoration': 'line-through'} : null">{{task.todotext}}</span>
+                        <span :style="task.completed ? {'text-decoration': 'line-through'} : null">{{task.todotext}}</span><br>
+                        <span v-if="seeTasksDueToday"><em>{{task.collectionname}}</em></span>
                       </button>
                     </template>
                     <span>Edit Task</span>
@@ -234,10 +255,10 @@
                   </v-btn>
                 </v-col>
               </v-list-item>
-              <hr />
+              
             </div>
           </v-list>
-          <div v-if="todoColl">
+          <div v-if="todoColl && !seeTasksDueToday">
             <v-alert v-if="alert"
               class="alert"
               :color="alert.color"
@@ -319,6 +340,8 @@ export default {
       taskText: '',
       level: 0,
       deadline: null,
+      seeTasksDueToday: false,
+      hideCompleted: false,
       newDeadline: null,
       newTaskText: '',
       editDeadline: false,
@@ -400,6 +423,14 @@ export default {
     async level(newValue) {
       if (newValue == 1 || newValue == 3) {
         await this.$store.commit('users/setTodoList', [])
+      }
+    },
+
+    async seeTasksDueToday(newValue, oldValue) {
+      if (newValue == true) {
+        this.loadingTodo = true
+        await this.$store.dispatch('users/getTasksDueToday')
+        this.loadingTodo = false
       }
     }
   },
@@ -521,6 +552,10 @@ export default {
       } else return name
     },
 
+    filteredTodoList(list) {
+      return list.filter(task => task.completed == false)
+    },
+
     runTutorial() {
       this.toHome()
       this.addSteps()
@@ -613,7 +648,8 @@ export default {
         completed: !task.completed,
         todoid: task.todoid,
         deadline: null,
-        collectionid: this.todoColl.collectionid
+        collectionid: this.todoColl.collectionid,
+        seeTasksDueToday: this.seeTasksDueToday
       })
     },
 
@@ -623,7 +659,8 @@ export default {
         completed: null,
         todoid: this.taskBeingEdited.todoid,
         deadline: this.newDeadline,
-        collectionid: this.todoColl.collectionid
+        collectionid: this.todoColl.collectionid,
+        seeTasksDueToday: this.seeTasksDueToday
       })
       this.taskBeingEdited = null
       this.editDeadline = false
@@ -635,7 +672,8 @@ export default {
         completed: null,
         todoid: this.taskBeingEdited.todoid,
         deadline: null,
-        collectionid: this.todoColl.collectionid
+        collectionid: this.todoColl.collectionid,
+        seeTasksDueToday: this.seeTasksDueToday
       })
       this.taskBeingEdited = null
       this.editText = false
@@ -644,7 +682,8 @@ export default {
     async deleteTodo(task) {
       await this.$store.dispatch('users/deleteTodo', {
         todoid: task.todoid,
-        collectionid: this.todoColl.collectionid
+        collectionid: this.todoColl.collectionid,
+        seeTasksDueToday: this.seeTasksDueToday
       })
     },
 
@@ -685,6 +724,10 @@ export default {
 
     todoList () {
       return this.$store.state.users.todoList
+    },
+
+    tasksDueToday () {
+      return this.$store.state.users.tasksDueToday
     },
 
     taskFolders () {
@@ -746,6 +789,15 @@ export default {
   height: 50vh;
   overflow-y: scroll;
   background-color: #f9f9f9;
+}
+
+.task-item {
+  padding: 10px 0;
+}
+
+.task-item:nth-child(odd) {
+  background-color: #eeeeee;
+  border-radius: 10px;
 }
 
 </style>

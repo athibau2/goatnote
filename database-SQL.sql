@@ -65,8 +65,10 @@ CREATE TABLE todo
   deadline DATE NOT NULL,
   completed BOOLEAN NOT NULL default false,
   collectionid SERIAL NOT NULL,
+  userid INT DEFAULT NULL,
   PRIMARY KEY (todoid),
-  FOREIGN KEY (collectionid) REFERENCES "collection"(collectionid) ON DELETE CASCADE
+  FOREIGN KEY (collectionid) REFERENCES "collection"(collectionid) ON DELETE CASCADE,
+  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE
 );
 
 CREATE TABLE note
@@ -232,6 +234,18 @@ create or replace view see_folder_colls as
   select * from collection;
   --this will be filtered later
 
+create or replace view see_task_folders as
+	select * from folder;
+	--this will be filtered later
+
+create or replace view see_task_colls as
+	select * from collection;
+	--this will be filtered later
+
+create or replace view see_task_folder_colls as
+	select * from collection;
+	--this will be filtered later
+
 create or replace view see_folders as
 	select * from folder;
 	--this will be filtered later
@@ -239,6 +253,13 @@ create or replace view see_folders as
 create or replace view see_todo_list as
   select * from todo
   order by deadline asc;
+  -- this will be filtered later
+
+create or replace view see_todo_due_today as
+  select t.todoid, t.todotext, t.deadline, t.completed, c.collectionid, t.userid, c.collectionname
+  from todo t inner join collection c on t.collectionid = c.collectionid
+  where t.completed = false
+  order by c.collectionid asc;
   -- this will be filtered later
 
 create or replace view see_notes as

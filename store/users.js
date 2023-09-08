@@ -14,6 +14,7 @@ export const state = () => ({
     folderColls: [],
     folders: [],
     todoList: [],
+    tasksDueToday: [],
     taskFolders: [],
     taskColls: [],
     taskFolderColls: [],
@@ -190,6 +191,10 @@ export const mutations = {
 
     setTodoList(state, data) {
         state.todoList = data
+    },
+
+    setTasksDueToday(state, data) {
+        state.tasksDueToday = data
     },
 
     setTodoOrg(state, data) {
@@ -1328,6 +1333,25 @@ export const actions = {
         }
     },
 
+    async getTasksDueToday({ commit, state }) {
+        let year = new Date().getFullYear()
+        let month = new Date().getMonth() + 1
+        if (month < 10) month = `0${month}`
+        let date = new Date().getDate()
+        if (date < 10) date = `0${date}`
+        const fullDate = `${year}-${month}-${date}`
+
+        const { data, error, status } = await supabase.from('see_todo_due_today')
+            .select()
+            .eq('userid', state.userData.userid)
+            .eq('deadline', fullDate)
+        if (!error) {
+            await commit('setTasksDueToday', data)
+        } else if (error) {
+            console.error(error)
+        }
+    },
+
     async createTodo({ dispatch, commit }, { text, deadline, collectionid }) {
         const { data, error, status } = await supabase.from('todo')
             .insert({
@@ -1347,7 +1371,7 @@ export const actions = {
         }
     },
 
-    async updateTodo({ dispatch, state }, { text, completed, todoid, deadline, collectionid }) {
+    async updateTodo({ dispatch, state }, { text, completed, todoid, deadline, collectionid, seeTasksDueToday }) {
         let body = {}
         if (text) {
             body = {
@@ -1367,18 +1391,25 @@ export const actions = {
             .eq('todoid', todoid)
             .select()
         if (!error) {
-            await dispatch('loadTodoList', { collectionid: collectionid })
+            seeTasksDueToday ? await dispatch('getTasksDueToday')
+            : await dispatch('loadTodoList', { collectionid: collectionid })
         } else if (error) {
             console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
         }
     },
 
-    async deleteTodo({ dispatch, commit }, { todoid, collectionid }) {
+    async deleteTodo({ dispatch, commit }, { todoid, collectionid, seeTasksDueToday }) {
         const { data, error, status } = await supabase.from('todo')
             .delete()
             .eq('todoid', todoid)
         if (!error) {
-            await dispatch('loadTodoList', { collectionid: collectionid })
+            seeTasksDueToday ? await dispatch('getTasksDueToday')
+            : await dispatch('loadTodoList', { collectionid: collectionid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
