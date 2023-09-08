@@ -198,7 +198,7 @@
 
           <!-- Buttons area large screen -->
           <v-col class="text-center" cols="3">
-            <div>
+            <div v-if="userData.subscriptionstatus == 'active'">
               <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 6</span>
             </div>
             <div>
@@ -267,7 +267,7 @@
 
         <!-- Buttons area small screen -->
         <v-col cols="12" v-else-if="windowWidth < 1200">
-          <div>
+          <div v-if="userData.subscriptionstatus == 'active'">
             <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 6</span>
           </div>
           <v-btn class="tool-btn" id="ai-btn"
@@ -724,7 +724,10 @@ export default {
           collectionid: this.currentNote.collectionid,
           orgid: this.currentNote.orgid
         })
+        this.editorOrWhiteboard = 0
         this.noteText = this.currentNote.typednotes
+        await this.sunEditor.destroy()
+        await this.createSunEditor()
       },
 
       async generateStudyTools() {
