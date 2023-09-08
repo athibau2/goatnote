@@ -33,6 +33,7 @@
     "jszip": "^3.10.1",
     "jwt-decode": "^3.1.2",
     "katex": "^0.16.8",
+    "limiter": "^2.1.0",
     "lodash": "^4.17.21",
     "natural": "^6.5.0",
     "netlify-cli": "^15.8.1",

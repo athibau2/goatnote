@@ -6,6 +6,7 @@
     <v-navigation-drawer
       class="main"
       id="menu-step-6"
+      v-if="windowWidth >= 800"
       :mini-variant="windowWidth < 1000 ? true : miniVariant"
       :clipped="true"
       fixed
@@ -42,9 +43,42 @@
       app
       color="light grey lighten-2"
     >
-      <v-tooltip bottom>
+      <v-menu bottom
+        offset-y
+        transition="slide-y-transition"
+        v-if="showSmallMenu"
+      >
         <template v-slot:activator="{ on, attrs }">
-          <v-app-bar-nav-icon 
+          <v-app-bar-nav-icon
+            v-on="on"
+            v-bind="attrs"
+          />
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(item, i) in items"
+            style="text-decoration: none;"
+            :key="i"
+            :id="'menu-step-'+i"
+            :to="item.to"
+            @click="item.click"
+            router
+            exact
+            :disabled="item.title !== 'Admin' ? false : userData?.isadmin ? false : true"
+          >
+            <v-list-item-action>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title v-text="item.title" />
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+      <v-tooltip bottom v-if="!showSmallMenu">
+        <template v-slot:activator="{ on, attrs }">
+          <v-app-bar-nav-icon
             @click.stop="miniVariant = !miniVariant"
             v-on="on"
             v-bind="attrs"
@@ -74,9 +108,9 @@
           </v-btn>
         </template>
         <div
-          style="width: 500px; background-color: #f9f9f9; padding: 15px; z-index: 0 !important;"
+          :style="{'width': windowWidth < 800 ? '100vw' : '40vw', 'background-color': '#f9f9f9', 'padding': '15px', 'z-index': '0 !important'}"
         >
-          <div v-if="!seeTasksDueToday">
+          <div v-if="!seeTasksDueToday" style="height: 50px; white-space: nowrap; overflow-x: scroll;">
             <!-- Level 0 -->
             <v-menu
               bottom
@@ -175,7 +209,7 @@
               </v-list>
             </v-menu>
           </div>
-          <v-row style="margin: 0 0 5px 0;">
+          <v-row v-if="windowWidth >= 800" style="margin: 0 0 5px 0;">
             <v-switch hide-details
               color="#85c59d"
               v-model="seeTasksDueToday"
@@ -190,6 +224,21 @@
               style="max-height: 12px; max-width: 45%;"
             ></v-switch>
           </v-row>
+          <div v-else-if="windowWidth < 800">
+            <v-switch hide-details
+              color="#85c59d"
+              v-model="seeTasksDueToday"
+              label="See All Due Today"
+              style="max-height: 12px; margin-right: 30px;"
+            ></v-switch>
+            <v-switch hide-details
+              v-if="!seeTasksDueToday"
+              color="#85c59d"
+              v-model="hideCompleted"
+              label="Hide Completed"
+              style="max-height: 12px;"
+            ></v-switch>
+          </div>
           <v-divider style="background-color: #f9f9f9;" />
           <Loading v-if="loadingTodo" />
           <v-list class="task-list">
@@ -340,6 +389,7 @@ export default {
       taskText: '',
       level: 0,
       deadline: null,
+      showSmallMenu: window.innerWidth < 800,
       seeTasksDueToday: false,
       hideCompleted: false,
       newDeadline: null,
@@ -411,6 +461,14 @@ export default {
         setTimeout(async () => {
           await this.$store.commit('users/setAlert', null)
         }, 5000);
+      }
+    },
+
+    windowWidth(newValue, oldValue) {
+      if (newValue < 800 && oldValue >= 800) {
+        this.showSmallMenu = true
+      } else if (newValue >= 800 && oldValue <= 799) {
+        this.showSmallMenu = false
       }
     },
 
