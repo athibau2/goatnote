@@ -33,15 +33,28 @@ CREATE TABLE part_of
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE
 );
 
+CREATE TABLE folder
+(
+  folderid SERIAL NOT NULL,
+  foldername text,
+  orgid SERIAL,
+  userid SERIAL,
+  PRIMARY KEY (folderid),
+  FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE,
+  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE
+);
+
 CREATE TABLE collection
 (
   collectionname text,
   collectionid SERIAL NOT NULL,
   userid SERIAL NOT NULL,
   orgid SERIAL,
+  folderid INT DEFAULT null,
   color TEXT NOT NULL DEFAULT '#D3D3D3',
   PRIMARY KEY (collectionid),
   FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE,
+  FOREIGN KEY (folderid) REFERENCES folder(folderid) ON DELETE CASCADE,
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE,
 );
 
@@ -208,12 +221,20 @@ create or replace view see_orgs as
   --this will be filtered later
 
 create or replace view see_collections as
-  select c.collectionname, o.orgid, u.userid, u.email, c.collectionid, c.color
+  select c.collectionname, o.orgid, u.userid, u.email, c.collectionid, c.color, c.folderid
   from collection c inner join organization o
   on c.orgid = o.orgid inner join "user" u
   on c.userid = u.userid
   order by c.collectionid asc;
   --this will be filtered later
+
+create or replace view see_folder_colls as
+  select * from collection;
+  --this will be filtered later
+
+create or replace view see_folders as
+	select * from folder;
+	--this will be filtered later
 
 create or replace view see_todo_list as
   select * from todo
@@ -221,14 +242,14 @@ create or replace view see_todo_list as
   -- this will be filtered later
 
 create or replace view see_notes as
-	select n.noteid, n.notename, c.collectionid, u.email, c.orgid, c.collectionname, c.color
+	select n.noteid, n.notename, c.collectionid, u.email, c.orgid, c.collectionname, c.color, c.folderid
 	from note n inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on c.userid = u.userid
 	order by n.noteid asc;
 	--this will be filtered later
 
 create or replace view see_note_with_data as
-  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.externalsharing                                      
+  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.externalsharing, c.folderid                                
   from note n inner join collection c on n.collectionid = c.collectionid
   inner join "user" u on c.userid = u.userid;
   --this will be filtered later
@@ -311,7 +332,7 @@ create or replace view admin_see_user_orgs as
 
 create or replace view admin_see_user_colls as
 	select c.collectionname, c.collectionid, c.userid, c.orgid, 
-		o.orgname, count(n.noteid) as numnotes
+		o.orgname, count(n.noteid) as numnotes, c.folderid
 	from collection c inner join note n on c.collectionid = n.collectionid
 	inner join organization o on o.orgid = c.orgid
 	group by c.collectionname, c.collectionid, o.orgname
@@ -332,7 +353,7 @@ create or replace view admin_see_org_users as
   --this will be filtered later
 
 create or replace view admin_see_coll_notes as
-  select c.collectionname, n.noteid, n.notename, n.notedate, n.collectionid
+  select c.collectionname, n.noteid, n.notename, n.notedate, n.collectionid, c.folderid
   from collection c inner join note n
   on c.collectionid = n.collectionid
   order by n.notename asc;
