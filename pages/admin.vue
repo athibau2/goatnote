@@ -191,8 +191,17 @@
                     <v-list-item @click="updateEmailGroup('Free Users')" link>
                       <span>Free Users</span>
                     </v-list-item>
+                    <v-list-item @click="updateEmailGroup('Custom')" link>
+                      <span>Custom</span>
+                    </v-list-item>
                   </v-list>
                 </v-menu>
+                <input class="email-field"
+                  style="margin-bottom: 4px;"
+                  v-if="emailGroup == 'Custom'"
+                  v-model="customEmailList"
+                  placeholder="Enter emails, separated by commas with no spaces"
+                />
                 <input class="email-field" v-model="subject" placeholder="Subject" />
                 <v-textarea
                   class="email-field"
@@ -204,7 +213,7 @@
                 <v-btn
                   class="good-btn"
                   @click="sendEmails()"
-                  :disabled="emailList.length == 0 || subject == '' || body == ''"
+                  :disabled="(emailList.length == 0 && customEmailList == '') || subject == '' || body == ''"
                 >
                   <v-icon color="#2F2B28">mdi-send</v-icon>
                   Send
@@ -219,6 +228,7 @@
       <v-dialog
         v-model="showOrgUsers"
         :width="windowWidth < 800 ? '90%' : '50%'"
+        style="z-index: 9999;"
       >
         <v-card class="dialog-card" elevation="5">
             <v-card-title class="basic-header justify-center" v-if="$route.params.org !== undefined">Members of {{$route.params.org.orgname}}</v-card-title>
@@ -259,6 +269,7 @@
       <v-dialog
         v-model="showCollNotes"
         :width="windowWidth < 800 ? '90%' : '50%'"
+        style="z-index: 9999;"
       >
         <v-card class="dialog-card" elevation="5">
             <v-card-title class="basic-header justify-center" v-if="collOpened !== {}">Notes in {{collOpened.collectionname}}</v-card-title>
@@ -338,6 +349,7 @@ export default {
       subject: '',
       body: '',
       emailGroup: 'Select',
+      customEmailList: '',
       windowWidth: window.innerWidth
     }
   },
@@ -345,18 +357,27 @@ export default {
   methods: {
     async updateEmailGroup(group) {
       this.emailGroup = group
-      await this.$store.dispatch('users/getEmailList', {
-        group: this.emailGroup
-      })
+      if (group != 'Custom') {
+        await this.$store.dispatch('users/getEmailList', {
+          group: this.emailGroup
+        })
+      } else await this.$store.commit('users/setEmailList', [])
     },
 
     async sendEmails() {
-      if (confirm(`Are you ready to email ${this.emailList.length} users?`)) {
+      let list = []
+      if (this.emailList.length == 0 && this.customEmailList.length > 0) {
+        this.customEmailList = this.customEmailList.split(',')
+        list = [...this.customEmailList]
+      } else list = [...this.emailList]
+
+      if (confirm(`Are you ready to email ${list.length} users?`)) {
         const body= {
-          'emails': this.emailList,
+          'emails': list,
           'subject': this.subject,
           'body': this.body
         }
+
         await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
           method: 'POST',
           headers: {
@@ -366,10 +387,12 @@ export default {
           },
           body: JSON.stringify(body)
         })
+
         this.subject = ''
         this.body = ''
         this.emailGroup = 'Select'
-        await this.$store.commit('setEmailList', [])
+        this.customEmailList = ''
+        await this.$store.commit('users/setEmailList', [])
       }
     },
 
