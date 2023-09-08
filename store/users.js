@@ -11,6 +11,7 @@ export const state = () => ({
     orgs: [],
     allColls: [],
     collections: [],
+    folderColls: [],
     folders: [],
     todoList: [],
     todoOrg: null,
@@ -161,6 +162,10 @@ export const mutations = {
 
     setCollections(state, data) {
         state.collections = data
+    },
+
+    setFolderColls(state, data) {
+        state.folderColls = data
     },
 
     setFolders(state, data) {
@@ -697,6 +702,7 @@ export const actions = {
             .eq('userid', state.userData.userid)
         if (!error) {
             await dispatch('userData', { email: state.userData.email })
+            this.$router.push({ name: 'join', params: { new: true }})
         } else if (error) {
             console.error(error)
             if (status === 404 || status === 400) {
@@ -837,10 +843,11 @@ export const actions = {
         }
     },
 
-    async getFolders({ commit }, { orgid }) {
+    async getFolders({ commit }, { orgid, userid }) {
         const { data, error, status } = await supabase.from('see_folders')
             .select()
             .eq('orgid', orgid)
+            .eq('userid', userid)
         if (!error) {
             await commit('setFolders', data)
         } else if (error) {
@@ -849,14 +856,15 @@ export const actions = {
         }
     },
 
-    async createFolder({ dispatch }, { foldername, orgid }) {
+    async createFolder({ dispatch, state }, { foldername, orgid }) {
         const { data, error, status } = await supabase.from('folder')
             .insert({
                 foldername: foldername,
-                orgid: orgid
+                orgid: orgid,
+                userid: state.userData.userid
             })
         if (!error) {
-            await dispatch('getFolders', { orgid: orgid })
+            await dispatch('getFolders', { orgid: orgid, userid: state.userData.userid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -867,7 +875,7 @@ export const actions = {
         }
     },
 
-    async updateFolder({ dispatch }, { foldername, folderid, orgid }) {
+    async updateFolder({ dispatch, state }, { foldername, folderid, orgid }) {
         const { data, error, status } = await supabase.from('folder')
             .update({
                 foldername: foldername
@@ -879,7 +887,7 @@ export const actions = {
                 icon: '$success',
                 text: 'Your folder has successfully been updated.'
             })
-            await dispatch('getFolders', { orgid: orgid })
+            await dispatch('getFolders', { orgid: orgid, userid: state.userData.userid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -890,7 +898,7 @@ export const actions = {
         }
     },
 
-    async deleteFolder({ dispatch }, { folderid, orgid }) {
+    async deleteFolder({ dispatch, state }, { folderid, orgid }) {
         const { data, error, status } = await supabase.from('folder')
             .delete()
             .eq('folderid', folderid)
@@ -900,7 +908,7 @@ export const actions = {
                 icon: '$success',
                 text: 'Your folder has successfully been deleted.'
             })
-            await dispatch('getFolders', { orgid: orgid })
+            await dispatch('getFolders', { orgid: orgid, userid: state.userData.userid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -911,14 +919,34 @@ export const actions = {
         }
     },
 
-    async updateCollName({ dispatch, commit }, { collectionid, newName, orgid }) {
+    async moveCollToFolder({ dispatch, commit }, { collectionid, folderid, currentFolderid, orgid, level }) {
+        const { data, error, status } = await supabase.from('collection')
+            .update({
+                folderid: folderid
+            })
+            .eq('collectionid', collectionid)
+        if (!error) {
+            level == 5 ? await dispatch('folderColls', { folderid: currentFolderid })
+            : await dispatch('collections', { orgid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async updateCollName({ dispatch, commit }, { collectionid, newName, orgid, folderid }) {
         const { data, error, status } = await supabase.from('collection')
             .update({
                 collectionname: newName
             })
             .eq('collectionid', collectionid)
         if (!error) {
-            await dispatch('collections', { orgid })
+            folderid ? await dispatch('folderColls', { folderid: folderid })
+            : await dispatch('collections', { orgid })
         } else if (error) {
             console.error(error)
             if (status === 404) {
@@ -1104,15 +1132,17 @@ export const actions = {
         }
     },
 
-    async createCollection({ dispatch, state, commit }, { collectionname, orgid }) {
+    async createCollection({ dispatch, state, commit }, { collectionname, orgid, folderid }) {
         const { data, error, status } = await supabase.from('collection')
             .insert({
                 collectionname: collectionname,
                 orgid: orgid,
-                userid: state.userData.userid
+                userid: state.userData.userid,
+                folderid: folderid
             })
         if (!error) {
-            await dispatch('collections', { orgid })
+            folderid ? await dispatch('folderColls', { folderid: folderid })
+            : await dispatch('collections', { orgid })
             await dispatch('allColls')
         } else if (error) {
             console.error(error)
@@ -1166,14 +1196,15 @@ export const actions = {
         }
     },
 
-    async updateCollColor({ dispatch }, { collectionid, color, orgid }) {
+    async updateCollColor({ dispatch }, { collectionid, color, orgid, folderid }) {
         const { data, error, status } = await supabase.from('collection')
             .update({
                 color: color
             })
             .eq('collectionid', collectionid)
         if (!error) {
-            await dispatch('collections', { orgid: orgid })
+            folderid ? await dispatch('folderColls', { folderid: folderid })
+            : await dispatch('collections', { orgid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -1196,6 +1227,18 @@ export const actions = {
         }
     },
 
+    async folderColls({ commit, state }, { folderid }) {
+        await commit('setFolderColls', [])
+        const { data, error, status } = await supabase.from('see_folder_colls')
+            .select()
+            .eq('folderid', folderid)
+        if (!error) {
+            await commit('setFolderColls', data)
+        } else if (error) {
+            console.error(error)
+        }
+    },
+
     async collections({ commit, state }, { orgid }) {
         await commit('setCollections', [])
         await commit('setNotes', [])
@@ -1203,6 +1246,7 @@ export const actions = {
             .select()
             .eq('email', state.userData.email)
             .eq('orgid', orgid)
+            .is('folderid', null)
         if (!error) {
             await commit('setCollections', data)
         } else if (error) {
