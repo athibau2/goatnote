@@ -185,8 +185,8 @@
           })
         },
 
-        addFlashcard () {
-          this.$store.dispatch('users/addFlashcard', {
+        async addFlashcard () {
+          await this.$store.dispatch('users/addFlashcard', {
             newPrompt: this.newPrompt,
             newAnswer: this.newAnswer,
             noteid: this.currentNote.noteid

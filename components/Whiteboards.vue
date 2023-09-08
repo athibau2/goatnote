@@ -2,6 +2,7 @@
     <v-dialog
         v-model="showMyWhiteboards"
         :width="windowWidth < 800 ? '90%' : '50%'"
+        style="z-index: 9999;"
     >
         <v-card class="dialog-card" elevation="5">
             <v-card-title class="basic-header justify-center">My Whiteboards</v-card-title>

@@ -8,7 +8,7 @@
       <script src="https://www.whiteboard.team/dist/api.js"></script>
     </head>
 
-    <v-container>
+    <div>
         <v-row>
             <v-col>
               <v-tooltip bottom>
@@ -403,7 +403,7 @@
         <Tools style="margin: auto;" />
         <QuickWord style="margin: auto;" />
         <Whiteboards style="margin: auto;" @opened-board="openBoard()" />
-    </v-container>
+    </div>
   </v-app>
 </template>
 
