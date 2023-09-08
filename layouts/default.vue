@@ -408,7 +408,7 @@ export default {
         {
           icon: 'mdi-domain',
           title: 'Join Organization',
-          to: '/joinOrg'
+          to: '/join'
         },
         {
           icon: 'mdi-calendar-alert',
