@@ -8,35 +8,43 @@ const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
 const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const sentEmails = {}
+
 const cron = new CronJob(
    `0 0 2 * * *`,
     async function() {
         const { data, error, status } = await supabase.from('get_daily_plans')
             .select()
-	console.log(error, status)
+	      console.log(error, status)
         if (!error) {
             data.forEach(async element => {
                 const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
                 const sendMin = (parseInt(element.times[0].split(':')[1]))
-                const job = new CronJob(
-                   `30 ${sendMin} ${sendHour} * * *`,
-                    async function() {
-                        try {
+
+                const entryKey = element.id;
+                
+                if (!sentEmails[entryKey]) {
+                  const job = new CronJob(
+                    `30 ${sendMin} ${sendHour} * * *`,
+                      async function() {
+                          try {
                             const res = await resend.emails.send({
                                 from: 'GOAT Notes <management@deltaapps.dev>',
                                 to: element.email,
                                 subject: 'Study Plan Reminder',
                                 html: buildReminderEmail(element.firstname, element.notenames, element.times)
                             });
-			    console.log(res)
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    },
-                    null,
-                    true,
-                    'America/Denver'
-                );
+                            console.log(res)
+                            sentEmails[entryKey] = true;
+                          } catch (err) {
+                              console.log(err)
+                          }
+                      },
+                      null,
+                      true,
+                      'America/Denver'
+                  );
+                }
             });
         } else if (error) {
             console.log(error)
