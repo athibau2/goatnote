@@ -167,26 +167,25 @@ CREATE TABLE "reset_code"
 
 CREATE OR REPLACE VIEW get_daily_plans AS
 	SELECT
+			u.userid,
 			u.firstname,
 			u.email,
-			u.userid,
-			s.studydate,
-			array_agg(DISTINCT n.notename) AS notenames,
-			array_agg(DISTINCT s.time) AS times
+			array_agg(n.notename) AS notenames,
+			array_agg(s.time ORDER BY s.time ASC) AS times,
+			array_agg(DISTINCT s.planid) AS planids
 	FROM
 			"user" u
-			INNER JOIN collection c ON u.userid = c.userid
-			INNER JOIN note n ON c.collectionid = n.collectionid
-			INNER JOIN study_plan s ON n.noteid = s.noteid
+	INNER JOIN collection c ON u.userid = c.userid
+	INNER JOIN note n ON c.collectionid = n.collectionid
+	INNER JOIN study_plan s ON n.noteid = s.noteid
 	WHERE
 			u.notifsettings = true
 			AND s.studycompleted = false
 			AND DATE(s.studydate) = CURRENT_DATE
 	GROUP BY
-			u.firstname,
-			u.email,
 			u.userid,
-			s.studydate
+			u.firstname,
+			u.email
 	ORDER BY
 			u.userid;
 

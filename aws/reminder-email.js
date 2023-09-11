@@ -15,17 +15,23 @@ const cron = new CronJob(
     async function() {
         const { data, error, status } = await supabase.from('get_daily_plans')
             .select()
-	      console.log(error, status)
+	      console.log(data, error, status)
         if (!error) {
             data.forEach(async element => {
                 const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
                 const sendMin = (parseInt(element.times[0].split(':')[1]))
 
-                const entryKey = element.id;
+                let hasSent = false;
+                for (let i = 0; i < element.planids.length; ++i) {
+                  if (sentEmails[element.planids[i]]) {
+                    hasSent = true
+                    break;
+                  }
+                }
                 
-                if (!sentEmails[entryKey]) {
+                if (!hasSent) {
                   const job = new CronJob(
-                    `30 ${sendMin} ${sendHour} * * *`,
+                    `10 ${sendMin} ${sendHour} * * *`,
                       async function() {
                           try {
                             const res = await resend.emails.send({
@@ -35,7 +41,9 @@ const cron = new CronJob(
                                 html: buildReminderEmail(element.firstname, element.notenames, element.times)
                             });
                             console.log(res)
-                            sentEmails[entryKey] = true;
+                            element.planids.forEach(id => {
+                              sentEmails[id] = true;
+                            });
                           } catch (err) {
                               console.log(err)
                           }
