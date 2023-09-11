@@ -64,10 +64,23 @@
                     {{feature}}
                   </li>
                 </ul>
+                <div v-if="userData.subscriptionstatus == 'inactive'">
+                  <span style="display: flex; justify-content: center; align-items: center;">
+                    <hr style="width: 40%;">
+                    <span style="margin: 0 5px;">OR</span>
+                    <hr style="width: 40%;">
+                  </span>
+                  <span>Upgrade to Receive:</span>
+                  <ul class="feature-list">
+                    <li v-for="(feature, i) in products[1].features" :key="i">
+                      {{feature}}
+                    </li>
+                  </ul>
+                </div>
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
-                <a :href="portal" style="text-decoration: none;">
+                <a v-if="userData.subscriptionstatus == 'active'" :href="portal" style="text-decoration: none;">
                   <v-btn text class="flat-btn">Manage Your Account</v-btn>
                 </a>
                 <a

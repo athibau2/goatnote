@@ -98,7 +98,6 @@
 
       <v-menu bottom
         offset-y
-        :close-on-click="false"
         :close-on-content-click="false"
         transition="slide-y-transition"
       >
@@ -108,88 +107,21 @@
           </v-btn>
         </template>
         <div
-          :style="{'width': windowWidth < 800 ? '100vw' : '40vw', 'background-color': '#f9f9f9', 'padding': '15px', 'z-index': '0 !important'}"
+          :style="{'width': windowWidth < 800 ? '85vw' : '40vw', 'background-color': '#f9f9f9', 'padding': '15px', 'z-index': '0 !important'}"
         >
-          <div v-if="!seeTasksDueToday" style="height: 50px; white-space: nowrap; overflow-x: scroll;">
+          <div v-if="!seeTasksDueToday" style="white-space: nowrap;">
             <!-- Level 0 -->
             <v-menu
               bottom
               offset-y
               transition="slide-y-transition"
+              close-on-content-click
+              ref="todoMenu"
             >
               <template v-slot:activator="{ on, attrs }">
                 <span
                   class="basic-header"
                   style="font-size: 18px; margin-right: 10px;"
-                  v-on="on"
-                  v-bind="attrs"
-                >
-                  {{todoOrg ? parseMenuName(todoOrg.orgname) : 'Select'}}
-                  <v-icon>mdi-chevron-down</v-icon>
-                </span>
-              </template>
-              <v-list style="max-height: 250px;">
-                <v-list-item v-for="(org, i) in orgs"
-                  :key="i"
-                  @click="loadFoldersAndColls(org)"
-                  link
-                  style="background-color: #f9f9f9;"
-                >
-                  <span>{{org.orgname}}</span>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-
-            <!-- Level 1 -->
-            <v-menu v-if="todoOrg"
-              bottom
-              offset-y
-              close-on-content-click
-              transition="slide-y-transition"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <span
-                  class="basic-header"
-                  style="font-size: 18px; margin-right: 10px;"
-                  v-on="on"
-                  v-bind="attrs"
-                >
-                  {{todoFolder ? parseMenuName(todoFolder.foldername) : todoColl ? parseMenuName(todoColl.collectionname) : 'Select'}}
-                  <v-icon>mdi-chevron-down</v-icon>
-                </span>
-              </template>
-              <v-list style="max-height: 250px;">
-                <v-list-item v-for="(folder, i) in taskFolders"
-                  :key="i"
-                  @click="loadFolderColls(folder)"
-                  link
-                  style="background-color: #f9f9f9;"
-                >
-                  <span>{{folder.foldername}}</span>
-                </v-list-item>
-                <v-divider />
-                <v-list-item v-for="(coll, i) in taskColls"
-                  :key="i"
-                  @click="loadCollToDo(coll)"
-                  link
-                  style="background-color: #f9f9f9;"
-                >
-                  <span>{{coll.collectionname}}</span>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-
-            <!-- Level 3 -->
-            <v-menu v-if="todoFolder"
-              bottom
-              offset-y
-              close-on-content-click
-              transition="slide-y-transition"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <span
-                  class="basic-header"
-                  style="font-size: 18px;"
                   v-on="on"
                   v-bind="attrs"
                 >
@@ -198,17 +130,79 @@
                 </span>
               </template>
               <v-list style="max-height: 250px;">
-                <v-list-item v-for="(coll, i) in taskFolderColls"
+                <v-list-item v-for="(org, i) in orgs"
                   :key="i"
-                  @click="loadCollToDo(coll)"
                   link
                   style="background-color: #f9f9f9;"
                 >
-                  <span>{{coll.collectionname}}</span>
+                  <!-- Level 1 -->
+                  <v-menu right
+                    offset-x
+                    close-on-content-click
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <span
+                        class="basic-header"
+                        style="font-size: 18px; margin-right: 10px;"
+                        v-on="on"
+                        v-bind="attrs"
+                        @click.stop="loadFoldersAndColls(org)"
+                      >
+                        {{parseMenuName(org.orgname)}}
+                        <v-icon>mdi-chevron-down</v-icon>
+                      </span>
+                    </template>
+                    <v-list style="max-height: 250px;">
+                      <v-list-item v-for="(folder, i) in taskFolders"
+                        :key="i"
+                        link
+                        style="background-color: #f9f9f9;"
+                      >
+                        <!-- Level 3 -->
+                        <v-menu right
+                          offset-x
+                          close-on-content-click
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <span
+                              class="basic-header"
+                              style="font-size: 18px; margin-right: 10px;"
+                              v-on="on"
+                              v-bind="attrs"
+                              @click.stop="loadFolderColls(folder)"
+                            >
+                              {{parseMenuName(folder.foldername)}}
+                              <v-icon>mdi-chevron-down</v-icon>
+                            </span>
+                          </template>
+                          <v-list style="max-height: 250px;">
+                            <v-list-item v-for="(coll, i) in taskFolderColls"
+                              :key="i"
+                              @click.stop="loadCollToDo(coll)"
+                              link
+                              style="background-color: #f9f9f9;"
+                            >
+                              <span>{{coll.collectionname}}</span>
+                            </v-list-item>
+                          </v-list>
+                        </v-menu>
+                      </v-list-item>
+                      <v-divider />
+                      <v-list-item v-for="(coll, i) in taskColls"
+                        :key="i"
+                        @click.stop="loadCollToDo(coll)"
+                        link
+                        style="background-color: #f9f9f9;"
+                      >
+                        <span>{{coll.collectionname}}</span>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </v-list-item>
               </v-list>
             </v-menu>
           </div>
+
           <v-row v-if="windowWidth >= 800" style="margin: 0 0 5px 0;">
             <v-switch hide-details
               color="#85c59d"
@@ -657,6 +651,7 @@ export default {
 
     async loadCollToDo(coll) {
       this.level == 1 ? this.level = 2 : this.level = 4
+      this.$refs.todoMenu.isActive = false
       if (this.level == 2) await this.$store.commit('users/setTodoFolder', null)
       await this.$store.commit('users/setTodoColl', coll)
       this.loadingTodo = true
