@@ -124,7 +124,7 @@
                 >
                   {{this.currentNote.collectionname}}
                 </span>
-                <h5 class="pretty-date">{{prettyDate}} &ndash; {{this.saving}}</h5>
+                <h5 class="pretty-date">{{prettyDate}}</h5>
             </v-col>
         </v-row>
 
@@ -141,6 +141,7 @@
               <v-btn style="font-size: 13px !important;">Text Editor</v-btn>
               <v-btn id="whiteboard-btn" style="font-size: 13px !important;">Whiteboard</v-btn>
             </v-btn-toggle>
+            <span class="small-header" v-if="editorOrWhiteboard == 0" style="float: right;">{{saving}}</span>
             <v-tooltip top v-if="editorOrWhiteboard == 1">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon
@@ -348,6 +349,7 @@
             <v-btn style="font-size: 13px !important;">Text Editor</v-btn>
             <v-btn id="whiteboard-btn" style="font-size: 13px !important;">Whiteboard</v-btn>
           </v-btn-toggle>
+          <span class="small-header" v-if="editorOrWhiteboard == 0" style="float: right;">{{saving}}</span>
           <v-tooltip right v-if="editorOrWhiteboard == 1">
             <template v-slot:activator="{ on, attrs }">
               <v-btn icon
@@ -719,15 +721,23 @@ export default {
       },
 
       async newNote() {
-        await this.$store.dispatch('users/createNote', {
-          notename: 'Untitled Note',
-          collectionid: this.currentNote.collectionid,
-          orgid: this.currentNote.orgid
-        })
-        this.editorOrWhiteboard = 0
-        this.noteText = this.currentNote.typednotes
-        await this.sunEditor.destroy()
-        await this.createSunEditor()
+        if (this.saving == 'Unsaved') {
+          await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'Save your notes before creating a new one.'
+          })
+        } else {
+          await this.$store.dispatch('users/createNote', {
+            notename: 'Untitled Note',
+            collectionid: this.currentNote.collectionid,
+            orgid: this.currentNote.orgid
+          })
+          this.editorOrWhiteboard = 0
+          this.noteText = this.currentNote.typednotes
+          await this.sunEditor.destroy()
+          await this.createSunEditor()
+        }
       },
 
       async generateStudyTools() {
@@ -974,18 +984,25 @@ export default {
             noteid: this.currentNote.noteid
           })
           localStorage.removeItem('note_text')
-          this.$store.commit('users/saving', 'Saved')
         }, 500);
       }, 500),
 
       async switchNote(noteid) {
-        this.editorOrWhiteboard = 0
-        await this.$store.dispatch('users/openNote', {
-          noteid: noteid
-        })
-        this.noteText = this.currentNote.typednotes
-        await this.sunEditor.destroy()
-        await this.createSunEditor()
+        if (this.saving == 'Unsaved') {
+          await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'Save your notes before switching.'
+          })
+        } else {
+          this.editorOrWhiteboard = 0
+          await this.$store.dispatch('users/openNote', {
+            noteid: noteid
+          })
+          this.noteText = this.currentNote.typednotes
+          await this.sunEditor.destroy()
+          await this.createSunEditor()
+        }
       }
   },
 

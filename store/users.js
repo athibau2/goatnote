@@ -1446,8 +1446,10 @@ export const actions = {
             localStorage.setItem('prettyDate', prettyDate)
             await commit('currentNote', data[0])
             localStorage.setItem('note', JSON.stringify(state.currentNote))
+            await dispatch('getPreparedWords', { noteid: noteid })
             await dispatch('getFlashcards', { noteid: noteid })
             await dispatch('getLinks', { noteid: noteid })
+            await dispatch('getFiles', { noteid: noteid })
             await dispatch('getStudyPlans', { noteid: noteid })
             await dispatch('getWhiteboards', { noteid: noteid })
             this.$router.push('/note')
@@ -1487,8 +1489,15 @@ export const actions = {
             temp.typednotes = noteText
             await commit('currentNote', temp)
             localStorage.setItem('note', JSON.stringify(temp))
+            await commit('saving', 'Saved')
         } else if (error) {
             console.error(error)
+            await commit('saving', 'Unsaved')
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Notes failed to save, check your connection and try again.'
+            })
         }
     },
 
