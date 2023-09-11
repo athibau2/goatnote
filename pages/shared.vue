@@ -12,7 +12,7 @@
         <v-tab-item class="shared-list" v-for="item in items" :key="item.tab">
           <!-- List of shared collections -->
           <v-col v-if="tab === 0">
-            <Loading v-if="collsSharedWithMe.length == 0" />
+            <Loading v-if="loading" />
             <v-row v-if="selectedColl == null">
               <v-card class="shared-card"
                 elevation="5"
@@ -130,12 +130,15 @@ export default {
   },
 
   async mounted () {
+    this.loading = true
     await this.$store.dispatch('users/loadSharedWithMe')
+    this.loading = false
   },
 
   data () {
     return {
       tab: null,
+      loading: false,
       items: [
         { tab: 'collections' },
         { tab: 'notes' },
