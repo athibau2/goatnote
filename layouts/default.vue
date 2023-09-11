@@ -706,7 +706,7 @@ export default {
         completed: !task.completed,
         todoid: task.todoid,
         deadline: null,
-        collectionid: this.todoColl.collectionid,
+        collectionid: task.collectionid ?? this.todoColl.collectionid,
         seeTasksDueToday: this.seeTasksDueToday
       })
     },
