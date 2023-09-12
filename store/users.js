@@ -1352,12 +1352,13 @@ export const actions = {
         }
     },
 
-    async createTodo({ dispatch, commit }, { text, deadline, collectionid }) {
+    async createTodo({ dispatch, commit, state }, { text, deadline, collectionid }) {
         const { data, error, status } = await supabase.from('todo')
             .insert({
                 todotext: text,
                 deadline: deadline,
-                collectionid: collectionid
+                collectionid: collectionid,
+                userid: state.userData.userid
             })
         if (!error) {
             await dispatch('loadTodoList', { collectionid: collectionid })
