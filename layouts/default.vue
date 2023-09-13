@@ -214,7 +214,7 @@
               v-if="!seeTasksDueToday"
               color="#85c59d"
               v-model="hideCompleted"
-              label="Hide Completed"
+              :label="hideCompleted ? 'Show Completed' : 'Hide Completed'"
               style="max-height: 12px; max-width: 45%;"
             ></v-switch>
           </v-row>
@@ -229,7 +229,7 @@
               v-if="!seeTasksDueToday"
               color="#85c59d"
               v-model="hideCompleted"
-              label="Hide Completed"
+              :label="hideCompleted ? 'Show Completed' : 'Hide Completed'"
               style="max-height: 12px;"
             ></v-switch>
           </div>
@@ -387,7 +387,7 @@ export default {
       deadline: null,
       showSmallMenu: window.innerWidth < 800,
       seeTasksDueToday: false,
-      hideCompleted: false,
+      hideCompleted: true,
       newDeadline: null,
       newTaskText: '',
       editDeadline: false,
