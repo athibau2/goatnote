@@ -236,16 +236,16 @@
           <v-divider style="background-color: #f9f9f9;" />
           <Loading v-if="loadingTodo" />
           <v-list class="task-list">
-            <div class="task-item"
+            <v-row class="task-item"
               v-for="(task, i) in seeTasksDueToday ? tasksDueToday : hideCompleted ? filteredTodoList(todoList) : todoList"
               :key="i"
             >
-              <v-list-item dense style="height: 20px">
-                <v-col cols="7">
+              <div style="width: 100%; display: flex;">
+                <div style="width: 75%; display: flex; align-items: center;">
                   <v-text-field v-if="editText && task.todoid == taskBeingEdited.todoid"
                     :value="task.todotext"
                     @input="textChanged($event)"
-                    @keydown.enter="updateTaskText()"
+                    @keydown.enter="updateTaskText(task)"
                   ></v-text-field>
                   <v-tooltip v-if="!editText || task.todoid != taskBeingEdited?.todoid" top>
                     <template v-slot:activator="{ on, attrs }">
@@ -253,6 +253,7 @@
                         :disabled="editDeadline || (editText && task.todoid != taskBeingEdited.todoid)"
                         v-on="on"
                         v-bind="attrs"
+                        style="text-align: left;"
                       >
                         <span :style="task.completed ? {'text-decoration': 'line-through'} : null">{{task.todotext}}</span><br>
                         <span v-if="seeTasksDueToday"><em>{{task.collectionname}}</em></span>
@@ -260,46 +261,47 @@
                     </template>
                     <span>Edit Task</span>
                   </v-tooltip>
-                </v-col>
+                </div>
                 <v-spacer />
-                <v-col cols="5" style="text-align: right;">
-                  <input v-if="editDeadline && task.todoid == taskBeingEdited.todoid"
-                    type="date"
-                    name="deadline"
-                    v-model="newDeadline"
-                    style="margin-right: 10px;"
-                    required
-                  />
-                  <v-tooltip v-if="!editDeadline || task.todoid != taskBeingEdited?.todoid" top>
-                    <template v-slot:activator="{ on, attrs }">
-                      <button @click="setEditDeadline(task)"
-                        :disabled="editText || (editDeadline && task.todoid != taskBeingEdited.todoid)"
-                        v-on="on"
-                        v-bind="attrs"
-                      >
-                        {{prettyDate(task.deadline)}}
-                      </button>
-                    </template>
-                    <span>Edit Deadline</span>
-                  </v-tooltip>
-                  <br>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn @click="toggleComplete(task)" v-on="on" v-bind="attrs" small icon>
-                        <v-icon size="25">
-                          {{task.completed ? 'mdi-checkbox-marked-outline' : 'mdi-checkbox-blank-outline'}}
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Completed</span>
-                  </v-tooltip>
-                  <v-btn @click="deleteTodo(task)" small icon>
-                    <v-icon size="25">mdi-delete</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-list-item>
-              
-            </div>
+                <div style="width: 25%;">
+                  <div style="text-align: right;">
+                    <input v-if="editDeadline && task.todoid == taskBeingEdited.todoid"
+                      type="date"
+                      name="deadline"
+                      v-model="newDeadline"
+                      style="margin-right: 10px;"
+                      required
+                    />
+                    <v-tooltip v-if="!editDeadline || task.todoid != taskBeingEdited?.todoid" top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <button @click="setEditDeadline(task)"
+                          :disabled="editText || (editDeadline && task.todoid != taskBeingEdited.todoid)"
+                          v-on="on"
+                          v-bind="attrs"
+                        >
+                          {{prettyDate(task.deadline)}}
+                        </button>
+                      </template>
+                      <span>Edit Deadline</span>
+                    </v-tooltip>
+                    <br>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn @click="toggleComplete(task)" v-on="on" v-bind="attrs" small icon>
+                          <v-icon size="25">
+                            {{task.completed ? 'mdi-checkbox-marked-outline' : 'mdi-checkbox-blank-outline'}}
+                          </v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Completed</span>
+                    </v-tooltip>
+                    <v-btn @click="deleteTodo(task)" small icon>
+                      <v-icon size="25">mdi-delete</v-icon>
+                    </v-btn>
+                  </div>
+                </div>
+              </div>
+            </v-row>
           </v-list>
           <div v-if="todoColl && !seeTasksDueToday">
             <v-alert v-if="alert"
@@ -706,26 +708,26 @@ export default {
       })
     },
 
-    async updateDeadline() {
+    async updateDeadline(task) {
       await this.$store.dispatch('users/updateTodo', {
         text: null,
         completed: null,
         todoid: this.taskBeingEdited.todoid,
         deadline: this.newDeadline,
-        collectionid: this.todoColl.collectionid,
+        collectionid: task.collectionid ?? this.todoColl.collectionid,
         seeTasksDueToday: this.seeTasksDueToday
       })
       this.taskBeingEdited = null
       this.editDeadline = false
     },
 
-    async updateTaskText() {
+    async updateTaskText(task) {
       await this.$store.dispatch('users/updateTodo', {
         text: this.newTaskText,
         completed: null,
         todoid: this.taskBeingEdited.todoid,
         deadline: null,
-        collectionid: this.todoColl.collectionid,
+        collectionid: task.collectionid ?? this.todoColl.collectionid,
         seeTasksDueToday: this.seeTasksDueToday
       })
       this.taskBeingEdited = null
@@ -735,7 +737,7 @@ export default {
     async deleteTodo(task) {
       await this.$store.dispatch('users/deleteTodo', {
         todoid: task.todoid,
-        collectionid: this.todoColl.collectionid,
+        collectionid: task.collectionid ?? this.todoColl.collectionid,
         seeTasksDueToday: this.seeTasksDueToday
       })
     },
@@ -845,7 +847,9 @@ export default {
 }
 
 .task-item {
-  padding: 10px 0;
+  margin: 10px 0;
+  padding: 10px 8px;
+  height: auto;
 }
 
 .task-item:nth-child(odd) {
