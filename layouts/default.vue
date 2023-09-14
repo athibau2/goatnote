@@ -469,7 +469,7 @@ export default {
     },
 
     newDeadline(newValue, oldValue) {
-      if (newValue != null && oldValue == null) {
+      if (newValue) {
         this.updateDeadline()
       }
     },
@@ -714,7 +714,7 @@ export default {
         completed: null,
         todoid: this.taskBeingEdited.todoid,
         deadline: this.newDeadline,
-        collectionid: task.collectionid ?? this.todoColl.collectionid,
+        collectionid: task?.collectionid ?? this.todoColl.collectionid,
         seeTasksDueToday: this.seeTasksDueToday
       })
       this.taskBeingEdited = null
