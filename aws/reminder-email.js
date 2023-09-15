@@ -8,59 +8,49 @@ const supabaseUrl = process.env.NUXT_ENV_SUPABASE_URL;
 const supabaseKey = process.env.NUXT_ENV_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const sentEmails = {}
-
 const cron = new CronJob(
-   `0 0 2 * * *`,
-    async function() {
-        const { data, error, status } = await supabase.from('get_daily_plans')
-            .select()
-	      console.log(data, error, status)
-        if (!error) {
-            data.forEach(async element => {
-                const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
-                const sendMin = (parseInt(element.times[0].split(':')[1]))
+  `0 0 2 * * *`,
+  async function() {
+    const { data, error, status } = await supabase.from('get_daily_plans')
+      .select()
+    console.log(data, error, status)
+    if (!error) {
+      data.forEach(async element => {
+        let sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
+        let sendMin = (parseInt(element.times[0].split(':')[1]))
 
-                let hasSent = false;
-                for (let i = 0; i < element.planids.length; ++i) {
-                  if (sentEmails[element.planids[i]]) {
-                    hasSent = true
-                    break;
-                  }
-                }
-                
-                if (!hasSent) {
-                  const job = new CronJob(
-                    `10 ${sendMin} ${sendHour} * * *`,
-                      async function() {
-                          try {
-                            const res = await resend.emails.send({
-                                from: 'GOAT Notes <management@deltaapps.dev>',
-                                to: element.email,
-                                subject: 'Study Plan Reminder',
-                                html: buildReminderEmail(element.firstname, element.notenames, element.times)
-                            });
-                            console.log(res)
-                            element.planids.forEach(id => {
-                              sentEmails[id] = true;
-                            });
-                          } catch (err) {
-                              console.log(err)
-                          }
-                      },
-                      null,
-                      true,
-                      'America/Denver'
-                  );
-                }
-            });
-        } else if (error) {
-            console.log(error)
-        }
-    },
-    null,
-    true,
-    'America/Denver'
+        if (sendHour < 10) sendHour = `0${sendHour}`
+        if (sendMin < 10) sendMin = `0${sendMin}`
+        
+        let fullDate = `${element.studydate.split('T')[0]}T${sendHour}:${sendMin}:30`
+        
+        const job = new CronJob(
+          new Date(fullDate),
+          async function() {
+            try {
+              const res = await resend.emails.send({
+                from: 'GOAT Notes <management@deltaapps.dev>',
+                to: element.email,
+                subject: 'Study Plan Reminder',
+                html: buildReminderEmail(element.firstname, element.notenames, element.times)
+              });
+              console.log(res)
+            } catch (err) {
+              console.log(err)
+            }
+          },
+          null,
+          true,
+          'America/Denver'
+        );
+      });
+    } else if (error) {
+      console.log(error)
+    }
+  },
+  null,
+  true,
+  'America/Denver'
 );
 
 

@@ -171,8 +171,9 @@ CREATE OR REPLACE VIEW get_daily_plans AS
 			u.firstname,
 			u.email,
 			array_agg(n.notename) AS notenames,
-			array_agg(s.time ORDER BY s.time ASC) AS times,
-			array_agg(DISTINCT s.planid) AS planids
+			array_agg(s.time ORDER BY s.time asc) AS times,
+			array_agg(DISTINCT s.planid) AS planids,
+			s.studydate
 	FROM
 			"user" u
 	INNER JOIN collection c ON u.userid = c.userid
@@ -185,7 +186,8 @@ CREATE OR REPLACE VIEW get_daily_plans AS
 	GROUP BY
 			u.userid,
 			u.firstname,
-			u.email
+			u.email,
+			s.studydate
 	ORDER BY
 			u.userid;
 
