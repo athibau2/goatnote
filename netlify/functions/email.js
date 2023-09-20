@@ -54,36 +54,6 @@ exports.handler = async function(event, context) {
         html: buildDeleteEmail(payload.name)
       })
       break;
-    case 'reminder-email':
-      // const { data, error, status } = await supabase.from('get_daily_plans')
-      //   .select()
-      // if (!error) {
-      //   data.forEach(async element => {
-      //     const sendHour = (parseInt(element.times[0].split(':')[0]) + 23) % 24;
-      //     const sendMin = (parseInt(element.times[0].split(':')[1]))
-      //     const job = new CronJob(
-      //       `30 ${sendMin} ${sendHour} * * *`,
-      //       async function() {
-      //         try {
-      //           const res = await resend.emails.send({
-      //             from: 'GOAT Notes <management@deltaapps.dev>',
-      //             to: element.email,
-      //             subject: payload.subject,
-      //             html: buildReminderEmail(element.firstname, element.notenames, element.times)
-      //           });
-      //         } catch (err) {
-      //           console.log(err)
-      //         }
-      //       },
-      //       null,
-      //       true,
-      //       'America/Denver'
-      //     );
-      //   });
-      // } else if (error) {
-      //     console.log(error)
-      // }
-      break;
   }
 
   // TODO: FIGURE OUT EXTRA NETLIFY EMAIL FUNCTION

@@ -365,34 +365,52 @@ export default {
     },
 
     async sendEmails() {
-      let list = []
+      let list = [];
       if (this.emailList.length == 0 && this.customEmailList.length > 0) {
-        this.customEmailList = this.customEmailList.split(',')
-        list = [...this.customEmailList]
-      } else list = [...this.emailList]
+        this.customEmailList = this.customEmailList.split(',');
+        list = [...this.customEmailList];
+      } else {
+        list = [...this.emailList];
+        list = list.map(obj => obj.email)
+      }
 
       if (confirm(`Are you ready to email ${list.length} users?`)) {
-        const body= {
-          'emails': list,
+        const batchSize = 10; // Set the batch size
+        const bodyTemplate = {
           'subject': this.subject,
           'body': this.body
-        }
+        };
 
-        await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
-          method: 'POST',
-          headers: {
+        while (list.length > 0) {
+          const currentBatch = list.splice(0, batchSize); // Take the first 10 emails
+
+          const body = {
+            'emails': currentBatch,
+            ...bodyTemplate
+          };
+
+          await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
+            method: 'POST',
+            headers: {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': '*',
               'Type': 'admin-email'
-          },
-          body: JSON.stringify(body)
-        })
+            },
+            body: JSON.stringify(body)
+          });
 
-        this.subject = ''
-        this.body = ''
-        this.emailGroup = 'Select'
-        this.customEmailList = ''
-        await this.$store.commit('users/setEmailList', [])
+          // Add a delay between batches if needed
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
+
+        }
+        // Clear the subject, body, and emailGroup for the next batch
+        this.subject = '';
+        this.body = '';
+        this.emailGroup = 'Select';
+        this.customEmailList = '';
+
+        // Commit to the store or reset the emailList as needed
+        await this.$store.commit('users/setEmailList', []); // Reset emailList
       }
     },
 
