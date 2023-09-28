@@ -517,6 +517,49 @@
 
     <!-- List of notes -->
     <v-col v-if="level == 3">
+      <v-list style="background-color: transparent;">
+        <v-list-item class="note-card"
+          v-for="(note, i) in notes"
+          :key="i"
+          :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${selectedColl.color})`}"
+        >
+          <button class="note-title-btn" @click="openNote(note.noteid)" :disabled="loadingNote">
+            <span class="card-title basic-header">
+                {{parseNoteName(note.notename)}}
+            </span>
+          </button>
+          <v-spacer />
+          <span style="z-index: 9999;">
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="getSharedNoteList(note)"
+                >
+                  <v-icon>mdi-share-variant</v-icon>
+                </v-btn>
+              </template>
+              <span>Share</span>
+            </v-tooltip>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="deleteNote(note.noteid, note.collectionid)"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </template>
+              <span>Delete</span>
+            </v-tooltip>
+          </span>
+          <Loading v-if="loadingNote && noteBeingOpened == note.noteid" />
+        </v-list-item>
+      </v-list>
+    </v-col>
+    <!-- <v-col v-if="level == 3">
       <v-row>
         <v-card class="note-card"
           elevation="5"
@@ -561,7 +604,7 @@
           </v-card-actions>
         </v-card>
       </v-row>
-    </v-col>
+    </v-col> -->
     <ShareColl style="margin: auto" />
     <ShareNote style="margin: auto" />
   </v-app>
@@ -1037,6 +1080,7 @@ export default {
 }
 
 .card-title {
+  font-size: 18px;
   word-break: break-all;
 }
 
@@ -1065,8 +1109,16 @@ export default {
 }
 
 .note-card {
+  border-radius: 8px;
   margin: 10px;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.note-title-btn {
+  width: 90%;
+  text-align: left;
+}
+.note-title-btn:hover {
+  opacity: 0.7;
 }
 
 .coll-card-title {

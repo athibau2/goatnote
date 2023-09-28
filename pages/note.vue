@@ -192,7 +192,6 @@
               <!-- </div> -->
             </div>
             <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
-              <!-- <div id="painterro"></div> -->
               <div style="width: 100%; height: 100%;" id="wt-container"></div>
             </div>
           </v-col>
@@ -396,7 +395,6 @@
             ></textarea>
           </div>
           <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
-            <!-- <div id="painterro"></div> -->
             <div style="width: 100%; height: 100%;" id="wt-container"></div>
           </div>
         </v-col>
@@ -477,21 +475,21 @@ export default {
     this.$nextTick(() => {
       this.createSunEditor()
       
-      $('#summernote').summernote({
-        height: (window.innerHeight / 100) * 80,
-        toolbar: [
-          ['style', ['style']],
-          ['font', ['bold', 'italic', 'underline', 'clear']],
-          ['fontstyle', ['strikethrough', 'subscript', 'superscript']],
-          ['fontsize', ['fontsize']],
-          ['fontname', ['fontname']],
-          ['color', ['forecolor', 'backcolor']],
-          ['para', ['ul', 'ol', 'paragraph', 'height']],
-          ['table', ['table']],
-          ['insert', ['link', 'picture', 'video', 'hr']],
-          ['view', ['undo', 'redo', 'fullscreen']],
-        ],
-      });
+      // $('#summernote').summernote({
+      //   height: (window.innerHeight / 100) * 80,
+      //   toolbar: [
+      //     ['style', ['style']],
+      //     ['font', ['bold', 'italic', 'underline', 'clear']],
+      //     ['fontstyle', ['strikethrough', 'subscript', 'superscript']],
+      //     ['fontsize', ['fontsize']],
+      //     ['fontname', ['fontname']],
+      //     ['color', ['forecolor', 'backcolor']],
+      //     ['para', ['ul', 'ol', 'paragraph', 'height']],
+      //     ['table', ['table']],
+      //     ['insert', ['link', 'picture', 'video', 'hr']],
+      //     ['view', ['undo', 'redo', 'fullscreen']],
+      //   ],
+      // });
     })
   },
 
