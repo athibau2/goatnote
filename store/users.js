@@ -18,6 +18,7 @@ export const state = () => ({
     taskFolders: [],
     taskColls: [],
     taskFolderColls: [],
+    showTaskList: false,
     todoOrg: null,
     todoFolder: null,
     todoColl: null,
@@ -187,6 +188,10 @@ export const mutations = {
 
     setFolders(state, data) {
         state.folders = data
+    },
+
+    setShowTaskList(state, data) {
+        state.showTaskList = data
     },
 
     setTodoList(state, data) {
@@ -1321,11 +1326,15 @@ export const actions = {
         }
     },
 
-    async loadTodoList({ commit }, { collectionid }) {
+    async loadTodoList({ commit, state }) {
         const { data, error, status } = await supabase.from('see_todo_list')
             .select()
-            .eq('collectionid', collectionid)
+            .eq('userid', state.userData.userid)
         if (!error) {
+            data.forEach(element => {
+                element.title = element.todotext
+                element.date = element.deadline
+            });
             await commit('setTodoList', data)
         } else if (error) {
             console.error(error)
@@ -1352,16 +1361,16 @@ export const actions = {
         }
     },
 
-    async createTodo({ dispatch, commit, state }, { text, deadline, collectionid }) {
+    async createTodo({ dispatch, commit, state }, { text, topic, deadline }) {
         const { data, error, status } = await supabase.from('todo')
             .insert({
                 todotext: text,
+                topic: topic,
                 deadline: deadline,
-                collectionid: collectionid,
                 userid: state.userData.userid
             })
         if (!error) {
-            await dispatch('loadTodoList', { collectionid: collectionid })
+            await dispatch('loadTodoList')
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -1372,7 +1381,7 @@ export const actions = {
         }
     },
 
-    async updateTodo({ dispatch, state }, { text, completed, todoid, deadline, collectionid, seeTasksDueToday }) {
+    async updateTodo({ dispatch, state }, { text, topic, completed, todoid, deadline, seeTasksDueToday }) {
         let body = {}
         if (text) {
             body = {
@@ -1393,7 +1402,7 @@ export const actions = {
             .select()
         if (!error) {
             seeTasksDueToday ? await dispatch('getTasksDueToday')
-            : await dispatch('loadTodoList', { collectionid: collectionid })
+            : await dispatch('loadTodoList')
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -1404,13 +1413,13 @@ export const actions = {
         }
     },
 
-    async deleteTodo({ dispatch, commit }, { todoid, collectionid, seeTasksDueToday }) {
+    async deleteTodo({ dispatch, commit }, { todoid, seeTasksDueToday }) {
         const { data, error, status } = await supabase.from('todo')
             .delete()
             .eq('todoid', todoid)
         if (!error) {
             seeTasksDueToday ? await dispatch('getTasksDueToday')
-            : await dispatch('loadTodoList', { collectionid: collectionid })
+            : await dispatch('loadTodoList')
         } else if (error) {
             console.error(error)
             await commit('setAlert', {

@@ -253,14 +253,13 @@ create or replace view see_folders as
 
 create or replace view see_todo_list as
   select * from todo
-  order by deadline asc;
+  order by deadline asc, topic asc;
   -- this will be filtered later
 
 create or replace view see_todo_due_today as
-  select t.todoid, t.todotext, t.deadline, t.completed, c.collectionid, t.userid, c.collectionname
-  from todo t inner join collection c on t.collectionid = c.collectionid
-  where t.completed = false
-  order by c.collectionid asc;
+  select t.todoid, t.todotext, t.deadline, t.completed, t.topic, t.userid
+  from todo t where t.completed = false
+  order by t.topic asc;
   -- this will be filtered later
 
 create or replace view see_notes as
