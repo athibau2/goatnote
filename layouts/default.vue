@@ -336,7 +336,7 @@ export default {
           id: 'step-2',
           text: 'Here you can keep track of all your tasks, including homework assignments, projects, exams, etc.',
           attachTo: {
-            element: '#step-2',
+            element: '#task-list-btn',
             on: 'bottom'
           },
           buttons: [
