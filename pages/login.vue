@@ -128,10 +128,9 @@
         <div class="faq-wrapper text-center"
           :style="{'width': windowWidth < 700 ? '100%' : windowWidth < 1265 ? '75%' : null}"
         >
-          <details class="faq-item" v-for="(faq, i) in faqs" :key="i">
-            <summary class="faq-title">{{faq.title}}</summary>
-            <p class="faq-text">{{faq.text}}</p>
-          </details>
+          <sl-details class="faq-item" :summary="faq.title" v-for="(faq, i) in faqs" :key="i">
+            {{faq.text}}
+          </sl-details>
         </div>
       </v-col>
     </v-row>
@@ -397,14 +396,10 @@ h3, h4 {
 }
 
 .faq-item {
-  margin: 4px;
-  padding: 6px;
+  margin: 5px;
   border: solid 1px #B3E5FC;
-  border-radius: 10px;
-  background-color: #f9f9f9;
   box-shadow: 0px 0px 8px #B3E5FC;
   font-family: Arial, Helvetica, sans-serif;
-  opacity: 0.8;
 }
 
 .faq-title {
