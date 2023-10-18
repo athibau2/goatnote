@@ -11,6 +11,9 @@ export const state = () => ({
     orgs: [],
     allColls: [],
     collections: [],
+    allFlashcardDecks: [],
+    allPublicDecks: [],
+    flashcardDeck: [],
     folderColls: [],
     folders: [],
     todoList: [],
@@ -168,6 +171,18 @@ export const mutations = {
 
     setCollections(state, data) {
         state.collections = data
+    },
+
+    setAllFlashcardDecks(state, data) {
+        state.allFlashcardDecks = data
+    },
+
+    setAllPublicDecks(state, data) {
+        state.allPublicDecks = data
+    },
+
+    setFlashcardDeck(state, data) {
+        state.flashcardDeck = data
     },
 
     setTaskFolders(state, data) {
@@ -1282,6 +1297,59 @@ export const actions = {
         } else if (error) {
             console.error(error)
             await commit('setCollections', [])
+        }
+    },
+
+    async getAllFlashcardDecks({ commit, state }) {
+        const { data, error, status } = await supabase.from('see_all_flashcard_decks')
+            .select()
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            await commit('setAllFlashcardDecks', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setAllFlashcardDecks', [])
+        }
+    },
+    
+    async getAllPublicDecks({ commit }) {
+        const { data, error, status } = await supabase.from('see_all_public_decks')
+            .select()
+        if (!error) {
+            await commit('setAllPublicDecks', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setAllPublicDecks', [])
+        }
+    },
+
+    async toggleDeckPublic({ commit, dispatch }, { collectionid, ispublic }) {
+        const { data, error, status } = await supabase.from('collection')
+            .update({
+                ispublic: ispublic
+            })
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await dispatch('getAllFlashcardDecks')
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async openFlashcardDeck({ commit }, { collectionid }) {
+        const { data, error, status } = await supabase.from('see_flashcard_deck')
+            .select()
+            .eq('collectionid', collectionid)
+        if (!error) {
+            await commit('setFlashcardDeck', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setFlashcardDeck', [])
         }
     },
 

@@ -108,7 +108,7 @@
     </v-app-bar>
 
     <v-main class="main">
-      <v-container class="main" id="step-5">
+      <v-container class="main" id="step-5" style="margin-bottom: 100px;">
         <Nuxt class="main" />
 
         <sl-drawer class="drawer-overview"
@@ -126,6 +126,12 @@
       </v-container>
     </v-main>
 
+    <sl-dialog id="announcement-dialog" label="Feature Announcement">
+      <span class="small-header" style="letter-spacing: 1px;">
+        Exciting news! To make studying for exams easier, you can now study entire collections of flashcards at once. You can also make your flashcard decks publicly accessible for other students to study! Check this out on the 'Flashcard Desks' tab in the menu.
+      </span>
+    </sl-dialog>
+    
     <Footer />
 
   </v-app>
@@ -164,12 +170,21 @@ export default {
       this.tour.start()
       this.tour.on('complete', this.onboardingComplete)
     }
+
     const drawer = document.querySelector('.drawer-overview');
     const openButton = document.getElementById('task-list-btn')
     openButton.addEventListener('click', async () => {
       drawer.show()
       await this.$store.dispatch('users/loadTodoList')
     });
+
+    if (!localStorage.getItem('flashcard-announcement')) {
+      const announcement = document.getElementById('announcement-dialog')
+      setTimeout(() => {
+        announcement.show()
+        localStorage.setItem('flashcard-announcement', true)
+      }, 1000);
+    }
   },
 
   components: {
@@ -212,6 +227,11 @@ export default {
           icon: 'mdi-calendar-alert',
           title: 'My Study Plans',
           to: '/plans'
+        },
+        {
+          icon: 'mdi-cards',
+          title: 'Flashcard Decks',
+          to: '/flashcards'
         },
         {
           icon: 'mdi-share-variant',
@@ -622,6 +642,10 @@ export default {
 
 <style scoped>
 @import '~/assets/styles.css';
+
+#menu-step-6 {
+  height: 100% !important;
+}
 
 .topButton {
   margin-right : 3px;

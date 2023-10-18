@@ -280,6 +280,37 @@ create or replace view see_flashcards as
 	order by cardid asc;
 	--this will be filtered later
 
+CREATE OR REPLACE VIEW see_all_flashcard_decks AS
+  SELECT c.collectionid, c.collectionname, c.color, c.userid, c.ispublic
+  FROM collection c
+  WHERE EXISTS (
+    SELECT 1
+    FROM note n
+    JOIN flashcards f ON n.noteid = f.noteid
+    WHERE n.collectionid = c.collectionid
+  )
+  order by c.collectionname;
+  --this will be filtered later
+
+CREATE OR REPLACE VIEW see_all_public_decks AS
+  SELECT c.collectionid, c.collectionname, c.color, c.ispublic, u.firstname, u.lastname
+  FROM collection c
+  INNER JOIN "user" u ON c.userid = u.userid
+  WHERE c.ispublic = true
+  AND EXISTS (
+    SELECT 1
+    FROM note n
+    JOIN flashcards f ON n.noteid = f.noteid
+    WHERE n.collectionid = c.collectionid
+  )
+  order by c.collectionname;
+
+create or replace view see_flashcard_deck as
+  select f.cardid, f.cardprompt, f.cardanswer, f.noteid, c.collectionid
+  from flashcards f inner join note n on f.noteid = n.noteid
+  inner join collection c on n.collectionid = c.collectionid;
+  --this will be filtered later
+
 create or replace view see_prepared_words as
   select * from prepared_words
   order by wordid asc;

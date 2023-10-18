@@ -7,16 +7,16 @@
               {{item.tab}} {{item.tab === 'public' ? '('+publicOrgs.length+')' : ''}}
             </v-tab>
             <v-text-field
-              v-if="tab === 1"
               class="search-bar"
               dense
               solo
               rounded
               background-color="#f9f9f9"
               v-model="searchText"
-              placeholder="Find by join code"
+              :placeholder="tab == 0 ? 'Find by name' : 'Find by join code'"
               append-icon="mdi-magnify"
               @keyup.enter="searchOrg()"
+              @input="tab == 0 ? searchOrg() : null"
             >
             </v-text-field>
         </v-tabs>
@@ -27,7 +27,12 @@
           <v-col v-if="tab === 0">
             <Loading v-if="publicOrgs.length == 0" />
             <v-row>
-              <v-card class="card" elevation="5" width="250" v-for="(org, i) in publicOrgs" :key="i">
+              <v-card class="card"
+                elevation="5"
+                width="250"
+                v-for="(org, i) in searchingPublic ? filteredPublicArr : publicOrgs"
+                :key="i"
+              >
                 <v-card-title>
                   {{org.orgname}}
                 </v-card-title>
@@ -99,17 +104,25 @@ export default {
       tab: null,
       items: [
         { tab: 'public' },
-        { tab: 'search' },
+        { tab: 'private' },
       ],
       searchText: "",
+      filteredPublicArr: []
     }
   },
 
   methods: {
-    searchOrg() {
-      this.$store.dispatch('users/searchOrg', {
-        searchText: this.searchText,
-      })
+    async searchOrg() {
+      if (this.tab == 0) {
+        if (this.searchText != '') {
+          this.searchingPublic = true
+          this.filteredPublicArr = this.publicOrgs.filter(org => org.orgname.toLowerCase().includes(this.searchText))
+        } else if (this.searchText == '') this.searchingPublic = false
+      } else if (this.tab == 1) {
+        await this.$store.dispatch('users/searchOrg', {
+          searchText: this.searchText,
+        })
+      }
     },
 
     joinOrg(org) {

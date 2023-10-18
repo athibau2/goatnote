@@ -1,7 +1,6 @@
 <template>
     <v-footer class="footer"
       absolute
-      app
       color="#eeeeee"
     >
       <v-col cols="8">
