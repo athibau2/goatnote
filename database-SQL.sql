@@ -293,9 +293,10 @@ CREATE OR REPLACE VIEW see_all_flashcard_decks AS
   --this will be filtered later
 
 CREATE OR REPLACE VIEW see_all_public_decks AS
-  SELECT c.collectionid, c.collectionname, c.color, c.ispublic, u.firstname, u.lastname
+  SELECT c.collectionid, c.collectionname, c.color, c.ispublic, u.firstname, u.lastname, o.orgname
   FROM collection c
   INNER JOIN "user" u ON c.userid = u.userid
+  INNER JOIN organization o ON o.orgid = c.orgid
   WHERE c.ispublic = true
   AND EXISTS (
     SELECT 1

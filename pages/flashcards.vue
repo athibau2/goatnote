@@ -28,14 +28,17 @@
         @click="openFlashcardDeck(deck)"
         :style="{ 'background-color': deck.color }"
       >
-        <span class="basic-header">{{ deck.collectionname }}</span><br>
+        <span class="small-header">{{ deck.orgname }}</span><br v-if="tab == 1">
+        <span class="basic-header" :id="tab == 1 ? 'public-deck-coll' : null">
+          {{ deck.collectionname }}
+        </span><br>
         <span class="small-header" v-if="tab == 1" style="font-size: 15px !important;">
           {{ deck.firstname }} {{ deck.lastname }}
         </span>
         <sl-checkbox
           v-if="tab == 0"
           id="public-checkbox"
-          @input="togglePublic(deck)"
+          @click.stop="togglePublic(deck)"
           :checked="deck.ispublic"
         >
           Publish Deck
@@ -243,6 +246,12 @@ export default {
   .deck-card {
     width: 31%;
   }
+}
+
+#public-deck-coll {
+  border: solid #2F2B28 1px;
+  border-radius: 4px;
+  padding: 4px 15px;
 }
 
 .basic-header {
