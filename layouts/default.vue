@@ -9,7 +9,7 @@
       class="main"
       id="menu-step-6"
       v-if="windowWidth >= 800"
-      :mini-variant="windowWidth < 1000 ? true : miniVariant"
+      :mini-variant="windowWidth < 1000 ? true : $route.path == '/note' ? true : miniVariant"
       :clipped="true"
       fixed
       app
@@ -126,9 +126,9 @@
       </v-container>
     </v-main>
 
-    <sl-dialog id="announcement-dialog" label="Feature Announcement">
+    <sl-dialog id="announcement-dialog" label="Important Announcement">
       <span class="small-header" style="letter-spacing: 1px;">
-        Exciting news! To make studying for exams easier, you can now study entire collections of flashcards at once. You can also make your flashcard decks publicly accessible for other students to study! Check this out on the 'Flashcard Desks' tab in the menu.
+        Dear users, there is a change coming up for you to keep an eye out for. In response to feedback and our desire to improve, we will be changing the way notes are organized. Soon, you will have a traditional file system, with the ability to organize folders and notes however works best for you. The use of collections will no longer be necessary, but you can still keep what you have. This will aim to make the structure more familiar, flexible, and easier to use.
       </span>
     </sl-dialog>
     
@@ -178,11 +178,11 @@ export default {
       await this.$store.dispatch('users/loadTodoList')
     });
 
-    if (!localStorage.getItem('flashcard-announcement')) {
+    if (!localStorage.getItem('file-system-announcement')) {
       const announcement = document.getElementById('announcement-dialog')
       setTimeout(() => {
         announcement.show()
-        localStorage.setItem('flashcard-announcement', true)
+        localStorage.setItem('file-system-announcement', true)
       }, 1000);
     }
   },

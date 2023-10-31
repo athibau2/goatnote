@@ -3,15 +3,15 @@
       absolute
       color="#eeeeee"
     >
-      <v-col cols="8">
-        <span>&copy; 2022 Delta Apps, LLC</span><br>
+      <v-col style="display: flex; justify-content: right; flex-wrap: wrap;">
         <a target="_blank" href="https://deltaapps.dev/goatnotes/privacy_policy.pdf">Privacy Policy</a><br>
         <a target="_blank" href="https://deltaapps.dev/goatnotes/terms_conditions.pdf">Terms and Conditions</a><br>
-      </v-col>
-      <v-col class="text-right" cols="4">
         <a target="_blank" href="https://deltaapps.dev/contact">Contact Us</a><br>
         <a target="_blank" href="https://forms.gle/FeVtuMJvpX2zRH4u6">Submit Feedback</a>
+        <span>&copy; 2022 Delta Apps, LLC</span><br>
       </v-col>
+      <!-- <v-col class="text-right" cols="4">
+      </v-col> -->
     </v-footer>
 </template>
 
