@@ -4,9 +4,11 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
 
+    <!-- Header buttons -->
     <span>
+      <!-- <a href="/index2">To new Index</a> -->
       <span class="basic-header">
-        {{level == 1 ? 'Your Organizations' : level == 5 ? `${selectedFolder.foldername}` : level == 2 ? `${selectedOrg.orgname}` : `${selectedColl.collectionname}`}}
+        {{level == 1 ? 'Your Organizations' : level == 5 ? `${parseOrgName(selectedFolder.foldername)}` : level == 2 ? `${parseOrgName(selectedOrg.orgname)}` : `${parseOrgName(selectedColl.collectionname)}`}}
       </span>
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -35,10 +37,10 @@
             <v-icon>mdi-arrow-up</v-icon>
           </v-btn>
         </template>
-        <span>Collapse</span>
+        <span>Up One Level</span>
       </v-tooltip>
       
-      <v-tooltip bottom v-if="level == 2">
+      <v-tooltip bottom v-if="level != 1">
         <template v-slot:activator="{ on, attrs }">
           <v-btn class="add-btn"
             @click="newFolder()"
@@ -266,7 +268,7 @@
     </v-col>
 
     <!-- List of folders -->
-    <v-col v-if="level == 2 && folders.length != 0" style="max-height: 90px; overflow-x: scroll;">
+    <v-col v-if="level == 2 && folders.length != 0" style="max-height: 180px; overflow-x: scroll;">
       <v-row>
         <button @click="loadFolderColls(folder)" v-for="(folder, i) in folders" :key="i">
           <div class="folder-card">
@@ -276,7 +278,7 @@
         </button>
       </v-row>
     </v-col>
-
+    
     <!-- List of folder collections -->
     <v-col v-if="level == 5">
       <v-row>
@@ -614,6 +616,7 @@
 import ShareColl from "~/components/ShareColl.vue"
 import ShareNote from "~/components/ShareNote.vue"
 import Loading from '~/components/Loading.vue'
+import FolderTree from '~/components/FolderTree.vue'
 
 export default {
   name: 'IndexPage',
@@ -639,7 +642,8 @@ export default {
   components: {
     ShareColl,
     ShareNote,
-    Loading
+    Loading,
+    FolderTree,
   },
 
   data () {
@@ -711,6 +715,10 @@ export default {
       });
     },
 
+    doIt() {
+      console.log('hi')
+    },
+
     parseOrgName(name) {
       if (name.length >= 16) {
         let short = name.substring(0, 16) + '...'
@@ -719,8 +727,8 @@ export default {
     },
     
     parseFolderName(name) {
-      if (name.length >= 14) {
-        let short = name.substring(0, 14) + '...'
+      if (name.length >= 30) {
+        let short = name.substring(0, 30) + '...'
         return short
       } else return name
     },
@@ -853,7 +861,6 @@ export default {
       this.selectedOrg = org
       await this.$store.dispatch('users/getFolders', {
         orgid: org.orgid,
-        userid: this.userData.userid
       })
       await this.$store.dispatch('users/collections', {
         orgid: org.orgid
