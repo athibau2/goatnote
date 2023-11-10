@@ -126,9 +126,9 @@
       </v-container>
     </v-main>
 
-    <sl-dialog id="announcement-dialog" label="Important Announcement">
+    <sl-dialog id="announcement-dialog" label="Feature Update">
       <span class="small-header" style="letter-spacing: 1px;">
-        Dear users, there is a change coming up for you to keep an eye out for. In response to feedback and our desire to improve, we will be changing the way notes are organized. Soon, you will have a traditional file system, with the ability to organize folders and notes however works best for you. The use of collections will no longer be necessary, but you can still keep what you have. This will aim to make the structure more familiar, flexible, and easier to use.
+        As of 11/10/2023, the structure of organizing your notes in GOAT Notes has changed. Collections have been removed. Now, you have a standard file explorer with folders and notes, which you have flexibility over. Let us know if you have any questions or if you discover any bugs!
       </span>
     </sl-dialog>
     
@@ -178,11 +178,11 @@ export default {
       await this.$store.dispatch('users/loadTodoList')
     });
 
-    if (!localStorage.getItem('file-system-announcement')) {
+    if (!localStorage.getItem('file-system-complete-announcement')) {
       const announcement = document.getElementById('announcement-dialog')
       setTimeout(() => {
         announcement.show()
-        localStorage.setItem('file-system-announcement', true)
+        localStorage.setItem('file-system-complete-announcement', true)
       }, 1000);
     }
   },
