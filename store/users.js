@@ -15,6 +15,12 @@ export const state = () => ({
     allPublicDecks: [],
     flashcardDeck: [],
     folderColls: [],
+    orgContentCollections: [],
+    orgContentFolders: [],
+    orgContentNotes: [],
+    folderContentCollections: [],
+    folderContentFolders: [],
+    folderContentNotes: [],
     folders: [],
     todoList: [],
     tasksDueToday: [],
@@ -48,9 +54,11 @@ export const state = () => ({
     orgUsers: [],
     collNotes: [],
     collBeingShared: null,
+    folderBeingShared: null,
     noteBeingShared: null,
     results: [],
     sharedCollList: [],
+    sharedFolderList: [],
     sharedNoteList: [],
     collsSharedWithMe: [],
     notesSharedWithMe: [],
@@ -101,6 +109,7 @@ export const state = () => ({
     showFlashcards: false,
     showShareNote: false,
     showShareColl: false,
+    showShareFolder: false,
     showStudyTools: false,
     showFileView: false,
     showQuickWord: false,
@@ -171,6 +180,30 @@ export const mutations = {
 
     setCollections(state, data) {
         state.collections = data
+    },
+
+    setOrgContentCollections(state, data) {
+        state.orgContentCollections = data
+    },
+
+    setOrgContentFolders(state, data) {
+        state.orgContentFolders = data
+    },
+
+    setOrgContentNotes(state, data) {
+        state.orgContentNotes = data
+    },
+
+    setFolderContentCollections(state, data) {
+        state.folderContentCollections = data
+    },
+
+    setFolderContentFolders(state, data) {
+        state.folderContentFolders = data
+    },
+
+    setFolderContentNotes(state, data) {
+        state.folderContentNotes = data
     },
 
     setAllFlashcardDecks(state, data) {
@@ -296,6 +329,10 @@ export const mutations = {
     collBeingShared(state, data) {
         state.collBeingShared = data
     },
+    
+    folderBeingShared(state, data) {
+        state.folderBeingShared = data
+    },
 
     noteBeingShared(state, data) {
         state.noteBeingShared = data
@@ -307,6 +344,10 @@ export const mutations = {
 
     sharedCollList(state, data) {
         state.sharedCollList = data
+    },
+
+    sharedFolderList(state, data) {
+        state.sharedFolderList = data
     },
 
     sharedNoteList(state, data) {
@@ -375,6 +416,10 @@ export const mutations = {
 
     setShowShareColl(state, data) {
         state.showShareColl = data
+    },
+
+    setShowShareFolder(state, data) {
+        state.showShareFolder = data
     },
 
     setShowStudyTools(state, data) {
@@ -888,11 +933,100 @@ export const actions = {
         }
     },
 
-    async getFolders({ commit }, { orgid, userid }) {
+    async getOrgFolders({ commit, state }, { orgid }) {
+        const { data, status, error } = await supabase.from('folder')
+            .select()
+            .eq('orgid', orgid)
+            .eq('userid', state.userData.userid)
+            .is('parent', null)
+        if (!error) {
+            await commit('setOrgContentFolders', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setOrgContentFolders', [])
+        }
+    },
+
+    async getOrgNotes({ commit, state }, { parent }) {
+        const { data, status, error } = await supabase.from('see_content_notes')
+            .select()
+            .eq('userid', state.userData.userid)
+            .is('parent', parent)
+        if (!error) {
+            await commit('setOrgContentNotes', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setOrgContentNotes', [])
+        }
+    },
+
+    async getOrgCollections({ commit, state }, { orgid }) {
+        const { data, status, error } = await supabase.from('collection')
+            .select()
+            .eq('orgid', orgid)
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            await commit('setOrgContentCollections', data)
+        } else if (error) {
+            await commit('setOrgContentCollections', [])
+        }
+    },
+
+    async getOrgContent({ dispatch }, { orgid }) {
+        await dispatch('getOrgFolders', { orgid: orgid })
+        await dispatch('getOrgNotes', { parent: null })
+        await dispatch('getOrgCollections', { orgid: orgid })
+    },
+
+    async getFolderFolders({ commit, state }, { parent }) {
+        const { data, status, error } = await supabase.from('folder')
+            .select()
+            .eq('parent', parent)
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            await commit('setFolderContentFolders', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setFolderContentFolders', [])
+        }
+    },
+
+    async getFolderNotes({ commit, state }, { parent }) {
+        const { data, status, error } = await supabase.from('see_content_notes')
+            .select()
+            .eq('userid', state.userData.userid)
+            .eq('parent', parent)
+        if (!error) {
+            await commit('setFolderContentNotes', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setFolderContentNotes', [])
+        }
+    },
+
+    async getFolderCollections({ commit, state }, { parent }) {
+        const { data, status, error } = await supabase.from('collection')
+            .select()
+            .eq('parent', parent)
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            await commit('setFolderContentCollections', data)
+        } else if (error) {
+            await commit('setFolderContentCollections', [])
+        }
+    },
+
+    async getFolderContent({ dispatch }, { parent }) {
+        await dispatch('getFolderFolders', { parent: parent })
+        await dispatch('getFolderNotes', { parent: parent })
+        await dispatch('getFolderCollections', { parent: parent })
+    },
+
+    async getFolders({ commit, state }, { orgid }) {
         const { data, error, status } = await supabase.from('see_folders')
             .select()
             .eq('orgid', orgid)
-            .eq('userid', userid)
+            .eq('userid', state.userData.userid)
         if (!error) {
             await commit('setFolders', data)
         } else if (error) {
@@ -901,15 +1035,17 @@ export const actions = {
         }
     },
 
-    async createFolder({ dispatch, state }, { foldername, orgid }) {
+    async createFolder({ commit, dispatch, state }, { foldername, orgid, parent }) {
         const { data, error, status } = await supabase.from('folder')
             .insert({
                 foldername: foldername,
+                parent: parent,
                 orgid: orgid,
                 userid: state.userData.userid
             })
         if (!error) {
-            await dispatch('getFolders', { orgid: orgid, userid: state.userData.userid })
+            parent ? await dispatch('getFolderFolders', { parent: parent })
+            : await dispatch('getOrgFolders', { orgid: orgid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -920,7 +1056,7 @@ export const actions = {
         }
     },
 
-    async updateFolder({ dispatch, state }, { foldername, folderid, orgid }) {
+    async updateFolder({ dispatch, commit }, { foldername, folderid, parent, orgid }) {
         const { data, error, status } = await supabase.from('folder')
             .update({
                 foldername: foldername
@@ -932,7 +1068,8 @@ export const actions = {
                 icon: '$success',
                 text: 'Your folder has successfully been updated.'
             })
-            await dispatch('getFolders', { orgid: orgid, userid: state.userData.userid })
+            parent ? await dispatch('getFolderFolders', { parent: parent })
+            : await dispatch('getOrgFolders', { orgid: orgid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -943,17 +1080,20 @@ export const actions = {
         }
     },
 
-    async deleteFolder({ dispatch, state }, { folderid, orgid }) {
+    async deleteFolder({ dispatch, state }, { folder }) {
         const { data, error, status } = await supabase.from('folder')
             .delete()
-            .eq('folderid', folderid)
+            .eq('folderid', folder.folderid)
         if (!error) {
-            await commit('setAlert', {
-                color: 'success',
-                icon: '$success',
-                text: 'Your folder has successfully been deleted.'
-            })
-            await dispatch('getFolders', { orgid: orgid, userid: state.userData.userid })
+            if (folder.type) {
+                if (folder.parent == null) {
+                    await dispatch('getOrgFolders', { orgid: folder.orgid })
+                } else if (typeof folder.parent == 'number') {
+                    await dispatch('getFolderFolders', { parent: folder.parent })
+                }
+            } else {
+                await dispatch('getFolders', { orgid: folder.orgid })
+            }
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -1042,7 +1182,7 @@ export const actions = {
         const { data, error, status } = await supabase.from('search_users')
             .select()
             .eq('orgid', orgid)
-            .like('email', `${searchText}%`)
+            .like('email', `%${searchText}%`)
         if (!error) {
             await commit('results', data)
         } else if (error) {
@@ -1061,6 +1201,19 @@ export const actions = {
         } else if (error) {
             console.error(error)
             await commit('sharedCollList', [])
+        }
+    },
+    
+    async getFolderSharedList({ commit }, { folder }) {
+        await commit('folderBeingShared', folder)
+        const { data, error, status } = await supabase.from('see_shared_folders')
+            .select()
+            .eq('folderid', folder.folderid)
+        if (!error) {
+            await commit('sharedFolderList', data)
+        } else if (error) {
+            console.error(error)
+            await commit('sharedFolderList', [])
         }
     },
 
@@ -1098,6 +1251,37 @@ export const actions = {
                 color: 'success',
                 icon: '$success',
                 text: 'Your collection has successfully been shared'
+            })
+        } else if (!success) {
+            await commit('setAlert', {
+                color: 'warning',
+                icon: '$warning',
+                text: 'Sharing has completed, but an error has occurred.'
+            })
+        }
+    },
+
+    async shareFolder({ commit, dispatch, state }, { folder, users }) {
+        let success = true
+        for (let i = 0; i < users.length; ++i) {
+            const { data, error, status } = await supabase.from('shared_folder')
+                .insert({
+                    folderid: folder.folderid,
+                    ownerid: state.userData.userid,
+                    userid: users[i]
+                })
+            if (!error) continue
+            else if (error) {
+                console.error(error)
+                success = false
+            }
+        }
+        await dispatch('getFolderSharedList', { folder: folder })
+        if (success) {
+            await commit('setAlert', {
+                color: 'success',
+                icon: '$success',
+                text: 'Your folder has successfully been shared'
             })
         } else if (!success) {
             await commit('setAlert', {
@@ -1158,6 +1342,25 @@ export const actions = {
         }
     },
 
+    async unshareFolder({ dispatch, commit }, { folder, userid, type }) {
+        const { data, error, status } = await supabase.from('shared_folder')
+            .delete()
+            .eq('folderid', folder.folderid)
+            .eq('userid', userid)
+        if (!error) {
+            (type === "owner")
+                ? await dispatch('getFolderSharedList', { folder: folder })
+                : await dispatch('loadSharedWithMe')
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
     async unshareNote({ dispatch, commit }, { note, userid, type }) {
         const { data, error, status } = await supabase.from('shared_note')
             .delete()
@@ -1207,16 +1410,19 @@ export const actions = {
         }
     },
 
-    async createNote({ dispatch, commit }, { notename, collectionid, orgid }) {
+    async createNote({ dispatch, commit, state }, { notename, parent, fromNote = false }) {
         const { data, error, status } = await supabase.from('note')
             .insert({
                 notename: notename,
-                collectionid: collectionid,
-            }).select()
+                parent: parent,
+                collectionid: null,
+                userid: state.userData.userid
+            })
+            .select()
         if (!error) {
-            await dispatch('openNote', { noteid: data[0].noteid })
-            await dispatch('collections', { orgid })
-            await dispatch('notes', { collectionid })
+            parent ? await dispatch('getFolderNotes', { parent: parent })
+            : await dispatch('getOrgNotes', { parent: null })
+            fromNote ? await dispatch('openNote', { noteid: data[0].noteid }) : null
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -1579,19 +1785,21 @@ export const actions = {
         }
     },
 
-    async updateNoteName({ commit, state }, { newNoteName, noteid }) {
+    async updateNoteName({ commit, dispatch }, { newNoteName, noteid, parent }) {
         const { data, error, status } = await supabase.from('note')
             .update({
                 notename: newNoteName
-            }).select()
+            })
             .eq('noteid', noteid)
         if (!error) {
-            let temp = { ...data[0], 
-                "collectionname": state.currentNote.collectionname,
-                "orgid": state.currentNote.orgid,
-                "userid": state.userData.userid }
-            await commit('currentNote', temp)
-            localStorage.setItem('note', JSON.stringify(temp))
+            // let temp = { ...data[0], 
+            //     "collectionname": state.currentNote.collectionname,
+            //     "orgid": state.currentNote.orgid,
+            //     "userid": state.userData.userid }
+            // await commit('currentNote', temp)
+            // localStorage.setItem('note', JSON.stringify(temp))
+            parent ? await dispatch('getFolderNotes', { parent: parent })
+            : await dispatch('getOrgNotes', { parent: null })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {
@@ -2386,13 +2594,18 @@ export const actions = {
         }
     },
 
-    async deleteNote({ dispatch, commit }, { noteid, collectionid }) {
+    async deleteNote({ dispatch, commit }, { note, orgid }) {
         const { data, error, status } = await supabase.from('note')
             .delete()
-            .eq('noteid', noteid)
+            .eq('noteid', note.noteid)
         if (!error) {
-            if (collectionid === undefined) await dispatch('adminLoadUsers')
-            else await dispatch('notes', { collectionid: collectionid })
+            if (note.type) {
+                if (note.parent == null) {
+                    await dispatch('getOrgNotes', { parent: null })
+                } else if (typeof note.parent == 'number') {
+                    await dispatch('getFolderNotes', { parent: note.parent })
+                }
+            }
         } else if (error) {
             console.error(error)
             await commit('setAlert', {

@@ -6,6 +6,22 @@
       <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
       <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
       <script src="https://www.whiteboard.team/dist/api.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/raw"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/nested-list@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/text-variant-tune@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/checklist@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/underline@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/warning@latest"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
     </head>
 
     <div>
@@ -55,56 +71,56 @@
             </v-col>
 
             <v-col :cols="windowWidth < 600 ? '12' : '7'" v-if="userData.userid == currentNote.userid">
-                <v-text-field v-if="editNote"
-                  class="noteselector"
-                  id="note-name"
-                  dense
-                  solo
-                  rounded
-                  color="#f9f9f9"
-                  append-icon="mdi-chevron-down"
-                  append-outer-icon="mdi-pencil"
-                  @click:append-outer="editNote = !editNote"
-                  :value="currentNote.notename"
-                  @input="nameChanged($event)"
-                  @keyup.enter="updateNoteName()"
-                >
-                </v-text-field>
-                <v-menu
-                  v-if="!editNote"
-                  bottom
-                  transition="slide-y-transition"
-                  :offset-y="true"
-                  close-on-content-click
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field id="note-name"
-                      class="noteselector"
-                      dense
-                      solo
-                      rounded
-                      readonly
-                      color="#f9f9f9"
-                      append-icon="mdi-chevron-down"
-                      append-outer-icon="mdi-pencil"
-                      @click:append-outer="editNote = !editNote"
-                      v-bind="attrs"
-                      v-on="on" 
-                      :placeholder="currentNote.notename"
-                    >
-                    </v-text-field>
-                  </template>
-                  <v-list>
-                    <v-list-item v-for="(n, i) in notes" :key="i" link>
-                        <v-list-item-title
-                          v-text="n.notename"
-                          style='font-size: 10pt;'
-                          @click="switchNote(n.noteid)"
-                        >
-                        </v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>                
+              <v-text-field v-if="editNote"
+                class="noteselector"
+                id="note-name"
+                dense
+                solo
+                rounded
+                color="#f9f9f9"
+                append-icon="mdi-chevron-down"
+                append-outer-icon="mdi-pencil"
+                @click:append-outer="editNote = !editNote"
+                :value="currentNote.notename"
+                @input="nameChanged($event)"
+                @keyup.enter="updateNoteName()"
+              >
+              </v-text-field>
+              <v-menu
+                v-if="!editNote"
+                bottom
+                transition="slide-y-transition"
+                :offset-y="true"
+                close-on-content-click
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field id="note-name"
+                    class="noteselector"
+                    dense
+                    solo
+                    rounded
+                    readonly
+                    color="#f9f9f9"
+                    append-icon="mdi-chevron-down"
+                    append-outer-icon="mdi-pencil"
+                    @click:append-outer="editNote = !editNote"
+                    v-bind="attrs"
+                    v-on="on" 
+                    :placeholder="currentNote.notename"
+                  >
+                  </v-text-field>
+                </template>
+                <v-list>
+                  <v-list-item v-for="(n, i) in notes" :key="i" link>
+                      <v-list-item-title
+                        v-text="n.notename"
+                        style='font-size: 10pt;'
+                        @click="switchNote(n.noteid)"
+                      >
+                      </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>                
             </v-col>
             <v-col :cols="windowWidth < 600 ? '12' : '7'" v-else>
               <v-text-field id="note-name"
@@ -120,11 +136,11 @@
             </v-col>
 
             <v-col class="text-right">
-                <span style="font-family: Times New Roman; font-size: 16px;"
-                >
-                  {{this.currentNote.collectionname}}
-                </span>
-                <h5 class="pretty-date">{{prettyDate}}</h5>
+              <span style="font-family: Times New Roman; font-size: 16px;"
+              >
+                {{ parent.type == 'org' ? parent.orgname : parent.foldername }}
+              </span>
+              <h5 class="pretty-date">{{prettyDate}}</h5>
             </v-col>
         </v-row>
 
@@ -168,28 +184,34 @@
               </template>
               <span>My Whiteboards</span>
             </v-tooltip>
+            <!-- <v-btn @click="saveTheNotes()">Save</v-btn> -->
             <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
               <Loading v-if="!showEditor" style="align-items: start;" />
-              <!-- <Editor class="editor" v-if="showEditor"
-                :disabled="(userData.userid == currentNote.userid) ? false : true"
+              <textarea id="sunEditor"
+                hidden
+                v-if="editorOrWhiteboard == 0"
                 v-model="noteText"
-                :api-key="tinyApi"
-                @onKeyDown.ctrl.space="quickWord"
-                :init="{
-                  plugins: 'lists link image media table code help wordcount',
-                  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-                }"
-              /> -->
-              <!-- <div class="editor"> -->
-                <!-- <ckeditor :editor="editor" :config="editorConfig" v-model="noteText"></ckeditor> -->
-                <!-- <div id="summernote" v-html="noteText"></div> -->
-                <textarea id="sunEditor"
-                  hidden
-                  v-if="editorOrWhiteboard == 0"
-                  v-model="noteText"
-                  :disabled="(userData.userid == currentNote.userid) ? false : true"
-                ></textarea>
-              <!-- </div> -->
+                :disabled="(userData.userid == currentNote.userid) ? false : true"
+              ></textarea>
+              <!-- <div id="editorjs"></div> -->
+              <!-- <div id="toolbar-container"></div>
+              <div id="editor"></div> -->
+              <!-- <RichEditor /> -->
+              <!-- <div style="border: 1px solid #ccc;">
+                <Toolbar
+                    style="border-bottom: 1px solid #ccc"
+                    :editor="editor"
+                    :defaultConfig="toolbarConfig"
+                    :mode="mode"
+                />
+                <Editor
+                    style="height: 500px; overflow-y: hidden;"
+                    v-model="noteText"
+                    :defaultConfig="editorConfig"
+                    :mode="mode"
+                    @onCreated="onCreated"
+                />
+              </div> -->
             </div>
             <div class="canvas-wrapper" v-if="editorOrWhiteboard == 1">
               <div style="width: 100%; height: 100%;" id="wt-container"></div>
@@ -207,6 +229,13 @@
                 :disabled="(userData.userid == currentNote.userid ? false : true) || isGeneratingTools"
               >
                 <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Flashcards' : `&ensp;${generatingStatus}` }}
+              </v-btn>
+            </div>
+            <div>
+              <v-btn class="tool-btn" id="summarize-btn"
+                @click="summarize()"
+              >
+                Summarize Notes
               </v-btn>
             </div>
             <div id="note-step-3">
@@ -377,16 +406,6 @@
           </v-tooltip>
           <div class="editor-wrapper" id="editor" v-if="editorOrWhiteboard == 0" @keydown.ctrl.space="quickWord">
             <Loading v-if="!showEditor" style="align-items: start;" />
-            <!-- <Editor class="editor" v-if="showEditor"
-              :disabled="(userData.userid == currentNote.userid) ? false : true"
-              v-model="noteText"
-              :api-key="tinyApi"
-              @onKeyDown.ctrl.space="quickWord"
-              :init="{
-                plugins: 'lists link image media table code help wordcount',
-                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-              }"
-            /> -->
             <textarea id="sunEditor"
               hidden
               v-if="editorOrWhiteboard == 0"
@@ -413,19 +432,42 @@ import ShareNote from '~/components/ShareNote.vue'
 import QuickWord from '~/components/QuickWord.vue'
 import Whiteboards from '~/components/Whiteboards.vue'
 import Shepherd from 'shepherd.js'
-import { openaiGenerateStudyTools } from '~/store/openai'
+import { openaiGenerateStudyTools, summarizeText } from '~/store/openai'
 import { debounce } from 'lodash'
 import Loading from '~/components/Loading.vue'
-import Painterro from 'painterro'
-import Editor from '@tinymce/tinymce-vue'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import CKEditor from "@ckeditor/ckeditor5-vue2"
 import suneditor from 'suneditor'
 import 'suneditor/dist/css/suneditor.min.css'
 import plugins from '~/node_modules/suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import randomstring from 'randomstring'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { i18nChangeLanguage } from '@wangeditor/editor'
+import { DomEditor } from '@wangeditor/editor'
+import RichEditor from '~/components/Editor.vue'
+import { ClassicEditor } from '@ckeditor/ckeditor5-editor-classic';
+import { Alignment } from '@ckeditor/ckeditor5-alignment';
+import { Autoformat } from '@ckeditor/ckeditor5-autoformat';
+import { Bold, Italic } from '@ckeditor/ckeditor5-basic-styles';
+import { BlockQuote } from '@ckeditor/ckeditor5-block-quote';
+import { CloudServices } from '@ckeditor/ckeditor5-cloud-services';
+import { Essentials } from '@ckeditor/ckeditor5-essentials';
+import { Heading } from '@ckeditor/ckeditor5-heading';
+import {
+    Image,
+    ImageCaption,
+    ImageStyle,
+    ImageToolbar,
+    ImageUpload
+} from '@ckeditor/ckeditor5-image';
+import { Indent } from '@ckeditor/ckeditor5-indent';
+import { Link } from '@ckeditor/ckeditor5-link';
+import { List } from '@ckeditor/ckeditor5-list';
+import { MediaEmbed } from '@ckeditor/ckeditor5-media-embed';
+import { Paragraph } from '@ckeditor/ckeditor5-paragraph';
+import { PasteFromOffice } from '@ckeditor/ckeditor5-paste-from-office';
+import { Table, TableToolbar } from '@ckeditor/ckeditor5-table';
+import { TextTransformation } from '@ckeditor/ckeditor5-typing';
 
 export default {
   name: 'NotePage',
@@ -444,15 +486,22 @@ export default {
       Tools,
       ShareNote,
       QuickWord,
-      Editor,
       Loading,
       Whiteboards,
-      ckeditor: CKEditor.component,
+      Editor,
+      Toolbar,
+      RichEditor,
   },
 
   async mounted() {
+    i18nChangeLanguage('en')
+    this.parent = JSON.parse(localStorage.getItem('notes-parent'))
     await this.$store.commit('users/currentNote', JSON.parse(localStorage.getItem('note')))
-    await this.$store.dispatch('users/notes', { collectionid: this.currentNote.collectionid })
+    // parent.type == 'org' ? await this.$store.dispatch('users/getOrgNotes', {
+    //   parent: null
+    // }) : await this.$store.dispatch('users/getFolderNotes', {
+    //   parent: parent.folderid
+    // })
     await this.$store.dispatch('users/getFiles', {
       noteid: this.currentNote.noteid
     })
@@ -471,25 +520,133 @@ export default {
       this.noteTour.start()
       this.noteTour.on('complete', this.onboardingComplete)
     }
+    // this.editorjs = new EditorJS({
+    //   holder: 'editorjs',
+    //   autofocus: true,
+    //   data: JSON.parse(localStorage.getItem('editor-js-notes')),
+    //   tools: {
+    //     paragraph: {
+    //       class: Paragraph,
+    //       inlineToolbar: true,
+    //     },
+    //     image: {
+    //       class: SimpleImage,
+    //       inlineToolbar: true,
+    //     },
+    //     header: {
+    //       class: Header,
+    //       shortcut: 'CMD+SHIFT+H',
+    //     },
+    //     table: {
+    //       class: Table,
+    //       inlineToolbar: true,
+    //       config: {
+    //         rows: 2,
+    //         cols: 3,
+    //       },
+    //     },
+    //     list: {
+    //       class: NestedList,
+    //       inlineToolbar: true,
+    //       config: {
+    //         defaultStyle: 'unordered'
+    //       },
+    //     },
+    //     checklist: {
+    //       class: Checklist,
+    //       inlineToolbar: true,
+    //     },
+    //     underline: {
+    //       class: Underline,
+    //       inlineToolbar: true,
+    //     },
+    //     Marker: {
+    //       class: Marker,
+    //       inlineToolbar: true,
+    //     },
+    //     inlineCode: {
+    //       class: InlineCode,
+    //       inlineToolbar: true,
+    //     },
+    //     code: CodeTool,
+    //     textVariant: TextVariantTune,
+    //     raw: RawTool,
+    //     warning: {
+    //       class: Warning,
+    //       inlineToolbar: true,
+    //       config: {
+    //         titlePlaceholder: 'Title',
+    //         messagePlaceholder: 'Message',
+    //       },
+    //     },
+    //     quote: {
+    //       class: Quote,
+    //       inlineToolbar: true,
+    //       shortcut: 'CMD+SHIFT+O',
+    //       config: {
+    //         quotePlaceholder: 'Enter a quote',
+    //         captionPlaceholder: 'Quote\'s author',
+    //       },
+    //     },
+    //     delimiter: Delimiter,
+    //   },
+    //   tunes: ['textVariant'],
+    // });
     this.showEditor = true
+    // ClassicEditor
+    //   .create( document.querySelector( '#editor' ), {
+    //       // plugins: [ Alignment,
+    //       //   Autoformat,
+    //       //   BlockQuote,
+    //       //   Bold,
+    //       //   CloudServices,
+    //       //   Essentials,
+    //       //   Heading,
+    //       //   Image,
+    //       //   ImageCaption,
+    //       //   ImageStyle,
+    //       //   ImageToolbar,
+    //       //   ImageUpload,
+    //       //   Indent,
+    //       //   Italic,
+    //       //   Link,
+    //       //   List,
+    //       //   MediaEmbed,
+    //       //   Paragraph,
+    //       //   PasteFromOffice,
+    //       //   Table,
+    //       //   TableToolbar,
+    //       //   TextTransformation
+    //       // ],
+    //       // toolbar: [
+    //       //   'alignment',
+    //       //   'heading',
+    //       //   '|',
+    //       //   'bold',
+    //       //   'italic',
+    //       //   'link',
+    //       //   'bulletedList',
+    //       //   'numberedList',
+    //       //   '|',
+    //       //   'outdent',
+    //       //   'indent',
+    //       //   '|',
+    //       //   'imageUpload',
+    //       //   'blockQuote',
+    //       //   'insertTable',
+    //       //   'mediaEmbed',
+    //       //   'undo',
+    //       //   'redo'
+    //       // ]
+    //   } )
+    //   .then( editor => {
+    //       console.log( 'Editor was initialized', editor );
+    //   } )
+    //   .catch( error => {
+    //       console.error( error.stack );
+    //   } );
     this.$nextTick(() => {
       this.createSunEditor()
-      
-      // $('#summernote').summernote({
-      //   height: (window.innerHeight / 100) * 80,
-      //   toolbar: [
-      //     ['style', ['style']],
-      //     ['font', ['bold', 'italic', 'underline', 'clear']],
-      //     ['fontstyle', ['strikethrough', 'subscript', 'superscript']],
-      //     ['fontsize', ['fontsize']],
-      //     ['fontname', ['fontname']],
-      //     ['color', ['forecolor', 'backcolor']],
-      //     ['para', ['ul', 'ol', 'paragraph', 'height']],
-      //     ['table', ['table']],
-      //     ['insert', ['link', 'picture', 'video', 'hr']],
-      //     ['view', ['undo', 'redo', 'fullscreen']],
-      //   ],
-      // });
     })
   },
 
@@ -499,6 +656,7 @@ export default {
 
   data () {
     return {
+        parent: {},
         showEditor: false,
         isGeneratingTools: false,
         generatingStatus: '',
@@ -508,7 +666,6 @@ export default {
         noteText: JSON.parse(localStorage.getItem('note')).typednotes,
         prettyDate: localStorage.getItem('prettyDate'),
         editNote: false,
-        tinyApi: process.env.NUXT_ENV_TINY_API_KEY,
         newNoteName: JSON.parse(localStorage.getItem('note')).notename,
         windowWidth: window.innerWidth,
         noteTour: new Shepherd.Tour({
@@ -517,23 +674,22 @@ export default {
             classes: 'shadow-md bg-purple-dark',
           }
         }),
-        ptro: null,
         whiteboard: null,
         wordsToRemove: [],
-        editor: ClassicEditor,
-        editorConfig: {
-          toolbar: {
-            items: [
-              'undo', 'redo',
-              '|', 'heading',
-              '|', 'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
-              '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
-              '|', 'link', 'uploadImage', 'uploadMedia', 'blockQuote', 'codeBlock',
-              '|', 'bulletedList', 'numberedList', 'todoList', 'alignment', 'outdent', 'indent'
-            ],
-          }
+        editorjs: null,
+        sunEditor: null,
+        editor: null,
+        html: '<p>hello</p>',
+        toolbarConfig: {
+          excludeKeys: [
+            'fullScreen',
+          ]
         },
-        sunEditor: null
+        editorConfig: { 
+          placeholder: 'Type here...',
+          language: 'en',
+        },
+        mode: 'default',
     }
   },
 
@@ -557,32 +713,8 @@ export default {
         this.sunEditor.hide()
         this.$nextTick(async () => {
           this.getCurrentWhiteboard()
-
-          // this.ptro = Painterro({
-          //   id: 'painterro',
-          //   defaultTool: 'brush',
-          //   defaultTextStrokeAndShadow: false,
-          //   activeColor: '#000000',
-          //   defaultLineWidth: '3',
-          //   defaultEraserWidth: '20',
-          //   hiddenTools: ['close', 'resize', 'pixelize', 'settings'],
-          //   toolbarPosition: 'top',
-          //   saveHandler: async (image, done) => {
-          //     this.blobToDataURL(image.asBlob(), async (dataURL) => {
-          //       await this.$store.dispatch('users/addWhiteboard', { 
-          //         dataURL: dataURL,
-          //         noteid: this.currentNote.noteid
-          //       });
-          //       done(false);
-          //     });
-          //   },
-          //   onChange: async () => {
-          //     this.ptro.save()
-          //   }
-          // })
         });
       } else if (newValue == 0 && oldValue == 1) {
-        // this.ptro.close()
         this.sunEditor.show()
       }
     }
@@ -591,6 +723,18 @@ export default {
   methods: {
       back() {
         this.$router.go(-1)
+      },
+
+      saveTheNotes() {
+        // this.editorjs.save().then(savedData => {
+        //   localStorage.setItem('editor-js-notes', JSON.stringify(savedData, null, 4))
+        // })
+        const toolbar = DomEditor.getToolbar(this.editor)
+        console.log(toolbar.getConfig().toolbarKeys)
+      },
+
+      onCreated(editor) {
+        this.editor = Object.seal(editor) // Use `Object.seal`
       },
 
       async createSunEditor() {
@@ -662,14 +806,12 @@ export default {
         })
         if (shouldDestroy) this.whiteboard.destroy()
         await this.initWhiteboard(code)
-        // this.ptro.show()
       },
 
       async openBoard() {
         this.whiteboard.destroy()
         let whiteboard = JSON.parse(localStorage.getItem('current_whiteboard'))
         await this.initWhiteboard(whiteboard.uid)
-        // this.ptro.show(whiteboard.data)
       },
 
       blobToDataURL(blob, callback) {
@@ -728,11 +870,12 @@ export default {
         } else {
           await this.$store.dispatch('users/createNote', {
             notename: 'Untitled Note',
-            collectionid: this.currentNote.collectionid,
-            orgid: this.currentNote.orgid
+            parent: this.parent.type == 'org' ? null : this.parent.folderid,
+            fromNote: true
           })
           this.editorOrWhiteboard = 0
           this.noteText = this.currentNote.typednotes
+          this.prettyDate = localStorage.getItem('prettyDate')
           await this.sunEditor.destroy()
           await this.createSunEditor()
         }
@@ -820,6 +963,19 @@ export default {
               text: 'Your study tools have been successfully generated. You can review them by clicking the \"Study Tools\" button.'
             })
           }
+        }
+      },
+
+      async summarize() {
+        const success = await summarizeText({
+          input: this.noteText
+        })
+        if (!success) {
+          await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'Maximum text length for summary has been exceeded. Please highlight a portion of your notes to summarize.'
+          })
         }
       },
       
@@ -1017,6 +1173,14 @@ export default {
       return this.userData.lastaicall == this.getDate
     },
 
+    listOfOrgNotes () {
+      return this.$store.state.users.orgContentNotes
+    },
+
+    listOfFolderNotes () {
+      return this.$store.state.users.folderContentNotes
+    },
+
     preparedWords () {
       return this.$store.state.users.preparedWords
     },
@@ -1064,6 +1228,7 @@ export default {
 }
 </script>
 
+<style src="@wangeditor/editor/dist/css/style.css"></style>
 <style scoped>
 @import '~/assets/styles.css';
 
@@ -1071,6 +1236,11 @@ export default {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
+#editorjs {
+  box-shadow: 0px 0px 2px #2F2B28;
+  max-height: 500px;
+  overflow-y: scroll;
+}
 .editor-wrapper {
   height: auto;
 }
@@ -1083,13 +1253,6 @@ export default {
 .canvas-wrapper {
   height: 80vh;
   width: 100%;
-}
-
-#painterro {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
 }
 
 .small-header {
