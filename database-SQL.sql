@@ -39,9 +39,12 @@ CREATE TABLE folder
   foldername text,
   orgid SERIAL,
   userid SERIAL,
+  parent INT default null,
+  ispublic BOOLEAN default false,
   PRIMARY KEY (folderid),
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE,
-  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE
+  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE,
+  FOREIGN KEY (parent) REFERENCES folder(folderid) ON DELETE CASCADE
 );
 
 CREATE TABLE collection
@@ -51,11 +54,13 @@ CREATE TABLE collection
   userid SERIAL NOT NULL,
   orgid SERIAL,
   folderid INT DEFAULT null,
+  parent INT default null,
   color TEXT NOT NULL DEFAULT '#D3D3D3',
   PRIMARY KEY (collectionid),
   FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE,
   FOREIGN KEY (folderid) REFERENCES folder(folderid) ON DELETE CASCADE,
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE,
+  FOREIGN KEY (parent) REFERENCES folder(folderid) ON DELETE CASCADE
 );
 
 CREATE TABLE todo
@@ -77,10 +82,14 @@ CREATE TABLE note
   notename text,
   notedate timestamp,
   typednotes TEXT,
-  collectionid SERIAL NOT NULL,
+  collectionid SERIAL,
+  parent INT default null,
   externalsharing BOOLEAN NOT NULL DEFAULT false,
+  userid INT,
   PRIMARY KEY (noteid),
-  FOREIGN KEY (collectionid) REFERENCES collection(collectionid) ON DELETE CASCADE
+  FOREIGN KEY (collectionid) REFERENCES collection(collectionid) ON DELETE CASCADE,
+  FOREIGN KEY (parent) REFERENCES folder(folderid) ON DELETE CASCADE,
+  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE
 );
 
 CREATE TABLE study_plan
@@ -144,6 +153,17 @@ CREATE TABLE shared_collection
 	FOREIGN KEY (ownerid) REFERENCES "user" (userid) ON DELETE CASCADE
 );
 
+CREATE TABLE shared_folder
+(
+	folderid SERIAL NOT NULL,
+	userid SERIAL NOT NULL,
+	ownerid SERIAL NOT NULL,
+	PRIMARY KEY (folderid, userid, ownerid),
+	FOREIGN KEY (folderid) REFERENCES folder (folderid) ON DELETE CASCADE,
+	FOREIGN KEY (userid) REFERENCES "user" (userid) ON DELETE CASCADE,
+	FOREIGN KEY (ownerid) REFERENCES "user" (userid) ON DELETE CASCADE
+);
+
 CREATE TABLE shared_note
 (
 	noteid SERIAL NOT NULL,
@@ -164,6 +184,8 @@ CREATE TABLE "reset_code"
   PRIMARY KEY (codeid),
   UNIQUE (code)
 );
+
+-- VIEWS
 
 CREATE OR REPLACE VIEW get_daily_plans AS
 	SELECT
@@ -224,7 +246,7 @@ create or replace view see_orgs as
   --this will be filtered later
 
 create or replace view see_collections as
-  select c.collectionname, o.orgid, u.userid, u.email, c.collectionid, c.color, c.folderid
+  select c.collectionname, o.orgid, u.userid, u.email, c.collectionid, c.color, c.folderid, c.parent
   from collection c inner join organization o
   on c.orgid = o.orgid inner join "user" u
   on c.userid = u.userid
@@ -247,6 +269,11 @@ create or replace view see_task_folder_colls as
 	select * from collection;
 	--this will be filtered later
 
+create or replace view see_content_notes as
+  select n.noteid, n.notename, n.parent, n.userid
+  from note n order by n.notename asc;
+  --this will be filtered later
+
 create or replace view see_folders as
 	select * from folder;
 	--this will be filtered later
@@ -263,16 +290,15 @@ create or replace view see_todo_due_today as
   -- this will be filtered later
 
 create or replace view see_notes as
-	select n.noteid, n.notename, c.collectionid, u.email, c.orgid, c.collectionname, c.color, c.folderid
+	select n.noteid, n.notename, c.collectionid, u.email, c.orgid, c.collectionname, c.color, c.folderid, c.parent
 	from note n inner join collection c on n.collectionid = c.collectionid
 	inner join "user" u on c.userid = u.userid
 	order by n.noteid asc;
 	--this will be filtered later
 
 create or replace view see_note_with_data as
-  select n.noteid, n.notename, n.notedate, n.typednotes, c.collectionname, c.orgid, u.userid, c.collectionid, n.externalsharing, c.folderid                                
-  from note n inner join collection c on n.collectionid = c.collectionid
-  inner join "user" u on c.userid = u.userid;
+  select n.noteid, n.notename, n.notedate, n.typednotes, u.userid                        
+  from note n inner join "user" u on n.userid = u.userid;
   --this will be filtered later
 
 create or replace view see_flashcards as
@@ -425,6 +451,12 @@ create or replace view see_shared_colls as
 	on s.userid = u.userid;
 	--this will be filtered later
 
+create or replace view see_shared_folders as
+	select s.folderid, s.userid, s.ownerid, u.email
+	from shared_folder s inner join "user" u
+	on s.userid = u.userid;
+	--this will be filtered later
+
 create or replace view see_shared_notes as
 	select s.noteid, s.userid, s.ownerid, u.email
 	from shared_note s inner join "user" u
@@ -462,7 +494,7 @@ create or replace view search_org_by_code as
 	--this will be filtered later
 
 
-
+-- FUNCTIONS
 CREATE OR REPLACE FUNCTION trigger_set_last_modified_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
