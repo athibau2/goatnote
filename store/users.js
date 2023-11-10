@@ -60,7 +60,7 @@ export const state = () => ({
     sharedCollList: [],
     sharedFolderList: [],
     sharedNoteList: [],
-    collsSharedWithMe: [],
+    foldersSharedWithMe: [],
     notesSharedWithMe: [],
     publicOrgs: [],
     foundOrg: null,
@@ -354,8 +354,8 @@ export const mutations = {
         state.sharedNoteList = data
     },
 
-    collsSharedWithMe(state, data) {
-        state.collsSharedWithMe = data
+    foldersSharedWithMe(state, data) {
+        state.foldersSharedWithMe = data
     },
 
     notesSharedWithMe(state, data) {
@@ -1148,15 +1148,15 @@ export const actions = {
         }
     },
 
-    async loadSharedColls({ commit, state }) {
-        const { data, error, status } = await supabase.from('see_colls_shared_with_me')
+    async loadSharedFolders({ commit, state }) {
+        const { data, error, status } = await supabase.from('see_folders_shared_with_me')
             .select()
             .eq('userid', state.userData.userid)
         if (!error) {
-            await commit('collsSharedWithMe', data)
+            await commit('foldersSharedWithMe', data)
         } else if (error) {
             console.error(error)
-            await commit('collsSharedWithMe', [])
+            await commit('foldersSharedWithMe', [])
         }
     },
 
@@ -1173,7 +1173,7 @@ export const actions = {
     },
 
     async loadSharedWithMe({ dispatch }) {
-        await dispatch('loadSharedColls')
+        await dispatch('loadSharedFolders')
         await dispatch('loadSharedNotes')
     },
 
