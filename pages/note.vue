@@ -444,7 +444,7 @@ import randomstring from 'randomstring'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import { i18nChangeLanguage } from '@wangeditor/editor'
 import { DomEditor } from '@wangeditor/editor'
-import RichEditor from '~/components/Editor.vue'
+// import RichEditor from '~/components/Editor.vue'
 import { ClassicEditor } from '@ckeditor/ckeditor5-editor-classic';
 import { Alignment } from '@ckeditor/ckeditor5-alignment';
 import { Autoformat } from '@ckeditor/ckeditor5-autoformat';
@@ -490,7 +490,7 @@ export default {
       Whiteboards,
       Editor,
       Toolbar,
-      RichEditor,
+      // RichEditor,
   },
 
   async mounted() {
