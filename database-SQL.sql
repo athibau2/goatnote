@@ -470,11 +470,17 @@ create or replace view see_colls_shared_with_me as
 	order by c.collectionname asc;
 	--this will be filtered later
 
+create or replace view see_folders_shared_with_me as
+	select s.folderid, s.userid, s.ownerid, f.foldername, f.orgid, u.firstname, u.lastname
+	from shared_folder s inner join folder f on s.folderid = f.folderid
+	inner join "user" u on u.userid = f.userid
+	order by f.foldername asc;
+	--this will be filtered later
+
 create or replace view see_notes_shared_with_me as
-	select s.noteid, s.userid, s.ownerid, n.notename, c.collectionname, c.orgid, u.firstname, u.lastname, c.color
+	select s.noteid, s.userid, s.ownerid, n.notename, u.firstname, u.lastname
 	from shared_note s inner join note n on s.noteid = n.noteid
-	inner join collection c on n.collectionid = c.collectionid
-	inner join "user" u on u.userid = c.userid
+	inner join "user" u on n.userid = u.userid
 	order by n.notename asc;
 	--this will be filtered later
 

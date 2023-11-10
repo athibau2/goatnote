@@ -4,106 +4,68 @@
         <v-tabs background-color="transparent" left v-model="tab">
           <v-tabs-slider></v-tabs-slider>
             <v-tab v-for="item in items" :key="item.tab">
-              {{item.tab}} ({{item.tab === 'collections' ? collsSharedWithMe.length : notesSharedWithMe.length}})
+              {{item.tab}} ({{item.tab === 'folders' ? foldersSharedWithMe.length : notesSharedWithMe.length}})
             </v-tab>
         </v-tabs>
       </span>
       <v-tabs-items v-model="tab">
         <v-tab-item class="shared-list" v-for="item in items" :key="item.tab">
           <!-- List of shared collections -->
-          <v-col v-if="tab === 0">
+          <v-col>
             <Loading v-if="loading" />
-            <v-row v-if="selectedColl == null">
-              <v-card class="shared-card"
-                elevation="5"
-                width="250"
-                v-for="(coll, i) in collsSharedWithMe"
-                :key="i"
-                :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${coll.color})`}"
-              >
-                <v-card-title>
-                  {{coll.collectionname}}
-                </v-card-title>
-                <v-card-subtitle>
-                  <em>{{coll.firstname}} {{coll.lastname}}</em>
-                </v-card-subtitle>
-                <v-card-actions>
-                  <v-spacer />
-                  <v-btn text class="flat-btn" @click="removeColl(coll)">Remove</v-btn>
-                  <v-btn class="good-btn"
-                    @click="loadNotes(coll)"
-                  >
-                    Open
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-row>
 
-            <!-- header for notes in shared collection -->
-            <span style="margin: 20px;" v-if="selectedColl != null">
-              <span class="basic-header">Notes in {{ selectedColl.collectionname }}</span>
+            <!-- header for folder content section -->
+            <span style="margin: 20px;" v-if="parent != null && level != 0 && tab == 0">
+              <span class="basic-header">{{ parent.foldername }}</span>
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn class="add-btn"
-                    @click="selectedColl = null"
+                    @click="levelBack()"
                     icon
                     v-on="on"
                     v-bind="attrs"
+                    :disabled="level == 0"
                   >
-                    <v-icon>mdi-chevron-up</v-icon>
+                    <v-icon>mdi-arrow-up</v-icon>
                   </v-btn>
                 </template>
-                <span>Collapse</span>
+                <span>Up One Level</span>
               </v-tooltip>
               <hr>
             </span>
 
-            <!-- List of notes in collection -->
-            <v-row v-if="selectedColl != null">
-              <v-card class="shared-card"
-                elevation="5"
-                width="300"
-                v-for="(note, i) in collNotes"
+            <div>
+              <div class="folder-card"
+                v-for="(item, i) in tab == 1 ? notesSharedWithMe : level == 0 ? foldersSharedWithMe : folderContent"
                 :key="i"
-                :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${note.color})`}"
+                @click="level == 0 || item.type == 'folder' ? loadFolderContent(item) : item.type == 'note' ? openNote(item.noteid) : null"
               >
-                <v-card-title>
-                    {{note.notename}}
-                </v-card-title>
-                <v-card-subtitle>
-                  <em>{{note.collectionname}}</em>
-                </v-card-subtitle>
-                <v-card-actions>
-                  <v-spacer />
-                  <v-btn class="good-btn" @click="openNote(note.noteid)">Open</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-row>
-          </v-col>
-
-          <!-- List of notes -->
-          <v-col v-else-if="tab === 1">
-            <v-row>
-              <v-card class="shared-card"
-                elevation="5"
-                width="300"
-                v-for="(note, i) in notesSharedWithMe"
-                :key="i"
-                :style="{'background-image': `linear-gradient(to top right, #f9f9f9, ${note.color})`}"
-              >
-                <v-card-title>
-                    {{note.notename}}
-                </v-card-title>
-                <v-card-subtitle>
-                  <em>{{note.firstname}} {{note.lastname}}</em>
-                </v-card-subtitle>
-                <v-card-actions>
-                  <v-spacer />
-                  <v-btn text class="flat-btn" @click="removeNote(note)">Remove</v-btn>
-                  <v-btn class="good-btn" @click="openNote(note.noteid)">Go</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-row>
+                <span class="basic-header" style="font-size: 18.5px;">
+                  <v-icon :style="{'margin-top': '-4px', 'color': tab == 1 ? '#85c59d' : level == 0 ? '#96d0e8' : item.type == 'folder' ? '#96d0e8' : '#85c59d'}">
+                    {{ tab == 1 ? 'mdi-note' : level == 0 ? 'mdi-folder' : item.type == 'folder' ? 'mdi-folder' : 'mdi-note'}}
+                  </v-icon>&ensp;
+                  {{ tab == 1 ? parseFolderName(item.notename) : level == 0 ? parseFolderName(item.foldername) : parseFolderName(item.name) }}
+                  <Loading v-if="loadingNote && noteBeingOpened == item.noteid" />
+                </span>
+                <span>
+                  <span class="basic-header"
+                    :style="{'font-size': '16px', 'margin-right': windowWidth < 750 ? '40px' : '100px'}"
+                    v-if="windowWidth > 600"
+                  >
+                    {{ level == 0 || tab == 1 ? `${item.firstname} ${item.lastname}` : upperType(item.type) }}
+                  </span>
+                  <span v-if="level == 0 || tab == 1">
+                    <sl-tooltip content="Remove">
+                      <v-btn icon small
+                        @click.stop="tab == 0 ? removeFolder(item) : removeNote(item)"
+                      >
+                        <v-icon size="20">mdi-delete</v-icon>
+                      </v-btn>
+                    </sl-tooltip>
+                  </span>
+                </span>
+              </div>
+            </div>
           </v-col>
         </v-tab-item>
       </v-tabs-items>
@@ -129,6 +91,12 @@ export default {
     }
   },
 
+  async created () {
+    window.addEventListener('resize', () => {
+      this.windowWidth = window.innerWidth
+    })
+  },
+
   async mounted () {
     this.loading = true
     await this.$store.dispatch('users/loadSharedWithMe')
@@ -139,25 +107,31 @@ export default {
     return {
       tab: null,
       loading: false,
+      loadingNote: false,
+      noteBeingOpened: null,
+      selectedFolder: null,
+      parent: null,
+      parentList: [],
+      level: 0,
       items: [
-        { tab: 'collections' },
+        { tab: 'folders' },
         { tab: 'notes' },
       ],
-      selectedColl: null,
+      windowWidth: window.innerWidth
     }
   },
 
   methods: {
-    async removeColl (coll) {
-      await this.$store.dispatch('users/unshareColl', {
-        collection: coll,
+    async removeFolder(folder) {
+      await this.$store.dispatch('users/unshareFolder', {
+        folder: folder,
         userid: this.userData.userid,
         type: "receiver"
       })
-      this.selectedColl = null
+      this.selectedFolder = null
     },
 
-    async removeNote (note) {
+    async removeNote(note) {
       this.$store.dispatch('users/unshareNote', {
         note: note,
         userid: this.userData.userid,
@@ -165,17 +139,51 @@ export default {
       })
     },
 
-    loadNotes (collection) {
-      this.selectedColl = collection
-      this.$store.dispatch('users/notes', {
-        collectionid: collection.collectionid
-      })
+    parseFolderName(name) {
+      if (name.length >= 30) {
+        let short = name.substring(0, 30) + '...'
+        return short
+      } else return name
     },
 
-    openNote (noteid) {
-      this.$store.dispatch('users/openNote', {
+    upperType(type) {
+      let first = type[0].toUpperCase()
+      return first + type.slice(1)
+    },
+
+    async levelBack() {
+      this.parentList.pop()
+      this.level--
+      if (this.level != 0) {
+        let folder = this.parentList[this.parentList.length - 1]
+        this.loadFolderContent(folder, false)
+      }
+    },
+
+    async loadFolderContent(item, forward = true) {
+      this.loading = true
+      this.selectedFolder = item
+      if (forward) {
+        this.parentList.push({...item, type: 'folder'})
+        this.parent = {
+          ...item,
+          type: 'folder'
+        }
+      } else this.parent = item
+      await this.$store.dispatch('users/getFolderContent', {
+        parent: item.folderid,
+      })
+      forward ? this.level++ : null
+      this.loading = false
+    },
+
+    async openNote(noteid) {
+      this.noteBeingOpened = noteid
+      this.loadingNote = true
+      await this.$store.dispatch('users/openNote', {
         noteid
       })
+      this.loadingNote = false
     },
   },
 
@@ -184,16 +192,49 @@ export default {
       return this.$store.state.users.userData
     },
 
-    collsSharedWithMe () {
-      return this.$store.state.users.collsSharedWithMe
+    folderContent () {
+      const combinedContent = [
+        ...this.folderContentFolders.map(item => ({ ...item, name: item.foldername, type: 'folder' })),
+        ...this.folderContentNotes.map(item => ({ ...item, name: item.notename, type: 'note' })),
+      ];
+
+      combinedContent.sort((a, b) => {
+        const nameA = a.name.toUpperCase();
+        const nameB = b.name.toUpperCase();
+
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+
+      return combinedContent;
+    },
+
+    folderContentFolders () {
+      return this.$store.state.users.folderContentFolders;
+    },
+
+    folderContentNotes () {
+      return this.$store.state.users.folderContentNotes;
+    },
+
+    foldersSharedWithMe () {
+      return this.$store.state.users.foldersSharedWithMe
     },
 
     notesSharedWithMe () {
-      return this.$store.state.users.notesSharedWithMe
-    },
-
-    collNotes () {
-      return this.$store.state.users.notes
+      let notes = this.$store.state.users.notesSharedWithMe
+      notes.forEach(note => {
+        note = {
+          ...note,
+          type: 'note'
+        }
+      });
+      return notes
     },
   }
 }
@@ -210,6 +251,23 @@ export default {
 .shared-card {
   margin: 10px;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.folder-card {
+  margin: 3px auto;
+  padding: 3px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: solid 1px;
+  border-radius: 4px;
+  box-shadow: 0px 0px 2px #2F2B28;
+  width: 90%;
+}
+
+.folder-card:hover {
+  opacity: 0.65;
+  cursor: pointer;
 }
 
 </style>
