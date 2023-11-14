@@ -1022,6 +1022,24 @@ export const actions = {
         await dispatch('getFolderCollections', { parent: parent })
     },
 
+    async moveItem({ dispatch, commit }, { itemId, type, parent }) {
+        const { data, error, status } = await supabase.from(type)
+            .update({
+                parent: parent
+            })
+            .eq(`${type}id`, itemId)
+        if (!error) {
+            await dispatch('getFolderContent', { parent: parent })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
     async getFolders({ commit, state }, { orgid }) {
         const { data, error, status } = await supabase.from('see_folders')
             .select()
