@@ -326,7 +326,7 @@ export default {
         },
         {
           id: 'step-5',
-          text: 'The organizations you are a part of will show up here. Click \'Open\' to expand and see your collections, and then again to see your notes.',
+          text: 'The organizations you are a part of will show up here. Click one to expand and see your file system. You can create folders and notes with the flexibility you need!',
           attachTo: {
             element: '#step-5',
             on: 'top'
@@ -340,7 +340,7 @@ export default {
         },
         {
           id: 'step-6',
-          text: 'The \'+\' button next to \'Your Organizations\' is where you can create new objects. Create an Organization (e.g. University name), a Collection (e.g. Class name), or a Note (e.g. Lecture title).',
+          text: 'The \'+\' button next to \'Your Organizations\' is where you can create new items. Create an Organization (e.g. University name), a Folder (e.g. Class name), or a Note (e.g. Lecture title).',
           attachTo: {
             element: '#step-5',
             on: 'top'
@@ -354,7 +354,7 @@ export default {
         },
         {
           id: 'step-2',
-          text: 'Here you can keep track of all your tasks, including homework assignments, projects, exams, etc.',
+          text: 'This area is crucial. Organize and track of all your tasks, including homework assignments, projects, exams, etc.',
           attachTo: {
             element: '#task-list-btn',
             on: 'bottom'
@@ -396,9 +396,23 @@ export default {
         },
         {
           id: 'menu-step-3',
-          text: 'You have the ability to share entire collections or just individual notes with people as long as they are also in the same organization. On this page, you can see all the collections and notes that have been shared with you. You can\'t edit the notes they have written, but you can add flashcards, files, and links to their notes.',
+          text: 'Here, you can create new flashcard decks to help you study. You can automatically add all the flashcards from your notes into a deck to share with others and study for exams. Additionally, you can create new decks with AI by entering a topic and watching the magic happen!',
           attachTo: {
             element: '#menu-step-3',
+            on: 'right'
+          },
+          buttons: [
+            {
+              text: 'Next',
+              action: this.tour.next
+            }
+          ]
+        },
+        {
+          id: 'menu-step-4',
+          text: 'You have the ability to share entire folders or individual notes with anyone in the same organization. On this page, you can see everything that has been shared with you. You can\'t edit the notes they have written, but you can add flashcards and other resources to their notes.',
+          attachTo: {
+            element: '#menu-step-4',
             on: 'right'
           },
           buttons: [
