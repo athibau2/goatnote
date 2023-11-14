@@ -17,7 +17,7 @@
             icon
             v-on="on"
             v-bind="attrs"
-            :disabled="level == 1"
+            :disabled="(level == 1) || (level == 2 && movingItem)"
           >
             <v-icon>mdi-arrow-up</v-icon>
           </v-btn>
@@ -54,6 +54,34 @@
             </v-btn>
           </template>
           <span>New Folder</span>
+        </v-tooltip>
+        
+        <v-tooltip bottom v-if="movingItem">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn class="add-btn"
+              @click="moveItem()"
+              icon
+              v-on="on"
+              v-bind="attrs"
+            >
+              <v-icon>mdi-content-save</v-icon>
+            </v-btn>
+          </template>
+          <span>Move Here</span>
+        </v-tooltip>
+        
+        <v-tooltip bottom v-if="movingItem">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn class="add-btn"
+              @click="cancelMove()"
+              icon
+              v-on="on"
+              v-bind="attrs"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </template>
+          <span>Cancel Move</span>
         </v-tooltip>
       </span>
     </span>
@@ -150,7 +178,8 @@
           <div class="folder-card"
             v-for="(item, i) in inOrgContent ? orgContent : folderContent"
             :key="i"
-            @click="item.type == 'folder' ? loadFolderContent(item) : item.type == 'note' ? openNote(item.noteid) : null"
+            :id="item.type == 'folder' ? `folder-${item.folderid}` : `note-${item.noteid}`"
+            @click="movingItem && item == itemBeingMoved ? null : item.type == 'folder' ? loadFolderContent(item) : item.type == 'note' ? openNote(item.noteid) : null"
           >
             <span class="basic-header" style="font-size: 18.5px;">
               <v-icon :style="{'margin-top': '-4px', 'color': item.type == 'folder' ? '#96d0e8' : '#85c59d'}">
@@ -185,56 +214,32 @@
                     </v-btn>
                   </template>
                   <v-list dense style="padding: 2px;">
-                    <sl-tooltip content="Edit">
+                    <sl-tooltip v-for="(button, i) in itemButtons"
+                      :key="i"
+                      :content="button.content"
+                    >
                       <v-btn icon small
                         style="margin-right: 5px;"
-                        @click.stop="editItemName(item)"
-                        :disabled="editingItem && item != itemBeingEdited"
+                        @click.stop="button.action(item)"
+                        :disabled="button.disabled && editingItem && item != itemBeingEdited"
                       >
-                        <v-icon size="20">mdi-pencil</v-icon>
-                      </v-btn>
-                    </sl-tooltip>
-                    <sl-tooltip content="Share">
-                      <v-btn icon small
-                        style="margin-right: 5px;"
-                        @click.stop="getItemSharedList(item)"
-                      >
-                        <v-icon size="20">mdi-share-variant</v-icon>
-                      </v-btn>
-                    </sl-tooltip>
-                    <sl-tooltip content="Delete">
-                      <v-btn icon small
-                      @click.stop="deleteItem(item)"
-                      >
-                        <v-icon size="20">mdi-delete</v-icon>
+                        <v-icon size="20">{{button.icon}}</v-icon>
                       </v-btn>
                     </sl-tooltip>
                   </v-list>
                 </v-menu>
               </span>
               <span v-if="windowWidth > 450">
-                <sl-tooltip content="Edit">
+                <sl-tooltip v-for="(button, i) in itemButtons"
+                  :key="i"
+                  :content="button.content"
+                >
                   <v-btn icon small
                     style="margin-right: 5px;"
-                    @click.stop="editItemName(item)"
-                    :disabled="editingItem && item != itemBeingEdited"
+                    @click.stop="button.action(item)"
+                    :disabled="button.disabled && editingItem && item != itemBeingEdited"
                   >
-                    <v-icon size="20">mdi-pencil</v-icon>
-                  </v-btn>
-                </sl-tooltip>
-                <sl-tooltip content="Share">
-                  <v-btn icon small
-                    style="margin-right: 5px;"
-                    @click.stop="getItemSharedList(item)"
-                  >
-                    <v-icon size="20">mdi-share-variant</v-icon>
-                  </v-btn>
-                </sl-tooltip>
-                <sl-tooltip content="Delete">
-                  <v-btn icon small
-                  @click.stop="deleteItem(item)"
-                  >
-                    <v-icon size="20">mdi-delete</v-icon>
+                    <v-icon size="20">{{button.icon}}</v-icon>
                   </v-btn>
                 </sl-tooltip>
               </span>
@@ -299,6 +304,8 @@ export default {
       newItemName: '',
       itemBeingEdited: null,
       editingItem: false,
+      itemBeingMoved: null,
+      movingItem: false,
       newName: null,
       showShareNote: false,
       isPrivate: false,
@@ -311,10 +318,33 @@ export default {
       creating: false,
       creationType: null,
       windowWidth: window.innerWidth,
+      itemButtons: [
+        {
+          content: 'Edit',
+          icon: 'mdi-pencil',
+          action: this.editItemName,
+          disabled: true
+        },
+        {
+          content: 'Move',
+          icon: 'mdi-cursor-move',
+          action: this.initMoveItem,
+          disabled: false
+        },
+        {
+          content: 'Share',
+          icon: 'mdi-share-variant',
+          action: this.getItemSharedList,
+          disabled: false
+        },
+        {
+          content: 'Delete',
+          icon: 'mdi-delete',
+          action: this.deleteItem,
+          disabled: false
+        },
+      ]
     }
-  },
-
-  watch: {
   },
 
   methods: {
@@ -330,6 +360,30 @@ export default {
       setTimeout(() => {
         this.isCodeCopied = false
       }, 2000);
+    },
+
+    async initMoveItem(item) {
+      this.movingItem = true
+      this.itemBeingMoved = item
+      let id = item.type == 'folder' ? `folder-${item.folderid}` : `note-${item.noteid}`
+      let element = document.getElementById(id)
+      element.style.opacity = 0.2
+    },
+
+    async moveItem() {
+      await this.$store.dispatch('users/moveItem', {
+        itemId: this.itemBeingMoved.type == 'folder' ? this.itemBeingMoved.folderid : this.itemBeingMoved.noteid,
+        type: this.itemBeingMoved.type,
+        parent: this.parent.folderid
+      })
+      this.cancelMove()
+    },
+
+    cancelMove() {
+      this.movingItem = false
+      let id = this.itemBeingMoved.type == 'folder' ? `folder-${this.itemBeingMoved.folderid}` : `note-${this.itemBeingMoved.noteid}`
+      let element = document.getElementById(id)
+      element.style.opacity = 1
     },
 
     editItemName(item) {
