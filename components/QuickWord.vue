@@ -45,7 +45,9 @@ export default {
                     await this.$store.dispatch('users/addFlashcard', {
                         newPrompt: this.word,
                         newAnswer: this.answer,
-                        noteid: this.currentNote.noteid
+                        noteid: this.currentNote.noteid,
+                        deckid: null,
+                        isNote: true
                     })
                 } else  {
                     await this.$store.dispatch('users/addPreparedWord', {

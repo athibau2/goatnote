@@ -189,7 +189,9 @@
           await this.$store.dispatch('users/addFlashcard', {
             newPrompt: this.newPrompt,
             newAnswer: this.newAnswer,
-            noteid: this.currentNote.noteid
+            noteid: this.currentNote.noteid,
+            deckid: null,
+            isNote: true
           })
           this.newPrompt = ""
           this.newAnswer = ""

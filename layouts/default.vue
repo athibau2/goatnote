@@ -178,12 +178,34 @@ export default {
       await this.$store.dispatch('users/loadTodoList')
     });
 
-    if (!localStorage.getItem('file-system-complete-announcement')) {
-      const announcement = document.getElementById('announcement-dialog')
-      setTimeout(() => {
-        announcement.show()
-        localStorage.setItem('file-system-complete-announcement', true)
-      }, 1000);
+    if (!localStorage.getItem('flashcard-decks-announcement') && this.userData?.onboarded) {
+      let tempTour = new Shepherd.Tour({
+        useModalOverlay: true,
+        defaultStepOptions: {
+          classes: 'shadow-md bg-purple-dark',
+        }
+      })
+      tempTour.addStep({
+        id: 'menu-step-1',
+        text: 'New Feature! Studying for exams is now easier than ever! Create new decks and add flashcards with AI by topic. Or, you can choose to add all flashcards to the deck from specific notes you\'ve taken.',
+        attachTo: {
+          element: '#menu-step-3',
+          on: 'right'
+        },
+        buttons: [
+          {
+            text: 'Done',
+            action: tempTour.complete
+          }
+        ]
+      })
+      tempTour.start()
+      localStorage.setItem('flashcard-decks-announcement', true)
+      // const announcement = document.getElementById('announcement-dialog')
+      // setTimeout(() => {
+      //   announcement.show()
+      //   localStorage.setItem('flashcard-decks-announcement', true)
+      // }, 1000);
     }
   },
 

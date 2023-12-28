@@ -1,94 +1,148 @@
 <template>
-  <v-col>
-    <v-tabs background-color="transparent" left v-model="tab">
-      <v-tabs-slider></v-tabs-slider>
-      <v-tab v-for="item in items" :key="item.tab">
-        {{item.tab}} {{ item.tab == 'personal' ? `(${allFlashcardDecks.length})` : `(${allPublicDecks.length})` }}
-      </v-tab>
-      <v-text-field v-if="tab == 1"
-        class="search-bar"
-        dense
-        solo
-        rounded
-        background-color="#f9f9f9"
-        v-model="searchText"
-        placeholder="Find by class name"
-        append-icon="mdi-magnify"
-        @input="searchPublicDecks()"
-      >
-      </v-text-field>
-    </v-tabs>
+  <v-app>
 
-    <v-row class="deck-row">
-      <Loading v-if="loading" />
+    <!-- Header tabs and buttons -->
+    <span>
+      <v-tabs background-color="transparent" left v-model="tab">
+        <v-tabs-slider></v-tabs-slider>
+        <v-tab v-for="item in items" :key="item.tab">
+          {{item.tab}} {{ item.tab == 'personal' ? `(${allFlashcardDecks.length})` : `(${allPublicDecks.length})` }}
+        </v-tab>
+        <sl-tooltip
+          placement="right"
+          content="New Deck"
+          style="align-items: center; display: flex;"
+        >
+          <v-btn icon
+            v-if="tab == 0"
+            @click="initNewDeck()"
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </sl-tooltip>
+        <v-text-field v-if="tab == 1"
+          class="search-bar"
+          dense
+          solo
+          rounded
+          background-color="#f9f9f9"
+          v-model="searchText"
+          placeholder="Find by class name"
+          append-icon="mdi-magnify"
+          @input="searchPublicDecks()"
+        >
+        </v-text-field>
+      </v-tabs>
+    </span>
+    
+    <Loading v-if="loading" />
 
+    <!-- List of decks -->
+    <div class="deck-row">
       <v-card class="deck-card"
         v-for="(deck, i) in tab == 0 ? allFlashcardDecks : searchingPublic ? filteredPublicArr : allPublicDecks"
         :key="i"
         @click="openFlashcardDeck(deck)"
-        :style="{ 'background-color': deck.color }"
       >
-        <span class="small-header">{{ deck.orgname }}</span><br v-if="tab == 1">
-        <span class="basic-header" :id="tab == 1 ? 'public-deck-coll' : null">
-          {{ deck.collectionname }}
-        </span><br>
-        <span class="small-header" v-if="tab == 1" style="font-size: 15px !important;">
-          {{ deck.firstname }} {{ deck.lastname }}
-        </span>
-        <sl-checkbox
-          v-if="tab == 0"
-          id="public-checkbox"
-          @click.stop="togglePublic(deck)"
-          :checked="deck.ispublic"
-        >
-          Publish Deck
-        </sl-checkbox>
-      </v-card>
-    </v-row>
-
-    <v-dialog v-model="showDialog" :width="windowWidth < 800 ? '90%' : windowWidth < 1000 ? '70%' : '50%'">
-      <v-card class="dialog-card" elevation="5">
-        <v-card-title class="basic-header justify-center">{{ deckName }}</v-card-title>
-        <Loading v-if="loadingDeck" />
-        <v-col v-if="flashcards.length !== 0">
-          <button class="flashcard"
-            :class="{ flipped: !onPrompt }"
-            :style="windowWidth < 600 ? {'width': '80%'} : null"
-            @click="flipCard()"
+        <span class="info-col">
+          <span class="small-header" v-if="tab == 1" style="font-size: 14px !important;">
+            {{ deck.orgname }}
+          </span>
+          <span class="basic-header"
+            id="deck-name"
+            style="margin: 5px 0;"
           >
-            <span class="flashcard-text">
-              {{onPrompt ? flashcards[index].cardprompt : flashcards[index].cardanswer}}
-            </span>
-          </button>
-          <v-card-subtitle class="text-center">
-            <v-btn icon @click="prev()">
-              <v-icon size="40">
-                mdi-chevron-left
-              </v-icon>
+            <sl-tooltip :content="tab == 0 ? 'Edit' : deck.deckname">
+              <button v-if="tab == 0 && (!editingDeck || deck.deckid != deckBeingEdited?.deckid)"
+                @click.stop="setEditDeckname(deck)"
+                :disabled="editingDeck"
+              >
+                {{ deck.deckname }}
+              </button>
+              <span v-if="tab == 1">{{ shorten(deck.deckname) }}</span>
+            </sl-tooltip>
+            <input
+              class="edit-deck-input"
+              v-if="editingDeck && deck.deckid == deckBeingEdited?.deckid"
+              :value="deckBeingEdited.deckname"
+              @input="nameChanged($event)"
+              @keyup.enter="editDeckname()"
+              @click.stop
+              autofocus
+            />
+          </span>
+          <span class="small-header" v-if="tab == 1" style="font-size: 14px !important;">
+            {{ deck.firstname }} {{ deck.lastname }}
+          </span>
+        </span>
+        <span>
+          <sl-checkbox
+            v-if="tab == 0"
+            id="public-checkbox"
+            @click.stop="togglePublic(deck)"
+            :checked="deck.ispublic"
+          >
+            Publish Deck
+          </sl-checkbox>
+          <sl-tooltip content="Delete Deck">
+            <v-btn small icon
+              v-if="tab == 0"
+              style="position: absolute; right: 10px; bottom: 10px;"
+              @click.stop="deleteDeck(deck)"
+            >
+              <v-icon>mdi-delete</v-icon>
             </v-btn>
-            {{index + 1}} / {{flashcards.length}}
-            <v-btn @click="next()" icon>
-              <v-icon size="40">
-                mdi-chevron-right
-              </v-icon>
-            </v-btn>
-          </v-card-subtitle>
-        </v-col>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn class="flat-btn" @click="close()" text>
-              Close
-          </v-btn>
-          <v-spacer />
-        </v-card-actions>
+          </sl-tooltip>
+        </span>
       </v-card>
-    </v-dialog>
+    </div>
 
-  </v-col>
+    <!-- Flashcards deck dialog -->
+    <DeckDialog :deck="openedDeck" :tab="tab" />
+
+    <!-- Creating a new deck -->
+    <sl-dialog class="dialog-overview"
+      label="New Flashcard Deck"
+    >
+      <v-text-field
+        class="selector"
+        dense
+        solo
+        rounded
+        background-color="#f1f1f1"
+        v-model="newDeckName"
+        @keyup.enter="!selectedOrg ? null : createNewDeck()"
+        placeholder="Name (e.g. History 100 Final)"
+        maxlength="50"
+      >
+      </v-text-field>
+      <v-select
+        v-model="selectedOrg"
+        style="z-index: 9999;"
+        :items="orgs"
+        item-text="orgname"
+        label="Select Organization"
+        density="compact"
+        return-object
+      ></v-select>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn class="good-btn"
+          @click="createNewDeck()"
+          :disabled="!selectedOrg || newDeckName == ''"
+          nuxt
+        >
+            Create
+        </v-btn>
+      </v-card-actions>
+    </sl-dialog>
+
+  </v-app>
 </template>
 
 <script>
 import Loading from '~/components/Loading.vue'
+import DeckDialog from '~/components/DeckDialog.vue'
 export default {
   name: 'Flashcards',
 
@@ -108,13 +162,15 @@ export default {
 
   async mounted () {
     this.loading = true
+    await this.$store.dispatch('users/orgs')
     await this.$store.dispatch('users/getAllFlashcardDecks')
     await this.$store.dispatch('users/getAllPublicDecks')
     this.loading = false
   },
     
   components: {
-    Loading
+    Loading,
+    DeckDialog
   },
     
   data () {
@@ -128,19 +184,92 @@ export default {
       showDialog: false,
       loadingDeck: false,
       onPrompt: true,
-      index: 0,
-      deckName: '',
+      newDeckName: '',
+      editedName: '',
+      editingDeck: false,
+      deckBeingEdited: null,
+      selectedOrg: null,
+      openedDeck: {},
       searchText: '',
       searchingPublic: false,
       filteredPublicArr: [],
       windowWidth: window.innerWidth
     }
   },
-    
+  
   methods: {
+    nameChanged (event) {
+      this.editedName = event.target.value
+    },
+
+    shorten(name) {
+      let max = this.windowWidth < 500 ? 16 : 25
+      if (name.length >= max) {
+        let short = name.substring(0, max) + '...'
+        return short
+      } else return name
+    },
+
+    async createNewDeck() {
+      if (this.newDeckName === '') {
+        await this.$store.commit('users/setAlert', {
+            color: 'error',
+            icon: '$error',
+            text: 'Name field may not be left empty.'
+        })
+      } else {
+        await this.$store.dispatch('users/createDeck', {
+          deckname: this.newDeckName,
+          orgid: this.selectedOrg.orgid
+        })
+        this.selectedOrg = null
+        this.newDeckName = ''
+        const dialog = document.querySelector('.dialog-overview');
+        dialog.hide()
+      }
+    },
+
+    initNewDeck() {
+      this.newDeckName = ''
+      const dialog = document.querySelector('.dialog-overview');
+      dialog.show()
+    },
+
+    setEditDeckname(deck) {
+      this.editingDeck = true
+      this.deckBeingEdited = deck
+      this.editedName = deck.deckname
+    },
+
+    async editDeckname() {
+      if (this.editedName == '') {
+        await this.$store.commit('users/setAlert', {
+          color: 'error',
+          icon: '$error',
+          text: 'Name field may not be left empty.'
+        })
+      } else {
+        await this.$store.dispatch('users/updateDeckname', {
+          deckid: this.deckBeingEdited.deckid,
+          newname: this.editedName
+        })
+        this.editingDeck = false
+        this.deckBeingEdited = null
+        this.editedName = ''
+      }
+    },
+
+    async deleteDeck(deck) {
+      if (confirm('Are you sure you want to delete this deck? Flashcards from your notes will not be deleted, but flashcards made with AI will.')) {
+        await this.$store.dispatch('users/deleteDeck', {
+          deck: deck
+        })
+      }
+    },
+
     async togglePublic(deck) {
       await this.$store.dispatch('users/toggleDeckPublic', {
-        collectionid: deck.collectionid,
+        deckid: deck.deckid,
         ispublic: !deck.ispublic
       })
     },
@@ -153,39 +282,21 @@ export default {
     },
     
     async openFlashcardDeck(deck) {
-      this.index = 0
-      this.showDialog = true
+      this.openedDeck = deck
+      await this.$store.commit('users/setShowDeckDialog', true)
       this.loadingDeck = true
-      this.deckName = deck.collectionname
       await this.$store.dispatch('users/openFlashcardDeck', {
-        collectionid: deck.collectionid
+        deckid: deck.deckid
       })
       this.loadingDeck = false
     },
-
-    flipCard() {
-      this.onPrompt = !this.onPrompt
-    },
-
-    next () {
-      this.onPrompt = true
-      if (this.index === this.flashcards.length - 1) this.index = 0
-      else this.index++
-    },
-
-    prev () {
-      this.onPrompt = true
-      if (this.index === 0) this.index = this.flashcards.length - 1
-      else this.index--
-    },
-
-    close() {
-      this.showDialog = false
-      this.index = 0
-    }
   },
 
   computed: {
+    orgs () {
+      return this.$store.state.users.orgs
+    },
+
     allFlashcardDecks () {
       return this.$store.state.users.allFlashcardDecks
     },
@@ -194,8 +305,8 @@ export default {
       return this.$store.state.users.allPublicDecks
     },
 
-    flashcards () {
-      return this.$store.state.users.flashcardDeck
+    showDeckDialog () {
+      return this.$store.state.users.showDeckDialog
     }
   }
 }
@@ -213,16 +324,22 @@ export default {
 }
 
 .deck-row {
-  margin: 2px 0;
+  margin: 10px 0;
   align-items: center;
   justify-content: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .deck-card {
   text-align: center;
   padding: 20px 15px;
   margin: 8px;
-  z-index: 1;
+  background-image: linear-gradient(to top right, #f9f9f9, #c1c1c1);
+  border: solid 1px;
+  border-color: #85c59d !important;
+  box-shadow: 0px 0px 6px #85c59d !important;
 }
 
 .deck-card:hover {
@@ -242,16 +359,28 @@ export default {
   }
 }
 
-@media (min-width: 801px) {
+@media (width > 801px) {
   .deck-card {
     width: 31%;
   }
 }
 
-#public-deck-coll {
-  border: solid #2F2B28 1px;
+.info-col {
+  display: flex;
+  flex-direction: column;
+}
+
+#deck-name {
   border-radius: 4px;
   padding: 4px 15px;
+  margin: 5px 0 !important;
+}
+
+.edit-deck-input {
+  border: solid #2F2B28 1px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  max-width: 100%;
 }
 
 .basic-header {

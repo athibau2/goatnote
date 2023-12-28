@@ -12,7 +12,19 @@ export async function openaiGenerateStudyTools({ input, notename }) {
         model: "gpt-3.5-turbo",
         messages: [{role: "user", content: `You are a student study aid. Here is the context for your task: ${notename}. Your task is to create brief flashcards that are a mix of definitions and quiz questions, for each entry in this list: ${input}. Return the flashcards in the following structure: [{"cardprompt": "flashcard prompt", "cardanswer": "flashcard answer"},...]`}],
     });
-    let resText = completion.data.choices[0].message.content
+    return cleanResponse(completion.data.choices[0].message.content)
+}
+
+export async function openaiTopicalFlashcards({ topic, numCards }) {
+    const openai = new OpenAIApi(configuration);
+    const completion = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: [{role: "user", content: `Create ${numCards} flashcards with various content (definitions, quiz questions, etc.) for the following topic: '${topic}'. Be concise. Return the flashcards in the following structure: [{"cardprompt": "flashcard prompt", "cardanswer": "flashcard answer"},...]`}],
+    });
+    return cleanResponse(completion.data.choices[0].message.content)
+}
+
+function cleanResponse(resText) {
     if (resText[resText.length - 1] != ']') {
         while (resText[resText.length - 1] != '}') {
             resText = resText.slice(0, -1)

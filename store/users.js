@@ -9,6 +9,7 @@ export const state = () => ({
     supabaseSession: null,
     alert: null,
     orgs: [],
+    userNotes: [],
     allColls: [],
     collections: [],
     allFlashcardDecks: [],
@@ -114,6 +115,7 @@ export const state = () => ({
     showFileView: false,
     showQuickWord: false,
     showMyWhiteboards: false,
+    showDeckDialog: false,
     preparedWords: [],
     openedFile: null,
     noteFiles: [],
@@ -182,6 +184,10 @@ export const mutations = {
         state.collections = data
     },
 
+    setUserNotes(state, data) {
+        state.userNotes = data
+    },
+
     setOrgContentCollections(state, data) {
         state.orgContentCollections = data
     },
@@ -240,6 +246,10 @@ export const mutations = {
 
     setShowTaskList(state, data) {
         state.showTaskList = data
+    },
+
+    setShowDeckDialog(state, data) {
+        state.showDeckDialog = data
     },
 
     setTodoList(state, data) {
@@ -1525,6 +1535,7 @@ export const actions = {
     },
 
     async getAllFlashcardDecks({ commit, state }) {
+        // const { data, error, status } = await supabase.from('see_all_flashcard_decks')
         const { data, error, status } = await supabase.from('see_all_flashcard_decks')
             .select()
             .eq('userid', state.userData.userid)
@@ -1537,8 +1548,10 @@ export const actions = {
     },
     
     async getAllPublicDecks({ commit }) {
+        // const { data, error, status } = await supabase.from('decks')
         const { data, error, status } = await supabase.from('see_all_public_decks')
             .select()
+            .eq('ispublic', true)
         if (!error) {
             await commit('setAllPublicDecks', data)
         } else if (error) {
@@ -1547,12 +1560,13 @@ export const actions = {
         }
     },
 
-    async toggleDeckPublic({ commit, dispatch }, { collectionid, ispublic }) {
-        const { data, error, status } = await supabase.from('collection')
-            .update({
-                ispublic: ispublic
+    async createDeck({ dispatch, commit, state }, { deckname, orgid }) {
+        const { data, error, status } = await supabase.from('decks')
+            .insert({
+                deckname: deckname,
+                orgid: orgid,
+                userid: state.userData.userid
             })
-            .eq('collectionid', collectionid)
         if (!error) {
             await dispatch('getAllFlashcardDecks')
         } else if (error) {
@@ -1565,10 +1579,64 @@ export const actions = {
         }
     },
 
-    async openFlashcardDeck({ commit }, { collectionid }) {
+    async updateDeckname({ dispatch }, { deckid, newname }) {
+        const { data, error, status } = await supabase.from('decks')
+            .update({
+                deckname: newname
+            })
+            .eq('deckid', deckid)
+        if (!error) {
+            await dispatch('getAllFlashcardDecks')
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async deleteDeck({ dispatch }, { deck }) {
+        const { data, error, status } = await supabase.from('decks')
+            .delete()
+            .eq('deckid', deck.deckid)
+        if (!error) {
+            await dispatch('getAllFlashcardDecks')
+            deck.ispublic ? await dispatch('getAllPublicDecks') : null
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async toggleDeckPublic({ commit, dispatch }, { deckid, ispublic }) {
+        const { data, error, status } = await supabase.from('decks')
+            .update({
+                ispublic: ispublic
+            })
+            .eq('deckid', deckid)
+        if (!error) {
+            await dispatch('getAllFlashcardDecks')
+            await dispatch('getAllPublicDecks')
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
+    async openFlashcardDeck({ commit }, { deckid }) {
         const { data, error, status } = await supabase.from('see_flashcard_deck')
             .select()
-            .eq('collectionid', collectionid)
+            .eq('deckid', deckid)
         if (!error) {
             await commit('setFlashcardDeck', data)
         } else if (error) {
@@ -2024,6 +2092,57 @@ export const actions = {
         }
     },
 
+    async getUserNotes({ commit, state }, { orgid, deckid }) {
+        const { data, error, status } = await supabase.rpc('get_notes_for_deck', {
+            user_id: state.userData.userid,
+            org_id: orgid,
+            deck_id: deckid
+        })
+        if (!error) {
+            await commit('setUserNotes', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setUserNotes', [])
+        }
+    },
+
+    async toggleNoteAdded({ dispatch, commit }, { noteid, deckid, isInDeck, orgid }) {
+        if (isInDeck) {
+            const { data, status, error} = await supabase.from('note_in_deck')
+                .delete()
+                .eq('noteid', noteid)
+                .eq('deckid', deckid)
+            if (!error) {
+                await dispatch('getUserNotes', { orgid: orgid, deckid: deckid })
+                await dispatch('openFlashcardDeck', { deckid: deckid })
+            } else if (error) {
+                console.error(error)
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
+            }
+        } else {
+            const { data, status, error} = await supabase.from('note_in_deck')
+                .insert({
+                    noteid: noteid,
+                    deckid: deckid
+                })
+            if (!error) {
+                await dispatch('getUserNotes', { orgid: orgid, deckid: deckid })
+                await dispatch('openFlashcardDeck', { deckid: deckid })
+            } else if (error) {
+                console.error(error)
+                await commit('setAlert', {
+                    color: 'error',
+                    icon: '$error',
+                    text: 'Something went wrong, please try again.'
+                })
+            }
+        }
+    },
+
     async getFlashcards({ commit, state }, { noteid }) {
         const { data, error, status } = await supabase.from('see_flashcards')
             .select()
@@ -2037,15 +2156,17 @@ export const actions = {
         }
     },
 
-    async addFlashcard({ dispatch, commit }, { newPrompt, newAnswer, noteid }) {
+    async addFlashcard({ dispatch, commit }, { newPrompt, newAnswer, noteid, deckid, isNote }) {
         const { data, error, status } = await supabase.from('flashcards')
             .insert({
                 cardprompt: newPrompt,
                 cardanswer: newAnswer,
-                noteid: noteid
+                noteid: noteid,
+                deckid: deckid
             })
         if (!error) {
-            await dispatch('getFlashcards', { noteid: noteid })
+            isNote ? await dispatch('getFlashcards', { noteid: noteid })
+                : await dispatch('openFlashcardDeck', { deckid: deckid })
         } else if (error) {
             console.error(error)
             await commit('setAlert', {

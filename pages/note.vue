@@ -432,7 +432,7 @@ import ShareNote from '~/components/ShareNote.vue'
 import QuickWord from '~/components/QuickWord.vue'
 import Whiteboards from '~/components/Whiteboards.vue'
 import Shepherd from 'shepherd.js'
-import { openaiGenerateStudyTools, summarizeText } from '~/store/openai'
+import { openaiGenerateStudyTools } from '~/store/openai'
 import { debounce } from 'lodash'
 import Loading from '~/components/Loading.vue'
 import suneditor from 'suneditor'
@@ -942,7 +942,9 @@ export default {
               await this.$store.dispatch('users/addFlashcard', {
                 newPrompt: studyTools[i].cardprompt,
                 newAnswer: studyTools[i].cardanswer,
-                noteid: this.currentNote.noteid
+                noteid: this.currentNote.noteid,
+                deckid: null,
+                isNote: true
               })
             }
 
@@ -966,18 +968,18 @@ export default {
         }
       },
 
-      async summarize() {
-        const success = await summarizeText({
-          input: this.noteText
-        })
-        if (!success) {
-          await this.$store.commit('users/setAlert', {
-            color: 'error',
-            icon: '$error',
-            text: 'Maximum text length for summary has been exceeded. Please highlight a portion of your notes to summarize.'
-          })
-        }
-      },
+      // async summarize() {
+      //   const success = await summarizeText({
+      //     input: this.noteText
+      //   })
+      //   if (!success) {
+      //     await this.$store.commit('users/setAlert', {
+      //       color: 'error',
+      //       icon: '$error',
+      //       text: 'Maximum text length for summary has been exceeded. Please highlight a portion of your notes to summarize.'
+      //     })
+      //   }
+      // },
       
       addSteps() {
         this.noteTour.addSteps([

@@ -388,7 +388,6 @@ export default {
         },
 
         async createTodo() {
-            console.log(this.taskText, this.deadline)
             if (this.taskText == '' || this.deadline == null) {
                 await this.$store.commit('users/setAlert', {
                     color: 'error',

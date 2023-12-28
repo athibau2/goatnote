@@ -86,10 +86,12 @@ CREATE TABLE note
   parent INT default null,
   externalsharing BOOLEAN NOT NULL DEFAULT false,
   userid INT,
+  deckid INT DEFAULT NULL,
   PRIMARY KEY (noteid),
   FOREIGN KEY (collectionid) REFERENCES collection(collectionid) ON DELETE CASCADE,
   FOREIGN KEY (parent) REFERENCES folder(folderid) ON DELETE CASCADE,
-  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE
+  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE,
+  FOREIGN KEY (deckid) REFERENCES decks(deckid)
 );
 
 CREATE TABLE study_plan
@@ -137,9 +139,32 @@ CREATE TABLE flashcards
   cardid SERIAL NOT NULL,
   cardprompt TEXT NOT NULL,
   cardanswer TEXT NOT NULL,
-  noteid SERIAL NOT NULL,
+  noteid SERIAL,
+  deckid INT DEFAULT NULL,
   PRIMARY KEY (cardid),
-  FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE
+  FOREIGN KEY (noteid) REFERENCES note(noteid) ON DELETE CASCADE,
+  FOREIGN KEY (deckid) REFERENCES decks(deckid) ON DELETE CASCADE
+);
+
+CREATE TABLE decks
+(
+	deckid SERIAL not null,
+	deckname TEXT not null,
+	userid SERIAL not null,
+  orgid SERIAL not null,
+  ispublic BOOLEAN DEFAULT false,
+	PRIMARY KEY (deckid),
+  FOREIGN KEY (userid) REFERENCES "user"(userid) ON DELETE CASCADE,
+  FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE
+);
+
+CREATE TABLE note_in_deck
+(
+  noteid INT NOT NULL,
+  deckid INT NOT NULL,
+  PRIMARY KEY (noteid, deckid),
+  FOREIGN KEY (noteid) references note (noteid),
+  FOREIGN KEY (deckid) references decks (deckid) ON DELETE CASCADE
 );
 
 CREATE TABLE shared_collection
@@ -307,46 +332,52 @@ create or replace view see_flashcards as
 	--this will be filtered later
 
 CREATE OR REPLACE VIEW see_all_flashcard_decks AS
-  SELECT c.collectionid, c.collectionname, c.color, c.userid, c.ispublic
-  FROM collection c
-  WHERE EXISTS (
-    SELECT 1
-    FROM note n
-    JOIN flashcards f ON n.noteid = f.noteid
-    WHERE n.collectionid = c.collectionid
-  )
-  order by c.collectionname;
+  select * from decks
+  order by deckid;
   --this will be filtered later
 
 CREATE OR REPLACE VIEW see_all_public_decks AS
-  SELECT c.collectionid, c.collectionname, c.color, c.ispublic, u.firstname, u.lastname, o.orgname
-  FROM collection c
-  INNER JOIN "user" u ON c.userid = u.userid
-  INNER JOIN organization o ON o.orgid = c.orgid
-  WHERE c.ispublic = true
-  AND EXISTS (
-    SELECT 1
-    FROM note n
-    JOIN flashcards f ON n.noteid = f.noteid
-    WHERE n.collectionid = c.collectionid
-  )
-  order by c.collectionname;
+  SELECT d.deckname, d.deckid, d.userid, d.orgid, d.ispublic, o.orgname, u.firstname, u.lastname
+  FROM decks d
+  INNER JOIN "user" u ON d.userid = u.userid
+  INNER JOIN organization o ON o.orgid = d.orgid
+  WHERE d.ispublic = true
+  order by d.deckname;
 
 create or replace view see_flashcard_deck as
-  select f.cardid, f.cardprompt, f.cardanswer, f.noteid, c.collectionid
-  from flashcards f inner join note n on f.noteid = n.noteid
-  inner join collection c on n.collectionid = c.collectionid;
-  --this will be filtered later
+	SELECT
+			f.cardid, 
+			f.cardprompt, 
+			f.cardanswer, 
+			f.noteid, 
+			d.deckid
+	FROM decks d
+	LEFT JOIN note_in_deck nid ON d.deckid = nid.deckid
+	LEFT JOIN note n ON nid.noteid = n.noteid
+	LEFT JOIN flashcards f ON n.noteid = f.noteid OR (f.noteid IS NULL AND d.deckid = nid.deckid)
+	WHERE n.noteid IS NOT NULL
+	UNION
+	SELECT
+			f.cardid, 
+			f.cardprompt, 
+			f.cardanswer, 
+			f.noteid, 
+			d.deckid
+	FROM decks d
+	LEFT JOIN note_in_deck nid ON d.deckid = nid.deckid
+	LEFT JOIN flashcards f ON d.deckid = f.deckid
+	WHERE nid.noteid IS NULL;
+	--this will be filtered later
 
 create or replace view see_prepared_words as
   select * from prepared_words
   order by wordid asc;
-  -- this will be filtered later
+  --this will be filtered later
 
 create or replace view see_whiteboards as
   select * from whiteboards
   order by boardid asc;
-  -- this will be filtered later
+  --this will be filtered later
 
 create or replace view see_links as
  	select * from links
@@ -520,6 +551,47 @@ CREATE TRIGGER set_insert_timestamp
 BEFORE INSERT ON note
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_last_modified_timestamp();
+
+
+CREATE or REPLACE FUNCTION public.get_notes_for_deck(user_id INT, org_id INT, deck_id INT)
+  RETURNS TABLE (
+      noteid INT,
+      notename text,
+      userid INT,
+      foldername text,
+      orgid INT,
+      deckid INT,
+      is_in_deck BOOLEAN
+  )
+  AS $$
+  BEGIN
+    RETURN QUERY
+    SELECT
+        n.noteid,
+        n.notename,
+        n.userid,
+        f.foldername,
+        f.orgid,
+        nid.deckid,
+        CASE WHEN nid.deckid IS NOT NULL AND nid.deckid = deck_id THEN true ELSE false END AS is_in_deck
+    FROM
+        note n
+    LEFT JOIN
+        note_in_deck nid ON n.noteid = nid.noteid
+    INNER JOIN
+        folder f ON n.parent = f.folderid
+    WHERE
+        (nid.deckid IS NOT NULL OR NOT EXISTS (
+                SELECT 1
+                FROM note_in_deck nd
+                WHERE nd.noteid = n.noteid
+        ))
+        AND n.userid = user_id
+        AND f.orgid = org_id
+    ORDER BY
+        is_in_deck DESC, f.foldername, n.notename;
+  END;
+  $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
