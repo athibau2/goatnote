@@ -551,6 +551,7 @@ export default {
   /* height: 50vh; */
   /* overflow-y: scroll; */
   background-color: #f9f9f9;
+  margin-bottom: 80px;
 }
 
 .task-item {
