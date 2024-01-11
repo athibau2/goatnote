@@ -231,13 +231,6 @@
                 <Loading v-if="isGeneratingTools" /> {{ !isGeneratingTools ? 'Generate Flashcards' : `&ensp;${generatingStatus}` }}
               </v-btn>
             </div>
-            <div>
-              <v-btn class="tool-btn" id="summarize-btn"
-                @click="summarize()"
-              >
-                Summarize Notes
-              </v-btn>
-            </div>
             <div id="note-step-3">
               <v-btn class="tool-btn" id="tools-btn" @click="showStudyTools()">Study Tools</v-btn>
             </div>
