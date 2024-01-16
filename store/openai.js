@@ -24,6 +24,16 @@ export async function openaiTopicalFlashcards({ topic, numCards }) {
     return cleanResponse(completion.data.choices[0].message.content)
 }
 
+export async function openaiTopicalQuiz({ topic, numQuestions }) {
+    const openai = new OpenAIApi(configuration);
+    const completion = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: [{role: "user", content: `Create ${numQuestions} multiple choice quiz questions with four choices each for the following topic: '${topic}'. Be concise. Return the quiz in the following structure: [{"question": "quiz question", "answers": [{"answer": "answer 1", "correct": true},...],...]`}],
+    });
+    console.log(completion)
+    return cleanResponse(completion.data.choices[0].message.content)
+}
+
 function cleanResponse(resText) {
     if (resText[resText.length - 1] != ']') {
         while (resText[resText.length - 1] != '}') {

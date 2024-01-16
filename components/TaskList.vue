@@ -109,9 +109,12 @@
 
         <FullCalendar v-if="viewSelection == 1" :options="calendarOptions" />
 
-        <sl-dialog id="task-dialog" v-if="showEventPopup" :label="popupEvent.todotext">
+        <sl-dialog id="task-dialog" v-if="showEventPopup" :label="popupEvent.topic">
             <div>
                 <div style="text-align: center;">
+                  <div class="small-header" style="margin-bottom: 10px;">
+                    {{ popupEvent.todotext }}
+                  </div>
                   <label for="deadline">Deadline</label>
                   <input v-if="editDeadline && popupEvent.todoid == taskBeingEdited.todoid"
                     type="date"
