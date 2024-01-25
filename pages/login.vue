@@ -128,9 +128,21 @@
         <div class="faq-wrapper text-center"
           :style="{'width': windowWidth < 700 ? '100%' : windowWidth < 1265 ? '75%' : null}"
         >
-          <sl-details class="faq-item" :summary="faq.title" v-for="(faq, i) in faqs" :key="i">
-            {{faq.text}}
-          </sl-details>
+          <v-expansion-panels class="expand-group main-white text-font"
+            data-aos="fade-in"
+            data-aos-duration="2500"
+          >
+            <v-expansion-panel
+              class="faq-item"
+              v-for="(faq, i) in faqs"
+              :key="i"
+            >
+              <v-expansion-panel-header>
+                <span>{{ faq.title }}</span>
+              </v-expansion-panel-header>
+              <v-expansion-panel-content>{{ faq.text }}</v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </div>
       </v-col>
     </v-row>
@@ -217,15 +229,19 @@ export default {
           img: 'study-mode.gif',
           description: 'When it\'s time to study, the study mode button changes the layout of your Study Tools so you can study more effectively without leaving the page!',
         },
+        {
+          img: 'flashcard-deck-ai.gif',
+          description: 'You can also create entire flashcard decks using AI. Just enter a topic, select the number of cards you want, and let it do its magic!'
+        },
       ],
       faqs: [
         {
           title: 'How is this better than other note-taking options?',
-          text: 'We understand that there are many ways to take notes and study. However, we provide multiple tools that make note-taking and studying much easier, faster, and more helpful than anything else!'
+          text: 'We understand that there are many ways to take notes and study. However, we provide more tools than any other service, which makes note-taking and studying easier, faster, and more helpful than anything else!'
         },
         {
           title: 'How does the AI create my flashcards?',
-          text: 'As you take notes, you can store any number of words or phrases in a queue. When you\'re ready, you can send that list to the AI, which will define all the words and create helpful study questions to test your knowledge and memory!'
+          text: 'In your notes, you can store any number of words or phrases in a queue. When you\'re ready, you can send that list to the AI, powered by GPT, which will define all the words and create helpful study questions to test your knowledge and memory!'
         },
         {
           title: 'What if I want to study my friends notes?',
@@ -234,6 +250,10 @@ export default {
         {
           title: 'How much does it cost?',
           text: 'GOAT Notes is free to join! There are many features you can use at no cost. However, some features, such as using AI to create your flashcards, are saved for the Premium plan, which is only $2.99 / month.'
+        },
+        {
+          title: 'Are you adding more features?',
+          text: 'Yes! We are always seeking to improve this site based on the needs of the users. Soon, you will also be able to use AI to create quizzes that you can use to help you study.'
         },
       ],
       windowWidth: window.innerWidth,
@@ -389,7 +409,7 @@ h3, h4 {
 }
 
 .faq-wrapper {
-  margin: auto;
+  margin: 0 auto 20px auto;
   justify-content: center;
   width: 50%;
   padding: 5px;

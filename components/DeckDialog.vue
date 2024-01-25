@@ -244,47 +244,51 @@ export default {
         },
 
         async createAiFlashcards() {
-            this.loadingText = 'Waiting for AI'
-            this.loading = true
-            const cards = await openaiTopicalFlashcards({
-                topic: this.aiTopic,
-                numCards: this.numCards == 0 ? 10 : this.numCards == 1 ? 15 : 20
-            })
-
-            if (cards.length == 0) {
-                this.loading = false
-                this.loadingText = ''
-                await this.$store.commit('users/setAlert', {
-                    color: 'error',
-                    icon: '$error',
-                    text: 'Something went wrong and no flashcards were generated. Please try again.'
-                })
+            if (this.userData.subscriptionstatus == 'inactive') {
+                alert("You need an active subscription to use AI flashcard generation. Go to your account settings to upgrade your plan.")
             } else {
-                this.loadingText = 'Waiting for Database'
-                await this.$store.dispatch('users/updateAiCalls', {
-                    date: this.getDate,
-                    num: this.calledAiToday ? this.userData.numaicalls + 1 : 1
+                this.loadingText = 'Waiting for AI'
+                this.loading = true
+                const cards = await openaiTopicalFlashcards({
+                    topic: this.aiTopic,
+                    numCards: this.numCards == 0 ? 10 : this.numCards == 1 ? 15 : 20
                 })
-
-                for (let i = 0; i < cards.length; ++i) {
-                    await this.$store.dispatch('users/addFlashcard', {
-                        newPrompt: cards[i].cardprompt,
-                        newAnswer: cards[i].cardanswer,
-                        noteid: null,
-                        deckid: this.deck.deckid,
-                        isNote: false
+    
+                if (cards.length == 0) {
+                    this.loading = false
+                    this.loadingText = ''
+                    await this.$store.commit('users/setAlert', {
+                        color: 'error',
+                        icon: '$error',
+                        text: 'Something went wrong and no flashcards were generated. Please try again.'
+                    })
+                } else {
+                    this.loadingText = 'Waiting for Database'
+                    await this.$store.dispatch('users/updateAiCalls', {
+                        date: this.getDate,
+                        num: this.calledAiToday ? this.userData.numaicalls + 1 : 1
+                    })
+    
+                    for (let i = 0; i < cards.length; ++i) {
+                        await this.$store.dispatch('users/addFlashcard', {
+                            newPrompt: cards[i].cardprompt,
+                            newAnswer: cards[i].cardanswer,
+                            noteid: null,
+                            deckid: this.deck.deckid,
+                            isNote: false
+                        })
+                    }
+    
+                    this.loading = false
+                    this.loadingText = ''
+                    this.aiTopic = ''
+                    this.numCards = null
+                    await this.$store.commit('users/setAlert', {
+                        color: 'success',
+                        icon: '$success',
+                        text: 'Success! Your flashcards have been created. You can view them back on the first slide.'
                     })
                 }
-
-                this.loading = false
-                this.loadingText = ''
-                this.aiTopic = ''
-                this.numCards = null
-                await this.$store.commit('users/setAlert', {
-                    color: 'success',
-                    icon: '$success',
-                    text: 'Success! Your flashcards have been created. You can view them back on the first slide.'
-                })
             }
         },
 
