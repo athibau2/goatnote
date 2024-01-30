@@ -215,14 +215,14 @@ export default {
     mixins: [aosMixin],
 
     head() {
-    return {
-      title: 'Demo - GOAT Notes',
-      meta: [
-        { hid: 'demo-description', name: 'description', content: 'GOAT Notes demo page; test out the AI features like flashcards and quiz questions' },
-        { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, flashcards, quiz, multiple choice, test, demo' }
-      ]
-    }
-  },
+        return {
+        title: 'Demo - GOAT Notes',
+        meta: [
+            { hid: 'demo-description', name: 'description', content: 'GOAT Notes demo page; test out the AI features like flashcards and quiz questions' },
+            { hid: 'keywords', name: 'keywords', content: 'goat, notes, study, ai, artificial intelligence, flashcards, quiz, multiple choice, test, demo' }
+        ]
+        }
+    },
 
     async created () {
         window.addEventListener('resize', () => this.windowWidth = window.innerWidth)
@@ -338,8 +338,6 @@ export default {
                 topic: this.quizTopic,
                 numQuestions: 5
             })
-
-            console.log(questions)
 
             if (questions.length == 0) {
                 this.loading = false

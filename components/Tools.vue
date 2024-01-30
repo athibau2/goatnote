@@ -35,9 +35,10 @@
             <v-tabs-items v-model="tab">
                 <v-tab-item class="shared-list" v-for="item in items" :key="item.tab">
                     <Flashcards v-if="tab === 0" />
-                    <Files v-if="tab === 1" />
-                    <Links v-if="tab === 2" />
-                    <StudyPlans v-if="tab === 3" />
+                    <Quiz v-if="tab === 1" />
+                    <Files v-if="tab === 2" />
+                    <Links v-if="tab === 3" />
+                    <StudyPlans v-if="tab === 4" />
                 </v-tab-item>
             </v-tabs-items>
         </v-card>
@@ -46,6 +47,7 @@
 
 <script>
 import Flashcards from '~/components/Flashcards.vue'
+import Quiz from '~/components/Quiz.vue'
 import Links from '~/components/Links.vue'
 import Files from '~/components/Files.vue'
 import StudyPlans from '~/components/StudyPlans.vue'
@@ -61,6 +63,7 @@ export default {
 
     components: {
         Flashcards,
+        Quiz,
         Links,
         Files,
         StudyPlans
@@ -72,6 +75,7 @@ export default {
             tab: null,
             items: [
                 { tab: 'flashcards' },
+                { tab: 'quiz' },
                 { tab: 'files' },
                 { tab: 'links' },
                 { tab: 'study plans' },

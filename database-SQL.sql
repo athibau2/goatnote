@@ -158,6 +158,30 @@ CREATE TABLE decks
   FOREIGN KEY (orgid) REFERENCES organization(orgid) ON DELETE CASCADE
 );
 
+CREATE TABLE quiz
+(
+  quizid SERIAL NOT NULL,
+  noteid INT,
+  quizname TEXT NOT NULL,
+  userid INT NOT NULL,
+  ispublic BOOLEAN NOT NULL DEFAULT false,
+  PRIMARY KEY (quizid),
+  FOREIGN KEY (noteid) references note (noteid),
+  FOREIGN KEY (userid) references "user" (userid)
+);
+
+CREATE TABLE question
+(
+  questionid SERIAL NOT NULL,
+  quizid INT,
+  noteid INT,
+  questiontext TEXT NOT NULL,
+  answers TEXT NOT NULL,
+  PRIMARY KEY (questionid),
+  FOREIGN KEY (quizid) references quiz (quizid),
+  FOREIGN KEY (noteid) references note (noteid)
+);
+
 CREATE TABLE note_in_deck
 (
   noteid INT NOT NULL,
@@ -325,6 +349,10 @@ create or replace view see_note_with_data as
   select n.noteid, n.notename, n.notedate, n.typednotes, u.userid                        
   from note n inner join "user" u on n.userid = u.userid;
   --this will be filtered later
+
+CREATE OR REPLACE VIEW see_note_quiz_questions AS
+	select * from question;
+	--this will be filtered later
 
 create or replace view see_flashcards as
  	select * from flashcards

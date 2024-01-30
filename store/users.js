@@ -12,6 +12,8 @@ export const state = () => ({
     userNotes: [],
     allColls: [],
     collections: [],
+    quizzes: [],
+    questions: [],
     allFlashcardDecks: [],
     allPublicDecks: [],
     flashcardDeck: [],
@@ -210,6 +212,14 @@ export const mutations = {
 
     setFolderContentNotes(state, data) {
         state.folderContentNotes = data
+    },
+
+    setQuizzes(state, data) {
+        state.quizzes = data
+    },
+
+    setQuestions(state, data) {
+        state.questions = data
     },
 
     setAllFlashcardDecks(state, data) {
@@ -1534,8 +1544,60 @@ export const actions = {
         }
     },
 
+    async getQuizzes({ commit, state }) {
+
+    },
+
+    async getQuestions({ commit }, { noteid = null }) {
+        const { data, error, status } = await supabase.from('see_note_quiz_questions')
+            .select()
+            .eq('noteid', noteid)
+        if (!error) {
+            data.forEach(question => {
+                question.answers = JSON.parse(question.answers)
+                question.answers.forEach(answer => {
+                    answer.answer = answer.answer.toString()
+                });
+            });
+            await commit('setQuestions', data)
+        } else if (error) {
+            console.error(error)
+            await commit('setQuestions', [])
+        }
+    },
+
+    async addQuestion({}, { quizid = null, noteid = null, questiontext, answers }) {
+        const { data, error, status } = await supabase.from('question')
+            .insert({
+                quizid: quizid,
+                noteid: noteid,
+                questiontext: questiontext,
+                answers: JSON.stringify(answers)
+            })
+        if (!error) {
+            // succeeded
+        } else if (error) {
+            console.error(error)
+        }
+    },
+
+    async deleteQuestion({ dispatch, commit }, { questionid, noteid }) {
+        const { data, error, status } = await supabase.from('question')
+            .delete()
+            .eq('questionid', questionid)
+        if (!error) {
+            await dispatch('getQuestions', { noteid: noteid })
+        } else if (error) {
+            console.error(error)
+            await commit('setAlert', {
+                color: 'error',
+                icon: '$error',
+                text: 'Something went wrong, please try again.'
+            })
+        }
+    },
+
     async getAllFlashcardDecks({ commit, state }) {
-        // const { data, error, status } = await supabase.from('see_all_flashcard_decks')
         const { data, error, status } = await supabase.from('see_all_flashcard_decks')
             .select()
             .eq('userid', state.userData.userid)

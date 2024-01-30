@@ -221,7 +221,7 @@
           <!-- Buttons area large screen -->
           <v-col class="text-center" cols="3">
             <div v-if="userData.subscriptionstatus == 'active'">
-              <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 6</span>
+              <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 8</span>
             </div>
             <div>
               <v-btn class="tool-btn" id="ai-btn"
@@ -290,7 +290,7 @@
         <!-- Buttons area small screen -->
         <v-col cols="12" v-else-if="windowWidth < 1200">
           <div v-if="userData.subscriptionstatus == 'active'">
-            <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 6</span>
+            <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 8</span>
           </div>
           <v-btn class="tool-btn" id="ai-btn"
             :style="windowWidth < 936 ? 'font-size: 12px' : null"
@@ -881,7 +881,7 @@ export default {
             icon: '$error',
             text: 'This feature is only available for the Premium plan. Please upgrade your account to access this feature.'
           })
-        } else if (this.calledAiToday && this.userData.numaicalls == 6) {
+        } else if (this.calledAiToday && this.userData.numaicalls == 8) {
           await this.$store.commit('users/setAlert', {
             color: 'error',
             icon: '$error',
@@ -1181,7 +1181,7 @@ export default {
     },
 
     remainingAiCalls () {
-      return this.calledAiToday ? 6 - this.userData.numaicalls : 6
+      return this.calledAiToday ? 8 - this.userData.numaicalls : 8
     },
 
     saving () {
