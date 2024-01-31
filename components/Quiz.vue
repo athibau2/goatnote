@@ -295,6 +295,14 @@ export default {
     justify-content: center;
 }
 
+.quiz-text {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  margin: auto;
+}
+
 .answer-group {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 16px;
