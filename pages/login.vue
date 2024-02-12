@@ -31,16 +31,15 @@
           Get Started
         </v-btn>
 
-        <h2 class="basic-header text-center"
-          v-if="windowWidth > 900"
+        <span class="basic-header text-center"
+          style="display: flex; justify-content: center;"
           data-aos="zoom-in"
           data-aos-duration="2000"
         >
           Why Choose Us?
-        </h2>
-        <h3 v-else>Why Choose Us?</h3>
+        </span>
 
-        <v-row class="key-feature-row">
+        <div class="key-feature-row">
           <div class="key-feature-card"
             v-for="(feat, i) in introFeatures"
             :key="i"
@@ -54,16 +53,15 @@
               <p class="key-feature-card-text text-center">{{feat.text}}</p>
             </div>
           </div>
-        </v-row>
+        </div>
 
-        <h2 class="basic-header text-center"
-          v-if="windowWidth > 900"
+        <span class="basic-header text-center"
+          style="display: flex; justify-content: center;"
           data-aos="zoom-in"
           data-aos-duration="2000"
         >
           See How It Works
-        </h2>
-        <h3 v-else>See How It Works</h3>
+      </span>
 
         <!-- Large Screen repeating card -->
         <div v-if="windowWidth >= 900">
@@ -150,6 +148,9 @@
     <SignupDialog style="margin: auto;" />
     <LoginDialog style="margin: auto;" />
 
+    <!-- Bottom buffer -->
+    <div style="margin-bottom: 30px;"></div>
+
   </v-app>
 </template>
 
@@ -198,12 +199,12 @@ export default {
         {
           title: 'AI',
           icon: 'mdi-brain',
-          text: 'Use AI to create flashcards faster'
+          text: 'Use AI to create flashcards and quizzes'
         },
         {
           title: 'Draw',
           icon: 'mdi-draw',
-          text: 'Handwrite your notes on a whiteboard'
+          text: 'Handwrite your notes or draw diagrams'
         },
         {
           title: 'Share',
@@ -237,23 +238,23 @@ export default {
       faqs: [
         {
           title: 'How is this better than other note-taking options?',
-          text: 'We understand that there are many ways to take notes and study. However, we provide more tools than any other service, which makes note-taking and studying easier, faster, and more helpful than anything else!'
+          text: 'Everyone takes notes and studies in different ways. GOAT Notes provides more tools than any other platform, giving you flexibility in your studies. GOAT Notes makes it easier and faster to achieve your success.'
         },
         {
-          title: 'How does the AI create my flashcards?',
-          text: 'In your notes, you can store any number of words or phrases in a queue. When you\'re ready, you can send that list to the AI, powered by GPT, which will define all the words and create helpful study questions to test your knowledge and memory!'
+          title: 'How does the AI work?',
+          text: 'Powered by GPT, you can use AI in GOAT Notes in various ways. You can send a list of words to receive flashcards for, you can input a topic you want flashcards for, or you can also send a topic and have the AI create a quiz for you!'
         },
         {
-          title: 'What if I want to study my friends notes?',
+          title: 'Can I share my notes with friends?',
           text: 'With GOAT Notes, you can do that! You can share your notes with others to collaborate on as many study tools as you want!'
         },
         {
           title: 'How much does it cost?',
-          text: 'GOAT Notes is free to join! There are many features you can use at no cost. However, some features, such as using AI to create your flashcards, are saved for the Premium plan, which is only $2.99 / month.'
+          text: 'GOAT Notes is free to join! There are many features you can use at no cost. However, some features, such as AI-generated flashcards and quizzes, are saved for the Premium plan, which is only $2.99 / month.'
         },
         {
           title: 'Are you adding more features?',
-          text: 'Yes! We are always seeking to improve this site based on the needs of the users. Soon, you will also be able to use AI to create quizzes that you can use to help you study.'
+          text: 'Yes! We are always seeking to improve this site based on the needs of the users. Let us know what you think is missing!'
         },
       ],
       windowWidth: window.innerWidth,
@@ -338,6 +339,8 @@ h3, h4 {
 .key-feature-row {
   margin: 50px 10px 60px 10px;
   justify-content: space-evenly;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .key-feature-card {
@@ -348,7 +351,7 @@ h3, h4 {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 10px;
+  margin: 10px 2px;
 }
 
 .key-feature-card-content {
