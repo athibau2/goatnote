@@ -325,7 +325,7 @@ exports.handler = async function(event, context) {
     return new SendEmailCommand({
       Destination: {
         CcAddresses: [],
-        ToAddresses: isMass ? ['management@deltaapps.dev'] : [...toAddresses],
+        ToAddresses: isMass ? ['management@deltaapps.dev'] : toAddresses,
         BccAddresses: isMass ? [...toAddresses] : []
       },
       Message: {
