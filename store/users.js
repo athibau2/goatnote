@@ -486,9 +486,9 @@ export const actions = {
             })
             if (!error) {
                 try {
-                    const params = {
+                    const body = {
                         'name': res[0].firstname,
-                        'email': email,
+                        'emails': [email],
                         'link': data.properties.action_link
                     }
                     await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
@@ -498,7 +498,7 @@ export const actions = {
                             'Access-Control-Allow-Origin': '*',
                             'Type': 'magic-link'
                         },
-                        body: JSON.stringify(params)
+                        body: JSON.stringify(body)
                     }).then(async function(response) {
                         if (response) {
                             await commit('setAlert', {
@@ -2469,9 +2469,53 @@ export const actions = {
         }
     },
 
+    async exportOrgs({ state }, {}) {
+        const { data, error, status } = await supabase.from('see_orgs')
+            .select()
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            return data
+        } else if (error) {
+            console.error(error)
+            return []
+        }
+    },
+
+    async exportFolders({ state }, {}) {
+        const { data, error, status } = await supabase.from('see_folders')
+            .select()
+            // .eq('orgid', orgid)
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            return data
+        } else if (error) {
+            console.error(error)
+            return []
+        }
+    },
+    
+    async exportNotes({ state }, {}) {
+        const { data, error, status } = await supabase.from('see_notes')
+            .select()
+            .eq('userid', state.userData.userid)
+        if (!error) {
+            return data
+        } else if (error) {
+            console.error(error)
+            return []
+        }
+    },
+
+    async exportDataNew({ dispatch, state }, {}) {
+        let orgs = await dispatch('exportOrgs')
+        let folders = await dispatch('exportFolders')
+        let notes = await dispatch('exportNotes')
+        let flashcards 
+    },
+
     async exportData({ commit, state }) {
         const { data, error, status } = await supabase.from('export_data')
-            .select('*')
+            .select()
             .eq('userid', state.userData.userid)
         if (!error) {
             // also get files
@@ -2623,7 +2667,7 @@ export const actions = {
 
         const body= {
             'name': firstname,
-            'email': email
+            'emails': [email]
         }
         const { data, error, status } = await supabase.rpc('signup', {
             firstname: firstname,
@@ -2654,7 +2698,7 @@ export const actions = {
         email = email.toLowerCase()
         const body= {
             'name': firstname,
-            'email': email
+            'emails': [email]
         }
         const { data, error, status } = await supabase.rpc('signup', {
             firstname: firstname,
@@ -2875,7 +2919,7 @@ export const actions = {
             await dispatch('deleteSupabaseUser')
             const body = {
                 name: state.userData.firstname,
-                email: state.userData.email
+                emails: [state.userData.email]
             }
             try {
                 await fetch(process.env.NUXT_ENV_EMAIL_WEBHOOK, {
