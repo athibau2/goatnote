@@ -12,9 +12,6 @@ exports.handler = async function(event, context) {
     }
   });
 
-  console.log(process.env.NUXT_ENV_SES_ACCESS_KEY_ID)
-  console.log(process.env.NUXT_ENV_SES_SECRET_ACCESS_KEY)
-
   let subject = ''
   let isMass = (headers.type == 'admin-email')
 
@@ -328,7 +325,7 @@ exports.handler = async function(event, context) {
     return new SendEmailCommand({
       Destination: {
         CcAddresses: [],
-        ToAddresses: isMass ? ['management@deltaapps.dev'] : toAddresses,
+        ToAddresses: isMass ? ['no-reply@deltaapps.dev'] : [...toAddresses],
         BccAddresses: isMass ? [...toAddresses] : []
       },
       Message: {
