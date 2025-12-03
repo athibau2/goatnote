@@ -354,6 +354,7 @@ export async function handler(event, context) {
   };
 
   try {
+    console.log(payload.emails)
     const sendEmailCommand = createSendEmailCommand(
         payload.emails,
         "GOAT Notes <no-reply@deltaapps.dev>",
