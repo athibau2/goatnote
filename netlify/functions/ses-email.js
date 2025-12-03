@@ -1,6 +1,6 @@
-const { SendEmailCommand, SESClient } = require("@aws-sdk/client-ses");
+import { SendEmailCommand, SESClient } from "@aws-sdk/client-ses";
 
-exports.handler = async function(event, context) {
+export async function handler(event, context) {
   const payload = JSON.parse(event.body);
   const headers = event.headers;
   const REGION = 'us-east-2';
@@ -325,7 +325,7 @@ exports.handler = async function(event, context) {
     return new SendEmailCommand({
       Destination: {
         CcAddresses: [],
-        ToAddresses: isMass ? ['no-reply@deltaapps.dev'] : [...toAddresses],
+        ToAddresses: isMass ? ['no-reply@deltaapps.dev'] : toAddresses,
         BccAddresses: isMass ? [...toAddresses] : []
       },
       Message: {
@@ -364,5 +364,5 @@ exports.handler = async function(event, context) {
     console.error("Failed to send email.", e);
     return { statusCode: 500 };
   }
-};
+}
 
