@@ -12,6 +12,9 @@ exports.handler = async function(event, context) {
     }
   });
 
+  console.log(process.env.NUXT_ENV_SES_ACCESS_KEY_ID)
+  console.log(process.env.NUXT_ENV_SES_SECRET_ACCESS_KEY)
+
   let subject = ''
   let isMass = (headers.type == 'admin-email')
 
