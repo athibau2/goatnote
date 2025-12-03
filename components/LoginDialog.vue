@@ -49,12 +49,11 @@
                                 @click="signInWithGoogle()"
                                 :disabled="loadingGoogle"
                             >
-                                <img src="https://static-00.iconduck.com/assets.00/google-icon-2048x2048-czn3g8x8.png" height="25px" />
+                                <img src="~/assets/logos/google-icon.png" height="25px" />
                                 &ensp;
                                 <Loading v-if="loadingGoogle" /> {{loadingGoogle ? null : 'Sign In With Google'}}
                             </v-btn>
                             <br>
-                            <!-- <span class="basic-header" style="padding: 10px;">Google Sign-in Coming Soon</span> -->
                         </div>
                     </center>
                 </v-card-text>
