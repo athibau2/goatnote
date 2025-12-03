@@ -2,6 +2,7 @@ import { SendEmailCommand, SESClient } from "@aws-sdk/client-ses";
 
 export async function handler(event, context) {
   const payload = JSON.parse(event.body);
+  console.log(payload)
   const headers = event.headers;
   const REGION = 'us-east-2';
   const sesClient = new SESClient({
