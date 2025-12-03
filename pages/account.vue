@@ -16,7 +16,8 @@
                   Sign in provider:&ensp;{{providers?.join(', ')}}
                 </p>
               </v-card-subtitle>
-              <v-card-text v-if="providers?.includes('email')">
+              <!-- v-if="providers?.includes('email')" -->
+              <v-card-text >
                 <v-text-field
                   class="selector"
                   dense
@@ -110,8 +111,10 @@
           <!-- <v-row justify="center" align="center">
             <v-card class="account-card" elevation="1" outlined width="500">
               <v-card-title class="name">Export Data</v-card-title>
-              <v-card-text class="card-text">
-                Performing this function will download all of your data. This includes your notes, flashcards, whiteboards, and files. They will be grouped by your organizations and collections.
+              <v-card-text class="card-text"
+                style="letter-spacing: 1px;"
+              >
+                Performing this function will download all of your folders, notes, flashcards, and quizzes. You will need to download your whiteboards and files from the notes page.
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
