@@ -272,7 +272,7 @@
         style="z-index: 9999;"
       >
         <v-card class="dialog-card" elevation="5">
-            <v-card-title class="basic-header justify-center" v-if="collOpened !== {}">Notes in {{collOpened.collectionname}}</v-card-title>
+            <v-card-title class="basic-header justify-center" v-if="collOpened != {}">Notes in {{collOpened.collectionname}}</v-card-title>
             <v-divider style="margin-bottom: 10px;" />
             <v-card-text class="table-list">
               <table>
@@ -375,14 +375,16 @@ export default {
       }
 
       if (confirm(`Are you ready to email ${list.length} users?`)) {
-        const batchSize = 10; // Set the batch size
+        const batchSize = 45; // Set the batch size
         const bodyTemplate = {
           'subject': this.subject,
           'body': this.body
         };
 
+        let count = 1;
+
         while (list.length > 0) {
-          const currentBatch = list.splice(0, batchSize); // Take the first 10 emails
+          const currentBatch = list.splice(0, batchSize);
 
           const body = {
             'emails': currentBatch,
@@ -399,10 +401,14 @@ export default {
             body: JSON.stringify(body)
           });
 
-          // Add a delay between batches if needed
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
+          if (count % 5 == 0) {
+            // Add a delay between batches if needed
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
+          }
 
+          count++;
         }
+
         // Clear the subject, body, and emailGroup for the next batch
         this.subject = '';
         this.body = '';

@@ -9,6 +9,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.540.0",
     "@ckeditor/ckeditor5-alignment": "^40.0.0",
     "@ckeditor/ckeditor5-autoformat": "^40.0.0",
     "@ckeditor/ckeditor5-basic-styles": "^40.0.0",
