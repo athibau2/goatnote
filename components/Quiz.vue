@@ -161,7 +161,7 @@ export default {
         async createAiQuiz() {
             if (this.userData.subscriptionstatus == 'inactive') {
                 alert("You need an active subscription to use AI quiz generation. Go to your account settings to upgrade your plan.")
-            } else if (this.calledAiToday && this.userData.numaicalls == 8) {
+            } else if (this.calledAiToday && this.userData.numaicalls == 10) {
                 await this.$store.commit('users/setAlert', {
                     color: 'error',
                     icon: '$error',
@@ -267,7 +267,7 @@ export default {
         },
         
         remainingAiCalls () {
-            return this.calledAiToday ? 8 - this.userData.numaicalls : 8
+            return this.calledAiToday ? 10 - this.userData.numaicalls : 10
         },
     }
 }

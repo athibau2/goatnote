@@ -221,7 +221,7 @@
           <!-- Buttons area large screen -->
           <v-col class="text-center" cols="3">
             <div v-if="userData.subscriptionstatus == 'active'">
-              <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 8</span>
+              <span class="small-header">AI calls remaining today:&ensp;{{remainingAiCalls}} / 10</span>
             </div>
             <div>
               <v-btn class="tool-btn" id="ai-btn"
@@ -881,7 +881,7 @@ export default {
             icon: '$error',
             text: 'This feature is only available for the Premium plan. Please upgrade your account to access this feature.'
           })
-        } else if (this.calledAiToday && this.userData.numaicalls == 8) {
+        } else if (this.calledAiToday && this.userData.numaicalls == 10) {
           await this.$store.commit('users/setAlert', {
             color: 'error',
             icon: '$error',
@@ -1181,7 +1181,7 @@ export default {
     },
 
     remainingAiCalls () {
-      return this.calledAiToday ? 8 - this.userData.numaicalls : 8
+      return this.calledAiToday ? 10 - this.userData.numaicalls : 10
     },
 
     saving () {
