@@ -5,8 +5,5 @@ export default async function ({ store, redirect }) {
     } else {
         const user = store.state.users.supabaseUser;
         let res = await store.dispatch('users/getUser', { email: user.email })
-        if (res.length == 0) {
-            await store.dispatch('users/createUserFromGoogle', { user: user })
-        }
     }
 }
