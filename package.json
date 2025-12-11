@@ -2,6 +2,7 @@
   "name": "goatNote",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
@@ -9,6 +10,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.948.0",
     "@aws-sdk/client-ses": "^3.540.0",
     "@ckeditor/ckeditor5-alignment": "^40.0.0",
     "@ckeditor/ckeditor5-autoformat": "^40.0.0",

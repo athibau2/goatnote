@@ -381,8 +381,6 @@ export default {
           'body': this.body
         };
 
-        let count = 1;
-
         while (list.length > 0) {
           const currentBatch = list.splice(0, batchSize);
 
@@ -401,12 +399,7 @@ export default {
             body: JSON.stringify(body)
           });
 
-          if (count % 5 == 0) {
-            // Add a delay between batches if needed
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
-          }
-
-          count++;
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
         }
 
         // Clear the subject, body, and emailGroup for the next batch

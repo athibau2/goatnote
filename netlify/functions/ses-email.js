@@ -1,14 +1,61 @@
 import { SendEmailCommand, SESClient } from "@aws-sdk/client-ses";
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+
+const REGION = 'us-east-2';
+const smClient = new SecretsManagerClient({
+  region: REGION,
+    credentials: {
+        // Map the custom Netlify variable names to the SDK constructor
+        accessKeyId: process.env.NUXT_ENV_SECRET_READER_KEY_ID,
+        secretAccessKey: process.env.NUXT_ENV_SECRET_READER_SECRET_KEY,
+    }
+});
+
+/**
+ * Fetches the SES credentials from AWS Secrets Manager.
+ * @returns {Promise<{accessKeyId: string, secretAccessKey: string}>}
+ */
+async function getSesCredentials() {
+  const secretName = process.env.NUXT_ENV_SES_SECRET_NAME;
+  
+  try {
+    const command = new GetSecretValueCommand({
+      SecretId: secretName,
+    });
+    
+    // Send the command and await the response
+    const data = await smClient.send(command);
+
+    if (data.SecretString) {
+      // The secret is stored as a JSON string
+      const secret = JSON.parse(data.SecretString);
+
+      // Return the actual SES keys
+      return {
+        accessKeyId: secret.SES_ACCESS_KEY_ID,
+        secretAccessKey: secret.SES_ACCESS_KEY_SECRET,
+      };
+    }
+    
+    throw new Error("SecretString was empty or null.");
+    
+  } catch (err) {
+    console.error(`Error retrieving SES credentials from ${secretName}:`, err);
+    throw new Error("Security Error: Failed to load SES credentials securely.");
+  }
+}
 
 export async function handler(event, context) {
   const payload = JSON.parse(event.body);
   const headers = event.headers;
-  const REGION = 'us-east-2';
+
+  const credentials = await getSesCredentials();
+
   const sesClient = new SESClient({
     region: REGION,
     credentials: {
-        accessKeyId: process.env.NUXT_ENV_SES_ACCESS_KEY_ID,
-        secretAccessKey: process.env.NUXT_ENV_SES_SECRET_ACCESS_KEY
+        accessKeyId: credentials.accessKeyId,
+        secretAccessKey: credentials.secretAccessKey
     }
   });
 
@@ -325,7 +372,7 @@ export async function handler(event, context) {
     return new SendEmailCommand({
       Destination: {
         CcAddresses: [],
-        ToAddresses: isMass ? ['no-reply@deltaapps.dev'] : toAddresses,
+        ToAddresses: isMass ? [] : toAddresses,
         BccAddresses: isMass ? [...toAddresses] : []
       },
       Message: {
