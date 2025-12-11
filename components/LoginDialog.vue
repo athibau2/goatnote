@@ -42,19 +42,6 @@
                     </v-text-field>
                     <center>
                         <NuxtLink to="/forgot-password">Forgot Password</NuxtLink>
-                        <div>
-                            <v-btn class="flat-btn"
-                                elevation="1"
-                                style="margin-top: 20px; font-size: 14px !important;"
-                                @click="signInWithGoogle()"
-                                :disabled="loadingGoogle"
-                            >
-                                <img src="~/assets/logos/google-icon.png" height="25px" />
-                                &ensp;
-                                <Loading v-if="loadingGoogle" /> {{loadingGoogle ? null : 'Sign In With Google'}}
-                            </v-btn>
-                            <br>
-                        </div>
                     </center>
                 </v-card-text>
                 <v-card-actions>

@@ -55,18 +55,6 @@
             :disabled="signUpWithGoogle"
         >
         </v-text-field>
-        <div class="line-container">
-            <v-divider />
-            <span class="line-label">OR</span>
-            <v-divider />
-        </div>
-        <div class="line-container" style="margin-bottom: 10px;">
-            <v-btn @click="toggleSignUpWithGoogle()" icon>
-                <v-icon size="28" v-if="!signUpWithGoogle">mdi-checkbox-blank-outline</v-icon>
-                <img v-if="signUpWithGoogle" src="google-icon.png" height="25px" />
-            </v-btn>
-            <span class="basic-header" style="font-size: 20px;">&ensp;Sign Up With Google</span>
-        </div>
         <div class="checks">
             <input class="checkbox" type="checkbox" v-model="consented" />
             <span>
